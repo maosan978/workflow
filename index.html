@@ -962,7 +962,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   else root.WorkflowConfig = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
   return {
-    appVersion: '2026.07.17.13',
+    appVersion: '2026.07.17.14',
     schemaVersion: 3,
     typeLabels: {
       general: '通用',
@@ -2438,7 +2438,7 @@ var driveFileId = localStorage.getItem('drive_file_id') || null;
 var accessToken = null;
 var syncInProgress = false;
 var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 3;
-var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.07.17.13';
+var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.07.17.14';
 
 var tokenClient = null;
 
@@ -4577,6 +4577,96 @@ window.hideInputModal = function(){
 
 // ===== PWA: Manifest & Install =====
 (function initPWA(){
+  function workflowIconDataUrl(size){
+    var c = document.createElement('canvas');
+    c.width = size; c.height = size;
+    var ctx = c.getContext('2d');
+    var scale = size / 512;
+    function p(v){ return v * scale; }
+    function roundRect(x,y,w,h,r){
+      ctx.beginPath();
+      ctx.moveTo(p(x+r), p(y));
+      ctx.lineTo(p(x+w-r), p(y));
+      ctx.quadraticCurveTo(p(x+w), p(y), p(x+w), p(y+r));
+      ctx.lineTo(p(x+w), p(y+h-r));
+      ctx.quadraticCurveTo(p(x+w), p(y+h), p(x+w-r), p(y+h));
+      ctx.lineTo(p(x+r), p(y+h));
+      ctx.quadraticCurveTo(p(x), p(y+h), p(x), p(y+h-r));
+      ctx.lineTo(p(x), p(y+r));
+      ctx.quadraticCurveTo(p(x), p(y), p(x+r), p(y));
+      ctx.closePath();
+    }
+    var bg = ctx.createLinearGradient(0, 0, size, size);
+    bg.addColorStop(0, '#4338ca');
+    bg.addColorStop(0.55, '#4f46e5');
+    bg.addColorStop(1, '#0f766e');
+    roundRect(0, 0, 512, 512, 96);
+    ctx.fillStyle = bg;
+    ctx.fill();
+
+    ctx.save();
+    ctx.globalAlpha = 0.18;
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = p(5);
+    for(var i=92;i<=420;i+=82){
+      ctx.beginPath(); ctx.moveTo(p(70), p(i)); ctx.lineTo(p(442), p(i)); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(p(i), p(70)); ctx.lineTo(p(i), p(442)); ctx.stroke();
+    }
+    ctx.restore();
+
+    ctx.save();
+    ctx.globalAlpha = 0.2;
+    ctx.strokeStyle = '#a7f3d0';
+    ctx.lineWidth = p(7);
+    ctx.beginPath();
+    ctx.ellipse(p(258), p(254), p(168), p(74), -0.55, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.ellipse(p(258), p(254), p(168), p(74), 0.55, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.shadowColor = 'rgba(15,23,42,.35)';
+    ctx.shadowBlur = p(22);
+    ctx.shadowOffsetY = p(14);
+    roundRect(132, 104, 248, 304, 42);
+    ctx.fillStyle = 'rgba(255,255,255,.96)';
+    ctx.fill();
+    ctx.shadowColor = 'transparent';
+
+    roundRect(174, 142, 164, 36, 18);
+    ctx.fillStyle = '#dbeafe';
+    ctx.fill();
+    ctx.fillStyle = '#4f46e5';
+    ctx.font = '700 ' + p(38) + 'px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('WF', p(256), p(160));
+
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = p(12);
+    ctx.lineCap = 'round';
+    [220, 268, 316].forEach(function(y){
+      ctx.beginPath(); ctx.moveTo(p(188), p(y)); ctx.lineTo(p(324), p(y)); ctx.stroke();
+    });
+    ctx.strokeStyle = '#10b981';
+    ctx.lineWidth = p(24);
+    ctx.beginPath();
+    ctx.moveTo(p(182), p(333));
+    ctx.lineTo(p(230), p(378));
+    ctx.lineTo(p(338), p(245));
+    ctx.stroke();
+
+    ctx.fillStyle = '#fbbf24';
+    ctx.beginPath(); ctx.arc(p(371), p(125), p(18), 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#a7f3d0';
+    ctx.beginPath(); ctx.arc(p(402), p(214), p(14), 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#bfdbfe';
+    ctx.beginPath(); ctx.arc(p(112), p(388), p(15), 0, Math.PI * 2); ctx.fill();
+    return c.toDataURL('image/png');
+  }
+  var icon192 = workflowIconDataUrl(192);
+  var icon512 = workflowIconDataUrl(512);
   // Inline manifest via blob URL
   var manifest = {
     name: '每日工作流',
@@ -4589,13 +4679,20 @@ window.hideInputModal = function(){
     theme_color: '#4f46e5',
     lang: 'zh-CN',
     icons: [{
-      src: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="32" fill="#4f46e5"/><text x="96" y="110" text-anchor="middle" font-size="100" fill="white">📋</text></svg>'),
-      sizes: '192x192', type: 'image/svg+xml'
+      src: icon192, sizes: '192x192', type: 'image/png', purpose: 'any maskable'
     },{
-      src: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="80" fill="#4f46e5"/><text x="256" y="300" text-anchor="middle" font-size="280" fill="white">📋</text></svg>'),
-      sizes: '512x512', type: 'image/svg+xml'
+      src: icon512, sizes: '512x512', type: 'image/png', purpose: 'any maskable'
     }]
   };
+  var fav = document.createElement('link');
+  fav.rel = 'icon';
+  fav.type = 'image/png';
+  fav.href = icon192;
+  document.head.appendChild(fav);
+  var apple = document.createElement('link');
+  apple.rel = 'apple-touch-icon';
+  apple.href = icon192;
+  document.head.appendChild(apple);
   var mBlob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
   var mUrl = URL.createObjectURL(mBlob);
   var link = document.createElement('link');
@@ -9130,9 +9227,9 @@ window.handleImportFile = function(event) {
 
 <!--
 workflow_tool build
-version: 2026.07.17.13
-sourceSha256: 3313303dfac68edb18378fe80a7587b33ee5ba5e3a323d0bc5d73961d896a3b9
-configSha256: c50c2745bb9d572df25d7eb69523e50711851f9ce6870f5876e293256b47bbd3
+version: 2026.07.17.14
+sourceSha256: 2e54f0215c574b3308a7a313857b7674325a451a2f00f911bd55feaca236c95d
+configSha256: 50e14f9fea2ded9fa5c0777280359de27ece966f9717541f52ee30c6615e0a25
 coreSha256: e0eabcb7fc6832f327040084b91ebd12735c43b070df30f54bcda766903f73df
 appSha256: 2f24aa03f02a5b051051aad95e186b81abef342d0af6958c66b79307c3dc0db3
 exportSha256: 13ad148412f079c37fed48892779a4c15a69b986b274bf432dd0506e64c0fa2a
@@ -9140,5 +9237,5 @@ syncSha256: d253ac2b5da24d6ab82cae5c41b91c72dc35ffda76ed3b160b3eb4d4025154ea
 historySha256: d2d96792bc489871e1e12fdf2483793e1781fec5835bae872974bc6b66894a79
 tasksSha256: cf7b1e78be5c87a40720433883aa80f4c8e36fe389400e217af9bb744ad8a590
 stylesSha256: 438038ffa6949e8cb705df0dbad8d9a17ed29abd17f0c072fc70f88118cf55be
-builtAt: 2026-07-17T13:50:01.129Z
+builtAt: 2026-07-17T15:13:37.185Z
 -->
