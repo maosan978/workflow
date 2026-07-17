@@ -962,7 +962,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   else root.WorkflowConfig = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
   return {
-    appVersion: '2026.07.17.14',
+    appVersion: '2026.07.17.15',
     schemaVersion: 3,
     typeLabels: {
       general: '通用',
@@ -2438,7 +2438,7 @@ var driveFileId = localStorage.getItem('drive_file_id') || null;
 var accessToken = null;
 var syncInProgress = false;
 var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 3;
-var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.07.17.14';
+var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.07.17.15';
 
 var tokenClient = null;
 
@@ -2586,7 +2586,7 @@ async function loadFromDrive() {
       var driveTime = _backupTimestamp(driveData);
       var localTime = parseInt(localStorage.getItem('wf_backup_time') || '0', 10);
       if (driveTime > localTime) {
-        _openSyncConflict('Drive', driveData, driveTime, function(){ saveToDrive(); });
+        _handleRemoteWorkflowData('Drive', driveData, driveTime, function(){ saveToDrive(); }, false);
       } else {
         _setSyncStatus('drive','ok','已连接 Drive');
         showToast('已连接 Google Drive', 'success');
@@ -2775,8 +2775,7 @@ function _silentPullDrive() {
       var remoteTs = _backupTimestamp(data);
       var localTs = parseInt(localStorage.getItem('wf_backup_time') || '0', 10);
       if (remoteTs > localTs + 5000) {
-        _setSyncStatus('drive','warn','检测到远端较新，等待选择');
-        _openSyncConflict('Drive', data, remoteTs, function(){ saveToDrive(); });
+        _handleRemoteWorkflowData('Drive', data, remoteTs, function(){ saveToDrive(); }, true);
       }
     })
     .catch(function() {});
@@ -2929,6 +2928,62 @@ function _workflowStorageKey(k) {
     petState: 'wf_pet_state'
   };
   return aliases[k] || k;
+}
+
+function _stableWorkflowString(value) {
+  if (typeof value === 'string') {
+    try { return _stableWorkflowString(JSON.parse(value)); } catch(e) { return value; }
+  }
+  if (value === null || typeof value !== 'object') return JSON.stringify(value);
+  if (Array.isArray(value)) return '[' + value.map(_stableWorkflowString).join(',') + ']';
+  return '{' + Object.keys(value).sort().map(function(k){
+    return JSON.stringify(k) + ':' + _stableWorkflowString(value[k]);
+  }).join(',') + '}';
+}
+
+function _workflowComparableMap(data) {
+  var split = _splitWorkflowBackupData(data);
+  var map = {};
+  function addGroup(group) {
+    Object.keys(group).forEach(function(k){ map[k] = _stableWorkflowString(group[k]); });
+  }
+  addGroup(split.days);
+  addGroup(split.weeks);
+  addGroup(split.notes);
+  Object.keys(split.settings).forEach(function(k){
+    map[_workflowStorageKey(k)] = _stableWorkflowString(split.settings[k]);
+  });
+  return map;
+}
+
+function _workflowMapsEqual(a, b) {
+  var ak = Object.keys(a).sort();
+  var bk = Object.keys(b).sort();
+  if (ak.length !== bk.length) return false;
+  for (var i=0;i<ak.length;i++) {
+    if (ak[i] !== bk[i] || a[ak[i]] !== b[bk[i]]) return false;
+  }
+  return true;
+}
+
+function _remoteWorkflowDiffers(remoteData) {
+  try {
+    return !_workflowMapsEqual(_workflowComparableMap(collectAllData()), _workflowComparableMap(remoteData));
+  } catch(e) {
+    return true;
+  }
+}
+
+function _handleRemoteWorkflowData(source, remoteData, remoteTs, afterLocalChoice, silent) {
+  if (_pendingSyncConflict) return true;
+  if (!_remoteWorkflowDiffers(remoteData)) {
+    if (remoteTs) localStorage.setItem('wf_backup_time', String(remoteTs));
+    _setSyncStatus(source.toLowerCase(), 'ok', silent ? '云端内容一致' : '已连接，云端内容一致');
+    return false;
+  }
+  if (silent) _setSyncStatus(source.toLowerCase(), 'warn', '检测到远端内容不同，等待选择');
+  _openSyncConflict(source, remoteData, remoteTs, afterLocalChoice);
+  return true;
 }
 
 function _validateWorkflowBackupData(data) {
@@ -3166,7 +3221,7 @@ function loadFromGitHub() {
       try { remote = JSON.parse(decoded); } catch(e) { return; }
       var remoteTs = _backupTimestamp(remote);
       var localTs = parseInt(localStorage.getItem('wf_backup_time') || '0', 10);
-      if (remoteTs > localTs) _openSyncConflict('GitHub', remote, remoteTs, function(){ saveToGitHub(0, true); });
+      if (remoteTs > localTs) _handleRemoteWorkflowData('GitHub', remote, remoteTs, function(){ saveToGitHub(0, true); }, false);
     })
     .catch(function() { _setSyncStatus('github','error','加载网络错误'); showToast('从 GitHub 加载失败，请检查网络', 'warn'); });
 }
@@ -3188,8 +3243,7 @@ function _silentPullGitHub() {
       var remoteTs = _backupTimestamp(remote);
       var localTs = parseInt(localStorage.getItem('wf_backup_time') || '0', 10);
       if (remoteTs > localTs + 5000) {
-        _setSyncStatus('github','warn','检测到远端较新，等待选择');
-        _openSyncConflict('GitHub', remote, remoteTs, function(){ saveToGitHub(0, true); });
+        _handleRemoteWorkflowData('GitHub', remote, remoteTs, function(){ saveToGitHub(0, true); }, true);
       }
     })
     .catch(function() {});
@@ -9227,9 +9281,9 @@ window.handleImportFile = function(event) {
 
 <!--
 workflow_tool build
-version: 2026.07.17.14
-sourceSha256: 2e54f0215c574b3308a7a313857b7674325a451a2f00f911bd55feaca236c95d
-configSha256: 50e14f9fea2ded9fa5c0777280359de27ece966f9717541f52ee30c6615e0a25
+version: 2026.07.17.15
+sourceSha256: cf6ba1847cd9aefe987fd70d4b5ec1cad9fb1a8c933abde007d8d08d42405aca
+configSha256: a8abbfe0bb5fcb8728a5cae276175e2269dfdac353e8d908d70cca06681c5247
 coreSha256: e0eabcb7fc6832f327040084b91ebd12735c43b070df30f54bcda766903f73df
 appSha256: 2f24aa03f02a5b051051aad95e186b81abef342d0af6958c66b79307c3dc0db3
 exportSha256: 13ad148412f079c37fed48892779a4c15a69b986b274bf432dd0506e64c0fa2a
@@ -9237,5 +9291,5 @@ syncSha256: d253ac2b5da24d6ab82cae5c41b91c72dc35ffda76ed3b160b3eb4d4025154ea
 historySha256: d2d96792bc489871e1e12fdf2483793e1781fec5835bae872974bc6b66894a79
 tasksSha256: cf7b1e78be5c87a40720433883aa80f4c8e36fe389400e217af9bb744ad8a590
 stylesSha256: 438038ffa6949e8cb705df0dbad8d9a17ed29abd17f0c072fc70f88118cf55be
-builtAt: 2026-07-17T15:13:37.185Z
+builtAt: 2026-07-17T15:53:59.425Z
 -->
