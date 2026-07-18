@@ -996,7 +996,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   else root.WorkflowConfig = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
   return {
-    appVersion: '2026.07.18.6',
+    appVersion: '2026.07.18.7',
     schemaVersion: 3,
     typeLabels: {
       general: '通用',
@@ -2513,9 +2513,28 @@ var driveFileId = localStorage.getItem('drive_file_id') || null;
 var accessToken = null;
 var syncInProgress = false;
 var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 3;
-var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.07.18.6';
+var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.07.18.7';
 
 var tokenClient = null;
+var _startupCloudReadPending = {drive: false, github: false};
+try {
+  _startupCloudReadPending.drive = localStorage.getItem('google_connected') === '1';
+  _startupCloudReadPending.github = !!(localStorage.getItem('gh_repo') && localStorage.getItem('gh_token'));
+} catch(e) {}
+
+function _markStartupCloudRead(channel, pending) {
+  if (_startupCloudReadPending && Object.prototype.hasOwnProperty.call(_startupCloudReadPending, channel)) {
+    _startupCloudReadPending[channel] = !!pending;
+  }
+}
+
+function _isStartupCloudReadPending() {
+  return !!(_startupCloudReadPending && (_startupCloudReadPending.drive || _startupCloudReadPending.github));
+}
+
+function _canAutoPushCloudChanges() {
+  return !_isStartupCloudReadPending() && !_pendingSyncConflict;
+}
 
 function _setSyncStatus(channel, status, message) {
   try {
@@ -2635,6 +2654,7 @@ function restoreCachedGoogleToken() {
 async function loadFromDrive() {
   if (!accessToken || syncInProgress) return;
   syncInProgress = true;
+  var keepStartupReadPending = false;
 
   try {
     // 搜索 appDataFolder 中的同名文件，确保所有设备用同一个文件
@@ -2642,7 +2662,13 @@ async function loadFromDrive() {
       'https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name="' + FILE_NAME + '"&orderBy=modifiedTime+desc',
       { headers: { Authorization: 'Bearer ' + accessToken } }
     );
-    if (searchResp.status === 401) { _setSyncStatus('drive','warn','令牌过期，正在刷新'); syncInProgress = false; refreshTokenThen('load'); return; }
+    if (searchResp.status === 401) {
+      _setSyncStatus('drive','warn','令牌过期，正在刷新');
+      keepStartupReadPending = true;
+      syncInProgress = false;
+      refreshTokenThen('load');
+      return;
+    }
     if (!searchResp.ok) { _setSyncStatus('drive','error','读取失败 HTTP ' + searchResp.status); syncInProgress = false; showToast('Google Drive 请求失败', 'danger'); return; }
 
     var searchData = await searchResp.json();
@@ -2659,15 +2685,10 @@ async function loadFromDrive() {
       var driveData = await fileResp.json();
 
       var driveTime = _backupTimestamp(driveData);
-      var localTime = parseInt(localStorage.getItem('wf_backup_time') || '0', 10);
-      if (driveTime > localTime) {
-        _handleRemoteWorkflowData('Drive', driveData, driveTime, function(){ saveToDrive(); }, false);
-      } else {
-        _setSyncStatus('drive','ok','已连接 Drive');
-        showToast('已连接 Google Drive', 'success');
-      }
+      _handleRemoteWorkflowData('Drive', driveData, driveTime, function(){ saveToDrive(); }, false);
     } else {
       // 首次使用，创建新文件
+      _markStartupCloudRead('drive', false);
       syncInProgress = false;
       await saveToDrive();
       return;
@@ -2677,6 +2698,7 @@ async function loadFromDrive() {
     _setSyncStatus('drive','error', err.message || '读取失败');
     showToast('Google Drive 同步失败', 'danger');
   } finally {
+    if (!keepStartupReadPending) _markStartupCloudRead('drive', false);
     syncInProgress = false;
   }
 }
@@ -2780,13 +2802,13 @@ var originalSetItem = Storage.prototype.setItem;
 Storage.prototype.setItem = function(key, value) {
   originalSetItem.call(this, key, value);
   if (_isAutoSyncDataKey(key)) {
-    if (accessToken) {
+    if (accessToken && _canAutoPushCloudChanges()) {
       clearTimeout(window._driveSyncTimer);
       window._driveSyncTimer = setTimeout(() => {
         saveToDrive().catch(err => console.error('Auto-save to Drive failed:', err));
       }, 2000);
     }
-    if (localStorage.getItem('gh_repo') && localStorage.getItem('gh_token')) {
+    if (localStorage.getItem('gh_repo') && localStorage.getItem('gh_token') && _canAutoPushCloudChanges()) {
       clearTimeout(window._ghSyncTimer);
       window._ghSyncTimer = setTimeout(() => saveToGitHub(0, false), 2000);
     }
@@ -2796,13 +2818,13 @@ var originalRemoveItem = Storage.prototype.removeItem;
 Storage.prototype.removeItem = function(key) {
   originalRemoveItem.call(this, key);
   if (_isAutoSyncDataKey(key)) {
-    if (accessToken) {
+    if (accessToken && _canAutoPushCloudChanges()) {
       clearTimeout(window._driveSyncTimer);
       window._driveSyncTimer = setTimeout(() => {
         saveToDrive().catch(err => console.error('Auto-save to Drive failed:', err));
       }, 2000);
     }
-    if (localStorage.getItem('gh_repo') && localStorage.getItem('gh_token')) {
+    if (localStorage.getItem('gh_repo') && localStorage.getItem('gh_token') && _canAutoPushCloudChanges()) {
       clearTimeout(window._ghSyncTimer);
       window._ghSyncTimer = setTimeout(() => saveToGitHub(0, false), 2000);
     }
@@ -2833,6 +2855,7 @@ window.addEventListener('load', function() {
     // 8秒后 token 仍未恢复，提示用户重新连接
     setTimeout(function() {
       if (localStorage.getItem('google_connected') === '1' && !accessToken) {
+        _markStartupCloudRead('drive', false);
         showToast('Google Drive 令牌已失效，请点击右上角重新连接', 'warn');
       }
     }, 8000);
@@ -2870,7 +2893,7 @@ function ghHeaders() {
 function initGitHubSync() {
   var repo = localStorage.getItem('gh_repo');
   var token = localStorage.getItem('gh_token');
-  if (!repo || !token) return;
+  if (!repo || !token) { _markStartupCloudRead('github', false); return; }
   document.getElementById('ghConfigBtn').style.display = 'none';
   document.getElementById('ghStatusBadge').style.display = '';
   loadFromGitHub();
@@ -3286,7 +3309,7 @@ function loadFromGitHub() {
   if (!repo || !token) return;
   fetch('https://api.github.com/repos/' + repo + '/contents/' + GH_FILE_PATH + '?t=' + Date.now(), { headers: ghHeaders() })
     .then(function(r) {
-      if (r.status === 404) { _setSyncStatus('github','warn','远端文件不存在，准备创建'); saveToGitHub(); return null; }
+      if (r.status === 404) { _setSyncStatus('github','warn','远端文件不存在，准备创建'); _markStartupCloudRead('github', false); saveToGitHub(); return null; }
       if (r.status === 401) { _setSyncStatus('github','error','Token 已失效'); showToast('GitHub Token 已失效，请重新配置', 'warn'); return null; }
       return r.json();
     })
@@ -3300,10 +3323,10 @@ function loadFromGitHub() {
       var remote;
       try { remote = JSON.parse(decoded); } catch(e) { return; }
       var remoteTs = _backupTimestamp(remote);
-      var localTs = parseInt(localStorage.getItem('wf_backup_time') || '0', 10);
-      if (remoteTs > localTs) _handleRemoteWorkflowData('GitHub', remote, remoteTs, function(){ saveToGitHub(0, true); }, false);
+      _handleRemoteWorkflowData('GitHub', remote, remoteTs, function(){ saveToGitHub(0, true); }, false);
     })
-    .catch(function() { _setSyncStatus('github','error','加载网络错误'); showToast('从 GitHub 加载失败，请检查网络', 'warn'); });
+    .catch(function() { _setSyncStatus('github','error','加载网络错误'); showToast('从 GitHub 加载失败，请检查网络', 'warn'); })
+    .finally(function() { _markStartupCloudRead('github', false); });
 }
 
 function _silentPullGitHub() {
@@ -9886,9 +9909,9 @@ window.handleImportFile = function(event) {
 
 <!--
 workflow_tool build
-version: 2026.07.18.6
-sourceSha256: 24621a817471e3be0a5bd681a6f7d057edb3c5064f8e7bf73f0711602ae64871
-configSha256: 1fd0689d1844adf10ecc9c6c11ae3e6912f184c554a9fd0095dc3fcc3e715f02
+version: 2026.07.18.7
+sourceSha256: 2b36386e49fa651f6d799024dd91e2ceefd92d1a54b9ef15c5991832bea52de9
+configSha256: 56bcce1b125e559741d471958728f5393c5d47d05be060ca0ade4633f33b3773
 coreSha256: 1cb49a41d5f4ec7c9803caa2560d6cde4b2daeb0abb39264d994970016982dd0
 appSha256: 2f24aa03f02a5b051051aad95e186b81abef342d0af6958c66b79307c3dc0db3
 exportSha256: 13ad148412f079c37fed48892779a4c15a69b986b274bf432dd0506e64c0fa2a
@@ -9896,5 +9919,5 @@ syncSha256: d253ac2b5da24d6ab82cae5c41b91c72dc35ffda76ed3b160b3eb4d4025154ea
 historySha256: d2d96792bc489871e1e12fdf2483793e1781fec5835bae872974bc6b66894a79
 tasksSha256: cf7b1e78be5c87a40720433883aa80f4c8e36fe389400e217af9bb744ad8a590
 stylesSha256: 438038ffa6949e8cb705df0dbad8d9a17ed29abd17f0c072fc70f88118cf55be
-builtAt: 2026-07-18T03:19:25.411Z
+builtAt: 2026-07-18T06:03:13.004Z
 -->
