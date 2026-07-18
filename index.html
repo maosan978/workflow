@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- workflow-build:1cb49a41d5f4ec7c9803caa2560d6cde4b2daeb0abb39264d994970016982dd0 -->
+<!-- workflow-build:30f0f4f64657efc825e2d2c08e75bf6a237206580de87bc38070f3a5edad1256 -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -1021,7 +1021,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   else root.WorkflowConfig = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
   return {
-    appVersion: '2026.07.18.22',
+    appVersion: '2026.07.18.23',
     schemaVersion: 3,
     typeLabels: {
       general: '通用',
@@ -1067,6 +1067,29 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
     return (t && (t.what || t.question || t.source || t.problem || t.choice)) || '';
   }
 
+  function sameTaskIdentity(a, b, allowLegacyLabel) {
+    if (!a || !b) return false;
+    if (a.id && b.id && a.id === b.id) return true;
+    if (a._chainId && b._chainId && a._chainId === b._chainId) return true;
+    if (allowLegacyLabel) {
+      var al = taskLabel(a);
+      var bl = taskLabel(b);
+      var at = a.type || 'general';
+      var bt = b.type || 'general';
+      if (al && bl && al === bl && at === bt) return true;
+    }
+    return false;
+  }
+
+  function dedupeMorningMirrorTasks(d) {
+    if (!d || !d.m || !d.m.taskObj || !Array.isArray(d.tasks)) return d;
+    var morningTask = d.m.taskObj;
+    d.tasks = d.tasks.filter(function(t) {
+      return !sameTaskIdentity(t, morningTask, true);
+    });
+    return d;
+  }
+
   function ensureTaskChain(t, newChainId) {
     if (!t || typeof t !== 'object') return t;
     newChainId = newChainId || function(prefix) { return (prefix || 'chain') + '_test'; };
@@ -1093,6 +1116,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
     d.e = Object.assign({log:'',tomorrow:'',highlight:''}, d.e || {});
     d.r = Object.assign({event:'',q1:'',q2:'',q3:''}, d.r || {});
     d.tasks = (d.tasks || []).map(function(t) { return ensureTaskChain(t, newChainId); });
+    dedupeMorningMirrorTasks(d);
     return d;
   }
 
@@ -2538,7 +2562,7 @@ var driveFileId = localStorage.getItem('drive_file_id') || null;
 var accessToken = null;
 var syncInProgress = false;
 var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 3;
-var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.07.18.22';
+var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.07.18.23';
 
 var tokenClient = null;
 var _startupCloudReadPending = {drive: false, github: false};
@@ -5605,6 +5629,26 @@ function _taskToMorning(t){
   var copy = _cloneTask(t);
   return {task:getTaskPrimaryField(copy) || '', marker:_taskVerifyValue(copy) || '', done:!!copy.done, taskObj:copy};
 }
+function _sameTaskIdentity(a, b, allowLegacyLabel){
+  if(!a || !b) return false;
+  if(a.id && b.id && a.id === b.id) return true;
+  if(a._chainId && b._chainId && a._chainId === b._chainId) return true;
+  if(allowLegacyLabel) {
+    var al = getTaskPrimaryField(a) || _taskLabel(a);
+    var bl = getTaskPrimaryField(b) || _taskLabel(b);
+    var at = a.type || 'general';
+    var bt = b.type || 'general';
+    if(al && bl && al === bl && at === bt) return true;
+  }
+  return false;
+}
+function _dedupeMorningMirrorTasks(data){
+  if(!data || !data.m || !Array.isArray(data.tasks) || !data.m.task) return data;
+  var morningTask = data.m.taskObj ? _morningToTask(data.m) : null;
+  if(!morningTask) return data;
+  data.tasks = data.tasks.filter(function(t){ return !_sameTaskIdentity(t, morningTask, true); });
+  return data;
+}
 function _syncMorningTaskObjFromFields(m){
   if(!m || !m.taskObj) return;
   _setTaskPrimaryField(m.taskObj, m.task || '');
@@ -5748,6 +5792,7 @@ function _normalizeDayData(data){
   d.e = Object.assign({log:'',tomorrow:'',highlight:''}, d.e || {});
   d.r = Object.assign({event:'',q1:'',q2:'',q3:''}, d.r || {});
   d.tasks = (d.tasks || []).map(_ensureTaskChain);
+  _dedupeMorningMirrorTasks(d);
   return d;
 }
 function loadDay(d){
@@ -6369,6 +6414,7 @@ window.setAsMorning = function(id) {
       var selected = todayData.tasks.splice(idx, 1)[0];
       if(previousMorning) todayData.tasks.splice(idx, 0, previousMorning);
       todayData.m = _taskToMorning(selected);
+      _dedupeMorningMirrorTasks(todayData);
       saveDay(today, todayData);
       initToday();
       showToast('已设为晨间任务', 'success');
@@ -7853,6 +7899,7 @@ window.histSetAsMorning = function(id){
   _histEditData.tasks.splice(idx, 1);
   if(previousMorning) _histEditData.tasks.splice(idx, 0, previousMorning);
   _histEditData.m = _taskToMorning(selected);
+  _dedupeMorningMirrorTasks(_histEditData);
   _histRenderEditBody();
   showToast('已整体设为晨间任务，保存后生效', 'success');
 };
@@ -10244,15 +10291,15 @@ window.handleImportFile = function(event) {
 
 <!--
 workflow_tool build
-version: 2026.07.18.22
-sourceSha256: 52c7d008a40fec9b30ad4ca41aab414f4b6b65f65eca05020bf410c4cbff2b46
-configSha256: 61b29da4a6a96cba4ab7e9b5f0ba285ce9e7adc25d89457fd7b3beb6b7baf027
-coreSha256: 1cb49a41d5f4ec7c9803caa2560d6cde4b2daeb0abb39264d994970016982dd0
+version: 2026.07.18.23
+sourceSha256: 29679f418f381a0c7a197525bee87e2136ff3d13e6a67876a52513eb9cb76316
+configSha256: 0d6a81158342720aa974a6359422e8d8a2e8a39a7a968e913210ba0d9560d7a9
+coreSha256: 30f0f4f64657efc825e2d2c08e75bf6a237206580de87bc38070f3a5edad1256
 appSha256: 2f24aa03f02a5b051051aad95e186b81abef342d0af6958c66b79307c3dc0db3
 exportSha256: 13ad148412f079c37fed48892779a4c15a69b986b274bf432dd0506e64c0fa2a
 syncSha256: d253ac2b5da24d6ab82cae5c41b91c72dc35ffda76ed3b160b3eb4d4025154ea
 historySha256: d2d96792bc489871e1e12fdf2483793e1781fec5835bae872974bc6b66894a79
 tasksSha256: cf7b1e78be5c87a40720433883aa80f4c8e36fe389400e217af9bb744ad8a590
 stylesSha256: 438038ffa6949e8cb705df0dbad8d9a17ed29abd17f0c072fc70f88118cf55be
-builtAt: 2026-07-18T08:41:46.597Z
+builtAt: 2026-07-18T08:52:45.800Z
 -->
