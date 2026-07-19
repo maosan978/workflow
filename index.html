@@ -929,13 +929,22 @@ html.theme-teal.dark .header{background:linear-gradient(135deg,#164e63,#134e4a,#
 .export-btns .btn-pdf:hover{opacity:.9;box-shadow:var(--shadow)}
 .export-btns .btn-pdf:active{transform:scale(.96)}
 /* ===== Markdown / Math Preview ===== */
-.md-preview{display:none;cursor:text;border:1.5px solid var(--border);border-radius:var(--radius-xs);background:var(--bg);padding:8px 12px;min-height:38px;font-size:14px;line-height:1.7;color:var(--text);word-break:break-word}
+.md-preview{display:none;cursor:text;border:1.5px solid var(--border);border-radius:var(--radius-xs);background:var(--bg);padding:8px 12px;min-height:38px;font-size:14px;line-height:1.7;color:var(--text);word-break:break-word;overflow-wrap:anywhere;box-sizing:border-box;overflow:hidden}
 .md-preview:hover{border-color:var(--primary-light)}
 .md-preview::before{content:'预览';display:block;font-size:10px;color:var(--text4);font-weight:600;margin-bottom:4px}
 .md-preview p{margin:0 0 6px}
 .md-preview p:last-child{margin:0}
+.md-preview *,.math-preview *{max-width:100%;box-sizing:border-box}
+.md-preview ul,.md-preview ol,.math-preview ul,.math-preview ol{margin:4px 0 6px 0;padding-left:22px;box-sizing:border-box;list-style-position:outside}
+.md-preview li,.math-preview li{margin:2px 0;padding-left:2px;overflow-wrap:anywhere}
+.md-preview h1,.md-preview h2,.md-preview h3,.md-preview h4,.math-preview h1,.math-preview h2,.math-preview h3,.math-preview h4{overflow-wrap:anywhere}
+.md-preview blockquote,.math-preview blockquote{margin:6px 0;padding:6px 10px;border-left:3px solid var(--primary-light);background:var(--surface2);border-radius:var(--radius-xs);overflow-wrap:anywhere}
+.md-preview hr,.math-preview hr{border:0;border-top:1px solid var(--border);margin:8px 0}
+.md-preview table,.math-preview table{display:block;width:100%;max-width:100%;overflow-x:auto;border-collapse:collapse;margin:6px 0}
+.md-preview th,.md-preview td,.math-preview th,.math-preview td{border:1px solid var(--border);padding:4px 6px;overflow-wrap:anywhere}
 .md-preview code{background:var(--surface2);border-radius:3px;padding:1px 4px;font-family:'Fira Code','Consolas',monospace;font-size:12px}
-.md-preview pre{background:var(--surface2);border-radius:var(--radius-xs);padding:10px;overflow-x:auto;margin:6px 0}
+.md-preview pre{background:var(--surface2);border-radius:var(--radius-xs);padding:10px;overflow-x:auto;margin:6px 0;max-width:100%}
+.md-preview pre code{white-space:pre-wrap;overflow-wrap:anywhere}
 .md-preview .katex-display{overflow-x:auto;overflow-y:hidden;padding:4px 0}
 .math-fallback{font-family:Georgia,'Times New Roman',serif;font-style:italic;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:0 4px;color:var(--text)}
 .math-fallback.display{display:block;text-align:center;margin:6px 0;padding:8px 10px;font-size:15px}
@@ -1021,7 +1030,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   else root.WorkflowConfig = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
   return {
-    appVersion: '2026.07.18.23',
+    appVersion: '2026.07.19.1',
     schemaVersion: 3,
     typeLabels: {
       general: '通用',
@@ -2562,7 +2571,7 @@ var driveFileId = localStorage.getItem('drive_file_id') || null;
 var accessToken = null;
 var syncInProgress = false;
 var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 3;
-var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.07.18.23';
+var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.07.19.1';
 
 var tokenClient = null;
 var _startupCloudReadPending = {drive: false, github: false};
@@ -4227,12 +4236,33 @@ function _basicMarkdownHtml(text){
       .replace(/__([^_]+)__/g, '<strong>$1</strong>');
   }
   function closeList(){ if(listType){ html += '</' + listType + '>'; listType = ''; } }
+  var inFence = false, fenceLines = [];
   lines.forEach(function(line){
     var m;
+    if(line.match(/^\s*```/)) {
+      if(inFence) {
+        closeList();
+        html += '<pre><code>' + fenceLines.join('\n') + '</code></pre>';
+        fenceLines = [];
+        inFence = false;
+      } else {
+        closeList();
+        inFence = true;
+        fenceLines = [];
+      }
+      return;
+    }
+    if(inFence) { fenceLines.push(line); return; }
     if(!line.trim()){ closeList(); return; }
     if((m = line.match(/^(#{1,3})\s+(.+)$/))) {
       closeList();
       html += '<h' + m[1].length + '>' + inline(m[2]) + '</h' + m[1].length + '>';
+    } else if((m = line.match(/^>\s?(.+)$/))) {
+      closeList();
+      html += '<blockquote>' + inline(m[1]) + '</blockquote>';
+    } else if(line.match(/^(-{3,}|\*{3,}|_{3,})$/)) {
+      closeList();
+      html += '<hr>';
     } else if((m = line.match(/^\s*[-*]\s+(.+)$/))) {
       if(listType !== 'ul') { closeList(); html += '<ul>'; listType = 'ul'; }
       html += '<li>' + inline(m[1]) + '</li>';
@@ -4244,6 +4274,7 @@ function _basicMarkdownHtml(text){
       html += '<p>' + inline(line) + '</p>';
     }
   });
+  if(inFence) html += '<pre><code>' + fenceLines.join('\n') + '</code></pre>';
   closeList();
   return html || '<p></p>';
 }
@@ -10016,7 +10047,7 @@ function autoCheckInContinue() {
   // 检查文本是否含有需要渲染的内容
   function needsRender(text) {
     if (!text) return false;
-    return /\$|\\\(|\\\[|\*\*|__|`|(^|\n)#{1,6}\s|(^|\n)\s*[-*]\s|(^|\n)\s*\d+\.\s|\[.+\]\(/.test(text);
+    return /\$|\\\(|\\\[|\*\*|__|`|(^|\n)#{1,6}\s|(^|\n)\s*[-*]\s|(^|\n)\s*\d+\.\s|(^|\n)>\s?|(^|\n)\s*```|(^|\n)\s*(-{3,}|\*{3,}|_{3,})\s*$|(^|\n)\|.+\||\[.+\]\(/.test(text);
   }
 
   // 为一个 textarea/input 绑定预览行为
@@ -10291,9 +10322,9 @@ window.handleImportFile = function(event) {
 
 <!--
 workflow_tool build
-version: 2026.07.18.23
-sourceSha256: 29679f418f381a0c7a197525bee87e2136ff3d13e6a67876a52513eb9cb76316
-configSha256: 0d6a81158342720aa974a6359422e8d8a2e8a39a7a968e913210ba0d9560d7a9
+version: 2026.07.19.1
+sourceSha256: 3ef390263b93da35d8e3940f5b052ab63f1afaa4e0a4e4f6a8c27a2ca8b0a870
+configSha256: cf12c8a4911341b6145e08db2516cf3fee6a2d97fac20327956e527c28c71bc6
 coreSha256: 30f0f4f64657efc825e2d2c08e75bf6a237206580de87bc38070f3a5edad1256
 appSha256: 2f24aa03f02a5b051051aad95e186b81abef342d0af6958c66b79307c3dc0db3
 exportSha256: 13ad148412f079c37fed48892779a4c15a69b986b274bf432dd0506e64c0fa2a
@@ -10301,5 +10332,5 @@ syncSha256: d253ac2b5da24d6ab82cae5c41b91c72dc35ffda76ed3b160b3eb4d4025154ea
 historySha256: d2d96792bc489871e1e12fdf2483793e1781fec5835bae872974bc6b66894a79
 tasksSha256: cf7b1e78be5c87a40720433883aa80f4c8e36fe389400e217af9bb744ad8a590
 stylesSha256: 438038ffa6949e8cb705df0dbad8d9a17ed29abd17f0c072fc70f88118cf55be
-builtAt: 2026-07-18T08:52:45.800Z
+builtAt: 2026-07-19T06:41:55.216Z
 -->
