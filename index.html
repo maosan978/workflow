@@ -154,7 +154,7 @@ input,textarea,select{-webkit-user-select:text;user-select:text}
 .loading-text{font-size:13px;color:var(--text3);font-weight:500}
 
 /* ===== Toast Notifications ===== */
-.toast-container{position:fixed;top:16px;right:16px;z-index:300;display:flex;
+.toast-container{position:fixed;top:16px;right:16px;z-index:1400;display:flex;
   flex-direction:column;gap:8px;max-width:380px;width:calc(100% - 32px);pointer-events:none}
 .toast{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);
   padding:10px 14px;display:flex;align-items:center;gap:10px;
@@ -709,8 +709,9 @@ body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between
 
 /* ===== Modal ===== */
 .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,.55);
-  z-index:200;display:flex;align-items:center;justify-content:center;animation:fadeIn .15s ease;
+  z-index:1100;display:flex;align-items:center;justify-content:center;animation:fadeIn .15s ease;
   backdrop-filter:blur(2px)}
+.confirm-modal{z-index:1300}
 .modal{background:var(--surface);border-radius:var(--radius-lg);padding:24px;
   width:calc(100% - 32px);max-width:460px;box-shadow:var(--shadow-lg);
   animation:slideUp .25s ease;border:1px solid var(--border);max-height:90vh;overflow-y:auto}
@@ -924,7 +925,6 @@ body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between
   .backup-section{padding:10px 12px}
   .achievement-toast{padding:16px 20px}
   .achievement-toast .ach-icon{font-size:36px}
-  .export-modal .export-box{width:calc(100% - 16px);max-height:88vh;overflow:auto}
   #exportPreviewBody{justify-content:flex-start!important}
   #exportPreviewBody > div{min-width:560px}
   #snapshotsList > div{align-items:flex-start!important;flex-direction:column}
@@ -980,7 +980,7 @@ body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between
 #mDone{width:18px;height:18px;cursor:pointer;flex-shrink:0;accent-color:var(--success)}
 </style>
 <style>
-.gh-config-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000}
+.gh-config-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1100}
 .gh-config-box{background:var(--surface);border-radius:16px;padding:24px;width:340px;max-width:90vw;display:flex;flex-direction:column;gap:12px}
 .gh-config-box h3{margin:0;font-size:15px;font-weight:600}
 .gh-config-box label{font-size:12px;color:var(--text3);margin-bottom:2px;display:block}
@@ -995,21 +995,31 @@ body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between
 .gh-btn-primary:active{transform:scale(.96)}
 .gh-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:12px;cursor:pointer;margin-left:8px}
 .gh-badge-dot{width:7px;height:7px;border-radius:50%;background:#22c55e}
-.export-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000}
-.export-box{background:var(--surface);border-radius:16px;padding:24px;width:320px;max-width:90vw;display:flex;flex-direction:column;gap:14px}
-.export-box h3{margin:0;font-size:15px;font-weight:600}
-.export-options{display:flex;flex-direction:column;gap:8px}
-.export-option{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:13px;color:var(--text)}
+.export-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1100;padding:8px;box-sizing:border-box}
+.export-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;width:min(620px,calc(100vw - 24px));max-height:90vh;max-height:90dvh;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow-lg);overflow:hidden;box-sizing:border-box}
+.export-box h3{margin:0;font-size:15px;font-weight:700}
+.export-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;overflow-y:auto;overscroll-behavior:contain;min-height:0;padding:1px 3px 1px 1px}
+.export-option{display:flex;align-items:center;gap:9px;min-height:46px;padding:7px 9px;border-radius:7px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:13px;color:var(--text);box-sizing:border-box;transition:border-color var(--t),background var(--t)}
+.export-option:hover{border-color:var(--primary-light)}
+.export-option:has(input:checked){border-color:var(--primary);background:var(--primary-bg)}
+.export-option:has(input:disabled){opacity:.45;cursor:not-allowed}
 .export-option input[type=radio]{accent-color:var(--primary);width:15px;height:15px;flex-shrink:0}
-.export-option label{cursor:pointer;flex:1}
-.export-btns{display:flex;gap:8px}
-.export-btns button{flex:1;padding:9px 0;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;cursor:pointer;font-weight:500}
+.export-option label{cursor:pointer;flex:1;min-width:0;line-height:1.35}
+.export-option label span{display:block;margin-top:2px;overflow-wrap:anywhere}
+.export-btns{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;flex:0 0 auto}
+.export-btns button{min-width:0;padding:8px 4px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:12px;cursor:pointer;font-weight:600;white-space:nowrap}
+.export-btns button:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(.75);box-shadow:none}
 .export-btns .btn-png{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 2px 8px rgba(79,70,229,.25);transition:all var(--t)}
 .export-btns .btn-png:hover{background:var(--primary-hover)}
 .export-btns .btn-png:active{transform:scale(.96)}
 .export-btns .btn-pdf{background:var(--success);color:#fff;border-color:var(--success);transition:all var(--t)}
 .export-btns .btn-pdf:hover{opacity:.9;box-shadow:var(--shadow)}
 .export-btns .btn-pdf:active{transform:scale(.96)}
+@media(max-width:600px){
+  .export-modal .export-box{width:calc(100% - 16px);max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px)}
+  .export-options{grid-template-columns:1fr}
+  .export-btns{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
 /* ===== Markdown / Math Preview ===== */
 .md-preview{display:none;cursor:text;border:1.5px solid var(--border);border-radius:var(--radius-xs);background:var(--bg);min-height:38px;font-size:14px;line-height:1.7;color:var(--text);word-break:break-word;overflow-wrap:anywhere;box-sizing:border-box;overflow:hidden}
 .md-preview:hover{border-color:var(--primary-light)}
@@ -1149,7 +1159,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   else root.WorkflowConfig = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
   return {
-    appVersion: '2026.07.19.9',
+    appVersion: '2026.07.19.10',
     schemaVersion: 4,
     typeLabels: {
       general: '通用',
@@ -2496,7 +2506,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
         <tr><th>操作</th><th>顶部按钮</th><th>说明</th></tr>
         <tr><td>本地备份</td><td>💾（备份）</td><td>下载完整 JSON 数据文件，包含所有历史记录、设置、版本号、生成时间和摘要</td></tr>
         <tr><td>导入恢复</td><td>📥（导入）</td><td>选择备份 JSON，先校验结构和显示摘要，确认后导入并刷新</td></tr>
-        <tr><td>导出图片/文档</td><td>📤（导出）</td><td>弹窗选择内容；可用格式会随导出目标变化，不支持的格式会在目标旁标明</td></tr>
+        <tr><td>导出图片/文档</td><td>📤（导出）</td><td>紧凑弹窗选择内容；可用格式会随导出目标立即变化，不支持的格式会直接禁用</td></tr>
         <tr><td>手动云同步</td><td>🔄（同步）</td><td>立即推送到 GitHub 或 Drive；未配置云端时打开同步详情；快捷键 Ctrl+S</td></tr>
         <tr><td>同步详情 / 自检</td><td>说明页按钮</td><td>查看 Drive/GitHub 最近状态，运行关键流程自检，可撤销最近高风险操作</td></tr>
         <tr><td>本地快照</td><td>说明页按钮</td><td>保留最近 5 次本地快照，可查看摘要、全部恢复或只恢复某一天</td></tr>
@@ -2528,7 +2538,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
     </div>
     <div class="help-section-body"><div class="help-section-inner">
       <p><b>导入恢复：</b>导入 JSON 后先进入恢复向导，可按日期、周计划、小记和设置选择范围。日期支持全选、清空、反选、仅新增和跳过覆盖；部分导入会以合并方式写入，避免删除未选择内容。</p>
-      <p><b>冲突详情：</b>同一天两端都修改时会保留本地，并显示字段级差异。可逐字段应用云端、批量使用云端、仅补云端新增字段或全部忽略。</p>
+      <p><b>冲突详情：</b>同一天两端都修改时会保留本地，并显示字段级差异。可逐字段应用云端、批量使用云端、仅补云端新增字段或全部忽略；批量操作的二次确认会直接显示在当前详情之上。</p>
       <p><b>科研建议：</b>不确定时先导出完整 JSON，再做恢复或批量冲突处理。数据本身就是研究记录的一部分，保留可追溯性比追求一次性整理干净更重要。</p>
     </div></div>
   </div>
@@ -2612,53 +2622,53 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   <div class="export-box">
     <h3>导出内容</h3>
     <div class="export-options" id="exportOptions">
-      <div class="export-option" onclick="document.getElementById('exp-today').checked=true">
+      <div class="export-option" onclick="selectExportTarget('exp-today')">
         <input type="radio" name="exportTarget" id="exp-today" value="today" checked>
         <label for="exp-today">今日总结 <span style="font-size:10px;color:var(--text4)">晨间 · 任务 · 日志 · 亮点</span></label>
       </div>
-      <div class="export-option" onclick="document.getElementById('exp-stats').checked=true">
+      <div class="export-option" onclick="selectExportTarget('exp-stats')">
         <input type="radio" name="exportTarget" id="exp-stats" value="stats">
         <label for="exp-stats">统计面板 <span style="font-size:10px;color:var(--text4)">总览 · 科研转化 · 全部图表 · 不支持 Markdown</span></label>
       </div>
-      <div class="export-option" onclick="document.getElementById('exp-weekly').checked=true">
+      <div class="export-option" onclick="selectExportTarget('exp-weekly')">
         <input type="radio" name="exportTarget" id="exp-weekly" value="weekly">
         <label for="exp-weekly">本周复盘 <span style="font-size:10px;color:var(--text4)">主问题 · 证据 · 成果 · 下周</span></label>
       </div>
-      <div class="export-option" id="exp-research-output-wrap" onclick="document.getElementById('exp-research-output').checked=true">
+      <div class="export-option" id="exp-research-output-wrap" onclick="selectExportTarget('exp-research-output')">
         <input type="radio" name="exportTarget" id="exp-research-output" value="research-output">
         <label for="exp-research-output">研究成果 <span style="font-size:10px;color:var(--text4)">当前成果草稿</span></label>
       </div>
-      <div class="export-option" id="exp-research-project-wrap" onclick="document.getElementById('exp-research-project').checked=true">
+      <div class="export-option" id="exp-research-project-wrap" onclick="selectExportTarget('exp-research-project')">
         <input type="radio" name="exportTarget" id="exp-research-project" value="research-project">
         <label for="exp-research-project">研究项目详情 <span style="font-size:10px;color:var(--text4)">当前地图 · 任务结果 · 演化时间线</span></label>
       </div>
-      <div class="export-option" id="exp-histday-wrap" onclick="document.getElementById('exp-histday').checked=true">
+      <div class="export-option" id="exp-histday-wrap" onclick="selectExportTarget('exp-histday')">
         <input type="radio" name="exportTarget" id="exp-histday" value="histday">
         <label for="exp-histday">历史某天 <span style="font-size:10px;color:var(--text4)">需先在历史Tab打开详情</span></label>
       </div>
-      <div class="export-option" onclick="document.getElementById('exp-week-tasks').checked=true">
+      <div class="export-option" onclick="selectExportTarget('exp-week-tasks')">
         <input type="radio" name="exportTarget" id="exp-week-tasks" value="week-tasks">
         <label for="exp-week-tasks">本周任务汇总</label>
       </div>
-      <div class="export-option" onclick="document.getElementById('exp-notes').checked=true">
+      <div class="export-option" onclick="selectExportTarget('exp-notes')">
         <input type="radio" name="exportTarget" id="exp-notes" value="notes">
         <label for="exp-notes">随手小记 <span style="font-size:10px;color:var(--text4)">可选择导出</span></label>
       </div>
-      <div class="export-option" onclick="document.getElementById('exp-month-tasks').checked=true">
+      <div class="export-option" onclick="selectExportTarget('exp-month-tasks')">
         <input type="radio" name="exportTarget" id="exp-month-tasks" value="month-tasks">
         <label for="exp-month-tasks">本月任务汇总 <span style="font-size:10px;color:var(--text4)">仅 MD · JSON</span></label>
       </div>
-      <div class="export-option" onclick="document.getElementById('exp-all-history').checked=true">
+      <div class="export-option" onclick="selectExportTarget('exp-all-history')">
         <input type="radio" name="exportTarget" id="exp-all-history" value="all-history">
         <label for="exp-all-history">全部历史记录 <span style="font-size:10px;color:var(--text4)">仅 MD · JSON</span></label>
       </div>
     </div>
     <div class="export-btns">
-      <button class="btn btn-secondary" onclick="previewExport()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border)"><span class="ico">👁</span>预览</button>
-      <button class="btn-png" onclick="doExport('png')">🖼 PNG</button>
-      <button class="btn-pdf" onclick="doExport('pdf')">🖨 PDF</button>
-      <button class="btn-json" onclick="doExport('json')" style="background:var(--info);color:#fff">JSON</button>
-      <button class="btn-md" onclick="doExport('markdown')" style="background:var(--accent);color:#fff">Markdown</button>
+      <button data-export-format="preview" class="btn btn-secondary" onclick="previewExport()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border)"><span class="ico">👁</span>预览</button>
+      <button data-export-format="png" class="btn-png" onclick="doExport('png')">🖼 PNG</button>
+      <button data-export-format="pdf" class="btn-pdf" onclick="doExport('pdf')">🖨 PDF</button>
+      <button data-export-format="json" class="btn-json" onclick="doExport('json')" style="background:var(--info);color:#fff">JSON</button>
+      <button data-export-format="markdown" class="btn-md" onclick="doExport('markdown')" style="background:var(--accent);color:#fff">Markdown</button>
     </div>
     <button class="gh-btn" style="width:100%;text-align:center" onclick="closeExportModal()">× 取消</button>
   </div>
@@ -3005,7 +3015,7 @@ var driveFileId = localStorage.getItem('drive_file_id') || null;
 var accessToken = null;
 var syncInProgress = false;
 var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 4;
-var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.07.19.9';
+var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.07.19.10';
 
 var tokenClient = null;
 var _syncReconcileInProgress = false;
@@ -3985,11 +3995,33 @@ function openExportModal() {
   var projectWrap=document.getElementById('exp-research-project-wrap');
   var projectRadio=document.getElementById('exp-research-project');
   if(projectWrap&&projectRadio){var hasProject=!!_researchProject();projectWrap.style.opacity=hasProject?'1':'0.45';projectRadio.disabled=!hasProject;}
+  var selected=document.querySelector('input[name="exportTarget"]:checked');
+  if(!selected||selected.disabled) document.getElementById('exp-today').checked=true;
+  updateExportFormatAvailability();
   document.getElementById('exportModal').style.display = 'flex';
 }
 function closeExportModal() {
   document.getElementById('exportModal').style.display = 'none';
 }
+function updateExportFormatAvailability(){
+  var selected=document.querySelector('input[name="exportTarget"]:checked');
+  var target=selected?selected.value:'today';
+  var documentOnly=target==='month-tasks'||target==='all-history';
+  var allowed={preview:!documentOnly,png:!documentOnly,pdf:!documentOnly,json:true,markdown:target!=='stats'};
+  var labels={preview:'该内容不提供网页预览',png:'该内容不支持 PNG',pdf:'该内容不支持 PDF',markdown:'统计面板不支持 Markdown'};
+  document.querySelectorAll('[data-export-format]').forEach(function(btn){
+    var format=btn.getAttribute('data-export-format');
+    btn.disabled=!allowed[format];
+    btn.title=btn.disabled?(labels[format]||'当前导出目标不支持此格式'):'';
+  });
+}
+window.selectExportTarget=function(id){
+  var radio=document.getElementById(id);
+  if(!radio||radio.disabled)return;
+  radio.checked=true;
+  updateExportFormatAvailability();
+};
+window.updateExportFormatAvailability=updateExportFormatAvailability;
 
 async function _buildExportCardForTarget(target){
   if (target === 'histday' && !document.querySelector('#historyContent .detail-box')) { showToast('请先在历史面板打开某天详情', 'warn'); return ''; }
@@ -5130,6 +5162,14 @@ function _exCloneWithComputedStyles(source){
   sourceSvgs.forEach(function(svg,i){
     var copy=cloneSvgs[i];if(!copy)return;
     try{
+      var svgSourceNodes=[svg].concat(Array.from(svg.querySelectorAll('*')));
+      var svgCopyNodes=[copy].concat(Array.from(copy.querySelectorAll('*')));
+      var paintProps=['color','fill','fill-opacity','fill-rule','stroke','stroke-opacity','stroke-width','stroke-linecap','stroke-linejoin','stroke-miterlimit','stroke-dasharray','stroke-dashoffset','paint-order','stop-color','stop-opacity','flood-color','flood-opacity','vector-effect','visibility'];
+      svgSourceNodes.forEach(function(node,j){
+        var svgCopy=svgCopyNodes[j];if(!svgCopy)return;
+        var svgStyle=getComputedStyle(node);
+        paintProps.forEach(function(prop){var value=svgStyle.getPropertyValue(prop);if(value)svgCopy.style.setProperty(prop,value);});
+      });
       var rect=svg.getBoundingClientRect();
       if(rect.width>0){copy.setAttribute('width',Math.round(rect.width));copy.setAttribute('height',Math.round(rect.height));}
       copy.setAttribute('xmlns','http://www.w3.org/2000/svg');
@@ -5515,6 +5555,34 @@ window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change', func
 });
 
 // ===== Custom Confirm Dialog =====
+(function initWorkflowModalLayers(){
+  var selector='.modal-overlay,.export-modal,.gh-config-modal';
+  function isVisible(el){return el&&getComputedStyle(el).display!=='none';}
+  var visibility=new WeakMap();
+  window._promoteWorkflowModal=function(el){
+    if(!el||el.classList.contains('confirm-modal'))return;
+    var max=1100;
+    document.querySelectorAll(selector).forEach(function(other){
+      if(other===el||other.classList.contains('confirm-modal')||!isVisible(other))return;
+      max=Math.max(max,parseInt(getComputedStyle(other).zIndex,10)||1100);
+    });
+    var next=String(Math.min(1290,max+1));
+    if(el.style.zIndex!==next)el.style.zIndex=next;
+  };
+  var observer=new MutationObserver(function(records){
+    records.forEach(function(record){
+      var el=record.target;
+      if(!el.matches||!el.matches(selector))return;
+      var visible=isVisible(el);
+      if(visibility.get(el)===visible)return;
+      visibility.set(el,visible);
+      if(visible)window._promoteWorkflowModal(el);
+      else if(!el.classList.contains('confirm-modal'))el.style.removeProperty('z-index');
+    });
+  });
+  document.querySelectorAll(selector).forEach(function(el){visibility.set(el,isVisible(el));observer.observe(el,{attributes:true,attributeFilter:['style','class']});});
+})();
+
 window.showConfirm = function(msg, icon, onConfirm){
   document.getElementById('confirmMsg').textContent = msg;
   document.getElementById('confirmIcon').textContent = icon || '⚠️';
@@ -5525,6 +5593,7 @@ window.showConfirm = function(msg, icon, onConfirm){
     hideConfirm();
     if(cb) cb();
   };
+  setTimeout(function(){document.getElementById('confirmOkBtn').focus();},40);
 };
 
 window.hideConfirm = function(){
@@ -9158,7 +9227,8 @@ window.addResearchProject = function(){
   });
 };
 window.selectResearchProject = function(id){ _researchProjectId=id; initResearch(); };
-window.openResearchProjectExport=function(){openExportModal();var radio=document.getElementById('exp-research-project');if(radio&&!radio.disabled)radio.checked=true;};
+window.openResearchProjectExport=function(){openExportModal();window.selectExportTarget('exp-research-project');};
+window.openResearchOutputExport=function(){openExportModal();window.selectExportTarget('exp-research-output');};
 function _renameResearchTaskProject(projectId,oldName,newName){
   for(var i=0;i<localStorage.length;i++){
     var key=localStorage.key(i); if(!key||key.indexOf('wf_day_')!==0)continue;
@@ -9262,7 +9332,7 @@ function _researchOutputMarkdown(type,p,state){
   return '# 可复现记录：'+p.name+'\n\n## 项目边界\n'+(p.limits||'')+'\n\n## 证据与来源\n'+ledger+'\n\n## 任务结果与产物\n'+(taskLines||'- 暂无');
 }
 window.generateResearchOutput=function(type){var s=_loadResearchState(),p=_researchProject(s);if(!p){showToast('请先建立研究项目','warn');return;}var labels={advisor:'组会沟通',paper:'论文骨架',figures:'图表清单',questions:'问题清单',repro:'复现记录'};_appendResearchEvent(p,'output','生成'+labels[type],p.name);var o={id:WorkflowResearch.uid('output'),projectId:p.id,type:type,title:labels[type]+' · '+p.name,status:'draft',content:_researchOutputMarkdown(type,p,s)+'\n\n## 项目近期演化\n'+_researchTimelineMarkdown(p,20),createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};s.outputs.unshift(o);_selectedResearchOutputId=o.id;_saveResearchState(s);initResearch();};
-function _renderResearchOutputs(el){var s=_loadResearchState(),selected=s.outputs.find(function(o){return o.id===_selectedResearchOutputId;})||s.outputs[0];if(selected)_selectedResearchOutputId=selected.id;var actions='<div class="research-output-actions">'+[['advisor','组会沟通'],['paper','论文骨架'],['figures','图表清单'],['questions','问题清单'],['repro','复现记录']].map(function(x){return '<button class="btn btn-secondary btn-sm" onclick="generateResearchOutput(\''+x[0]+'\')">'+x[1]+'</button>';}).join('')+'</div>';var nav=s.outputs.map(function(o){return '<button class="research-project-btn'+(selected&&selected.id===o.id?' active':'')+'" onclick="selectResearchOutput(\''+o.id+'\')">'+esc(o.title)+'</button>';}).join('');var editor=selected?'<div class="research-editor"><div class="research-title-row"><input value="'+esc(selected.title)+'" oninput="updateResearchOutput(\''+selected.id+'\',\'title\',this.value)"><select onchange="updateResearchOutput(\''+selected.id+'\',\'status\',this.value)">'+_closureOptions(selected.status,[['draft','草稿'],['ready','可使用'],['shared','已沟通'],['archived','归档']])+'</select><button class="btn btn-secondary btn-xs" onclick="openExportModal()">导出</button><button class="btn btn-danger btn-xs" onclick="deleteResearchOutput(\''+selected.id+'\')">×</button></div><div class="field"><label>成果内容</label><textarea style="min-height:320px" oninput="updateResearchOutput(\''+selected.id+'\',\'content\',this.value)">'+esc(selected.content||'')+'</textarea></div></div>':'<div class="empty"><div class="empty-title">选择上方模板生成成果草稿</div></div>';el.innerHTML=actions+'<div class="research-layout"><div class="research-nav">'+nav+'</div>'+editor+'</div>';if(typeof window.refreshMDPreviews==='function')window.refreshMDPreviews();}
+function _renderResearchOutputs(el){var s=_loadResearchState(),selected=s.outputs.find(function(o){return o.id===_selectedResearchOutputId;})||s.outputs[0];if(selected)_selectedResearchOutputId=selected.id;var actions='<div class="research-output-actions">'+[['advisor','组会沟通'],['paper','论文骨架'],['figures','图表清单'],['questions','问题清单'],['repro','复现记录']].map(function(x){return '<button class="btn btn-secondary btn-sm" onclick="generateResearchOutput(\''+x[0]+'\')">'+x[1]+'</button>';}).join('')+'</div>';var nav=s.outputs.map(function(o){return '<button class="research-project-btn'+(selected&&selected.id===o.id?' active':'')+'" onclick="selectResearchOutput(\''+o.id+'\')">'+esc(o.title)+'</button>';}).join('');var editor=selected?'<div class="research-editor"><div class="research-title-row"><input value="'+esc(selected.title)+'" oninput="updateResearchOutput(\''+selected.id+'\',\'title\',this.value)"><select onchange="updateResearchOutput(\''+selected.id+'\',\'status\',this.value)">'+_closureOptions(selected.status,[['draft','草稿'],['ready','可使用'],['shared','已沟通'],['archived','归档']])+'</select><button class="btn btn-secondary btn-xs" onclick="openResearchOutputExport()">导出</button><button class="btn btn-danger btn-xs" onclick="deleteResearchOutput(\''+selected.id+'\')">×</button></div><div class="field"><label>成果内容</label><textarea style="min-height:320px" oninput="updateResearchOutput(\''+selected.id+'\',\'content\',this.value)">'+esc(selected.content||'')+'</textarea></div></div>':'<div class="empty"><div class="empty-title">选择上方模板生成成果草稿</div></div>';el.innerHTML=actions+'<div class="research-layout"><div class="research-nav">'+nav+'</div>'+editor+'</div>';if(typeof window.refreshMDPreviews==='function')window.refreshMDPreviews();}
 window.selectResearchOutput=function(id){_selectedResearchOutputId=id;initResearch();};
 window.updateResearchOutput=function(id,key,val){var s=_loadResearchState(),o=s.outputs.find(function(x){return x.id===id;});if(o){o[key]=val;o.updatedAt=new Date().toISOString();var p=s.projects.find(function(x){return x.id===o.projectId;});if(p&&key==='status')_appendResearchEvent(p,'output-status','成果状态变为 '+(RESEARCH_VALUE_LABELS[val]||val),o.title,id);_saveResearchState(s);}};
 window.deleteResearchOutput=function(id){var s=_loadResearchState(),o=s.outputs.find(function(x){return x.id===id;}),p=o&&s.projects.find(function(x){return x.id===o.projectId;});if(p)_appendResearchEvent(p,'output-delete','删除成果草稿',o.title,id);s.outputs=s.outputs.filter(function(x){return x.id!==id;});_selectedResearchOutputId='';_saveResearchState(s);initResearch();};
@@ -10735,7 +10805,7 @@ window.confirmNotesSelection = function() {
     return;
   }
   openExportModal();
-  document.getElementById('exp-notes').checked = true;
+  window.selectExportTarget('exp-notes');
   showToast('已选择 ' + _selectedNoteIds.length + ' 条小记，请选择导出格式', 'info');
 };
 /* ===== End Notes Selection Module ===== */
@@ -11490,9 +11560,9 @@ window.handleImportFile = function(event) {
 
 <!--
 workflow_tool build
-version: 2026.07.19.9
-sourceSha256: 639b07fb98ea4ed92203f49caa813d1ad132d02c36ef6d16a25e1a0042b7479e
-configSha256: 4e6e773199b7b7b7c94a3072d1e83227b544bfc1f8fd666f17f09c8bfd9f833e
+version: 2026.07.19.10
+sourceSha256: f64e4f923301f9dcb87f4f4d308e5ef5c001d37f3e45a26f4abb373a20c2c478
+configSha256: 585fde2278375995644a2cf9989f246a379d43fadc9ba65212d7077db27ace15
 coreSha256: df13979bffd53031020af999e844b0ca904b3b80042b681f515ec649bae248af
 appSha256: 2f24aa03f02a5b051051aad95e186b81abef342d0af6958c66b79307c3dc0db3
 exportSha256: 13ad148412f079c37fed48892779a4c15a69b986b274bf432dd0506e64c0fa2a
@@ -11501,5 +11571,5 @@ historySha256: d2d96792bc489871e1e12fdf2483793e1781fec5835bae872974bc6b66894a79
 tasksSha256: cf7b1e78be5c87a40720433883aa80f4c8e36fe389400e217af9bb744ad8a590
 researchSha256: 7f18bf83e2678ea03658117f346225a9af8304668c9f622903770f0292e2c5a8
 stylesSha256: 438038ffa6949e8cb705df0dbad8d9a17ed29abd17f0c072fc70f88118cf55be
-builtAt: 2026-07-19T09:19:18.753Z
+builtAt: 2026-07-19T09:49:36.575Z
 -->
