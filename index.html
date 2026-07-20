@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- workflow-build:df13979bffd53031020af999e844b0ca904b3b80042b681f515ec649bae248af -->
+<!-- workflow-build:9a31af33ad9c21ba900792ccaba6a96c083b75198de17c24b6d6db8672c76326 -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -47,7 +47,7 @@
   --heat-0:#18293a; --heat-1:#0d3d26; --heat-2:#0a5a2e; --heat-3:#1e8a38; --heat-4:#2ebd4a;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{touch-action:manipulation}
+html{touch-action:manipulation;overflow-x:hidden}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
   background:
     linear-gradient(180deg,rgba(79,70,229,.055),transparent 260px),
@@ -521,6 +521,15 @@ html.theme-teal.dark .header{background:linear-gradient(135deg,#164e63,#134e4a,#
 .ico{display:inline-flex;align-items:center;justify-content:center;width:1.25em;line-height:1;flex-shrink:0}
 .icon-label{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
 .btn .ico,.filter-btn .ico,.tab .ico{margin-right:2px}
+.calendar-date-icon{position:relative;display:inline-grid;grid-template-columns:auto auto;align-items:center;gap:.22em;
+  min-width:2.45em;height:1.34em;box-sizing:border-box;padding:0 .34em;border:1px solid var(--primary-light);
+  border-radius:999px;background:var(--primary-bg);color:var(--primary);font-size:1em;font-style:normal;font-weight:800;
+  line-height:1;vertical-align:-.2em;box-shadow:var(--shadow-xs)}
+.calendar-date-icon::before{content:attr(data-month);font-size:.58em;font-weight:750;white-space:nowrap;color:var(--primary)}
+.calendar-date-icon::after{content:attr(data-day);font-size:.58em;font-weight:750;white-space:nowrap;color:var(--primary)}
+.header .calendar-date-icon,.btn-primary .calendar-date-icon{border-color:rgba(255,255,255,.55);background:rgba(255,255,255,.16);box-shadow:none}
+.header .calendar-date-icon::before,.btn-primary .calendar-date-icon::before{color:#fff}
+.header .calendar-date-icon::after,.btn-primary .calendar-date-icon::after{color:#fff}
 .task-filter-pills{display:flex;gap:6px;flex-wrap:nowrap;padding:6px 0;margin-bottom:4px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .task-filter-pills::-webkit-scrollbar{display:none}
 .filter-pill{padding:3px 10px;border-radius:20px;font-size:11px;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--text3);transition:all var(--t)}
@@ -771,6 +780,18 @@ body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between
 .stat-chart{background:var(--surface);border-radius:var(--radius);padding:14px;
   border:1px solid var(--border);overflow-x:auto;position:relative}
 .stat-chart svg{width:100%;max-width:100%;height:auto}
+.stats-overview-emoji{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;font-size:21px;line-height:1;filter:saturate(1.08)}
+.stats-month-icon{position:relative;display:inline-flex;align-items:flex-end;justify-content:center;width:27px;height:27px;
+  box-sizing:border-box;padding-bottom:3px;border:1px solid rgba(79,70,229,.22);border-radius:6px;
+  background:linear-gradient(to bottom,#f97373 0 31%,#fff 31% 100%);box-shadow:0 2px 5px rgba(79,70,229,.16)}
+.stats-month-icon::before,.stats-month-icon::after{content:'';position:absolute;top:-2px;width:3px;height:7px;border-radius:2px;background:#6366f1}
+.stats-month-icon::before{left:6px}.stats-month-icon::after{right:6px}
+.stats-month-icon b{font-size:10px;line-height:1;font-weight:900;color:#4f46e5;text-align:center}
+.checkin-task-icon{position:relative;display:inline-flex;align-items:center;justify-content:center;width:1.18em;height:1.18em;
+  vertical-align:-.17em;flex:0 0 auto;font-size:1em;line-height:1}
+.checkin-task-icon.is-active::after{content:'✓';position:absolute;right:-.24em;bottom:-.16em;display:flex;align-items:center;justify-content:center;
+  width:.72em;height:.72em;border:1px solid var(--surface);border-radius:50%;background:var(--success);color:#fff;font-size:.5em;font-weight:900}
+.checkin-toggle-btn.active{border-color:var(--warn);background:var(--warn-bg);color:var(--warn)}
 .chart-tooltip{position:absolute;background:var(--text);color:var(--bg);padding:4px 8px;border-radius:6px;
   font-size:11px;pointer-events:none;white-space:nowrap;z-index:5;display:none;font-weight:500}
 .stat-chart .bar-rect{transition:opacity .15s ease}
@@ -797,7 +818,7 @@ body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between
 .help-section-header .help-arrow{font-size:12px;transition:transform var(--t);opacity:.5;color:var(--text3)}
 .help-section.collapsed .help-arrow{transform:rotate(-90deg)}
 .help-section-body{overflow:hidden;transition:max-height .35s ease,padding .35s ease;
-  max-height:1200px}
+  max-height:10000px}
 .help-section.collapsed .help-section-body{max-height:0}
 .help-section-inner{padding:12px 16px 14px;font-size:13px;color:var(--text2);line-height:1.7;
   background:var(--surface);border:1.5px solid var(--border);border-top:none;
@@ -814,6 +835,7 @@ body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between
 .help-table th{font-weight:700;color:var(--text);background:var(--surface2);font-size:11px;
   text-transform:uppercase;letter-spacing:.02em}
 .help-table td{color:var(--text2)}
+.help-table th,.help-table td{overflow-wrap:anywhere;word-break:break-word}
 .help-table tr:last-child td{border-bottom:none}
 .help-step-list{list-style:none;padding:0;counter-reset:help-step}
 .help-step-list li{counter-increment:help-step;padding:6px 0 6px 32px;position:relative;
@@ -915,6 +937,15 @@ body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between
   .done-row{padding:8px 0;min-height:40px}
   .done-row input[type=checkbox]{width:22px;height:22px}
   .help-icon{width:18px;height:18px;font-size:11px}
+  #pane-help{padding-bottom:calc(150px + env(safe-area-inset-bottom))}
+  #pane-help .help-section-header{padding:11px 12px;gap:10px}
+  #pane-help .help-section-header > span:first-child{min-width:0;overflow-wrap:anywhere}
+  #pane-help .help-section-inner{padding:10px 12px 12px;min-width:0;overflow-wrap:anywhere}
+  #pane-help .help-section-body{max-height:none;overflow:visible}
+  #pane-help .help-section.collapsed .help-section-body{max-height:0;overflow:hidden}
+  #pane-help .help-table{min-width:100%;width:max-content;max-width:none}
+  #pane-help .help-table th,#pane-help .help-table td{min-width:88px;white-space:normal}
+  #pane-help .help-table th:first-child,#pane-help .help-table td:first-child{min-width:72px}
   .history-item{padding:14px 14px;margin-bottom:8px}
   .history-date{font-size:14px}
   .wk-row input{padding:10px 12px;font-size:14px}
@@ -1159,7 +1190,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   else root.WorkflowConfig = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
   return {
-    appVersion: '2026.07.19.10',
+    appVersion: '2026.07.20.6',
     schemaVersion: 4,
     typeLabels: {
       general: '通用',
@@ -1240,12 +1271,20 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
       if (!t.checkInDays) t.checkInDays = 1;
       if (!t.checkInHistory) t.checkInHistory = [];
       if (t.done && !t.checkInCompleteType) t.checkInCompleteType = 'full';
-    } else {
-      delete t.checkInDays;
-      delete t.checkInCompleteType;
-      delete t.checkInHistory;
     }
     delete t.checkInChainId;
+    return t;
+  }
+
+  function setCheckInEnabled(t, enabled, date, newChainId) {
+    if (!t || typeof t !== 'object') return t;
+    t.isCheckInTask = !!enabled;
+    if (t.isCheckInTask) {
+      if (!t.checkInDays) t.checkInDays = 1;
+      if (!t._chainId) t._chainId = (newChainId || function(prefix) { return (prefix || 'checkin') + '_test'; })('checkin');
+      if (!Array.isArray(t.checkInHistory)) t.checkInHistory = [];
+      if (!t.checkInHistory.length) t.checkInHistory.push({date: date || '', action:'start'});
+    }
     return t;
   }
 
@@ -1472,6 +1511,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
     emptyDay: emptyDay,
     taskLabel: taskLabel,
     ensureTaskChain: ensureTaskChain,
+    setCheckInEnabled: setCheckInEnabled,
     normalizeDayData: normalizeDayData,
     splitWorkflowBackupData: splitWorkflowBackupData,
     validateWorkflowBackupData: validateWorkflowBackupData,
@@ -2408,7 +2448,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
       <div style="overflow-x:auto"><table class="help-table">
         <tr><th>功能</th><th>操作方式</th><th>说明</th></tr>
         <tr><td>📁 项目标签</td><td>点击任务卡片右上角 📁</td><td>为任务添加项目标签（如 YbNi4P2、LuNi4P2），支持按项目过滤，历史详情中显示</td></tr>
-        <tr><td>📅 打卡任务</td><td>任务卡片右上角 📅 按钮</td><td>标记为打卡任务，完成时可选"当日完成"（明天自动续接）或"完全完成"（彻底结束）；历史编辑模式同样区分两种完成方式</td></tr>
+        <tr><td><span class="checkin-task-icon is-active" aria-hidden="true">🎯</span> 打卡任务</td><td>任务卡片右上角的靶心打卡按钮</td><td>带绿色勾的靶心表示已设为打卡任务；完成时可选"当日完成"（明天自动续接）或"完全完成"（彻底结束）。取消只暂停打卡属性并保留原创建时间、连续天数和历史，再次设置会恢复原记录</td></tr>
         <tr><td>日 / 周 / 月 / 年视图</td><td>历史标签顶部视图切换</td><td>按不同时间尺度浏览记录；所有视图都可点具体日期进入详情和编辑，批量操作时使用日视图</td></tr>
         <tr><td>🧭 历史补偿</td><td>历史详情 → 编辑</td><td>把昨天的打卡任务改为"当日完成"后，若今天缺少同链任务，会自动补续接到今日</td></tr>
         <tr><td>📋 续未完成</td><td>任务区右上角"续未完成"按钮</td><td>从历史中选择未完成任务添加到今日；优先按续接链归并，旧数据按文字兜底，拖延天数按剩余候选中最早日期计算；支持晨间任务</td></tr>
@@ -2470,7 +2510,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
       <p><b>Google Drive：</b>点击顶部 <svg width="13" height="13" viewBox="0 0 48 48" style="vertical-align:middle;margin:0 2px"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg> 按钮，用 Google 账号授权即可。数据存储在 Drive 应用隐藏目录，不占主目录空间。</p>
       <p><b>GitHub：</b>点击顶部 <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin:0 2px"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg> 按钮，填写仓库名（<code>用户名/仓库名</code>）和 Personal Access Token（需有 Contents 读写权限）。</p>
       <p><b>同步机制：</b>修改内容 2 秒后自动推送；切回页面时自动拉取；每 30 秒轮询一次。两端同时配置时均生效，互为备份。手动点击 🔄 或按 <span class="help-kbd">Ctrl+S</span> 可立即触发同步。</p>
-      <p><b>冲突处理：</b>当云端数据比本地新时，会弹出本地/云端摘要，可选择“合并新增”“使用云端覆盖”或“保留本地并推送”。合并只导入本地不存在的日期/周计划/小记，同一天两端都改过时保留本地。</p>
+      <p><b>冲突处理：</b>工具会以最近一次成功同步为共同版本：仅本地修改时自动推送，仅云端修改时自动接收，只有两端都从共同版本继续修改时才提示冲突。首次连接旧版云端文件因没有共同版本，可能保守提示一次。弹窗可选择“合并新增”“使用云端覆盖”或“保留本地并推送”。</p>
     </div></div>
   </div>
 
@@ -2849,7 +2889,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
     </div>
     <div style="display:flex;flex-direction:column;gap:10px">
       <button class="btn btn-primary" onclick="confirmCheckInComplete('daily')" style="padding:12px;text-align:left">
-        <div style="font-size:14px;font-weight:600">📅 当日完成</div>
+        <div style="font-size:14px;font-weight:600"><span class="checkin-task-icon is-active" aria-hidden="true">🎯</span> 当日完成</div>
         <div style="font-size:12px;color:rgba(255,255,255,0.8);margin-top:4px">记录今日打卡，明天自动续接任务</div>
       </button>
       <button class="btn btn-success" onclick="confirmCheckInComplete('full')" style="padding:12px;text-align:left">
@@ -3015,7 +3055,7 @@ var driveFileId = localStorage.getItem('drive_file_id') || null;
 var accessToken = null;
 var syncInProgress = false;
 var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 4;
-var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.07.19.10';
+var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.07.20.6';
 
 var tokenClient = null;
 var _syncReconcileInProgress = false;
@@ -3131,6 +3171,7 @@ window.signOutGoogle = function() {
   localStorage.removeItem('google_connected');
   localStorage.removeItem('google_access_token');
   localStorage.removeItem('google_token_expiry');
+  _clearSyncBaseline('Drive');
   // 撤销授权，强制下次重新授权时使用正确的 scope
   if (accessToken) {
     fetch('https://oauth2.googleapis.com/revoke?token=' + accessToken, { method: 'POST' })
@@ -3177,7 +3218,9 @@ async function loadFromDrive() {
     var searchData = await searchResp.json();
     if (searchData.files && searchData.files.length > 0) {
       // 使用最新修改的文件，并同步 fileId
+      var previousDriveFileId = localStorage.getItem('drive_file_id') || '';
       driveFileId = searchData.files[0].id;
+      if (previousDriveFileId && previousDriveFileId !== driveFileId) _clearSyncBaseline('Drive');
       localStorage.setItem('drive_file_id', driveFileId);
 
       var fileResp = await fetch(
@@ -3211,7 +3254,7 @@ async function saveToDrive() {
   syncInProgress = true;
 
   try {
-    var allData = collectAllData();
+    var allData = _prepareSyncPayload('Drive');
     var content = JSON.stringify(allData);
     // PATCH 更新时不能包含 parents 字段，否则 Google API 返回 403
     var metadata = driveFileId
@@ -3274,6 +3317,7 @@ async function saveToDrive() {
         localStorage.setItem('drive_file_id', driveFileId);
       }
       localStorage.setItem('wf_backup_time', String(Date.now()));
+      _rememberSyncBaseline('Drive', allData);
       _setSyncStatus('drive','ok','已保存到 Drive');
       console.log('Drive sync OK, fileId:', driveFileId);
     } else {
@@ -3378,10 +3422,7 @@ function _silentPullDrive() {
     .then(function(data) {
       if (!data) return;
       var remoteTs = _backupTimestamp(data);
-      var localTs = parseInt(localStorage.getItem('wf_backup_time') || '0', 10);
-      if (remoteTs > localTs + 5000) {
-        _handleRemoteWorkflowData('Drive', data, remoteTs, function(){ saveToDrive(); }, true);
-      }
+      _handleRemoteWorkflowData('Drive', data, remoteTs, function(){ saveToDrive(); }, true);
     })
     .catch(function() {});
 }
@@ -3434,6 +3475,8 @@ function saveGitHubConfig() {
   } })
     .then(function(r) {
       if (r.status === 200) {
+        var previousRepo = localStorage.getItem('gh_repo') || '';
+        if (previousRepo && previousRepo !== repo) _clearSyncBaseline('GitHub');
         localStorage.setItem('gh_repo', repo);
         localStorage.setItem('gh_token', token);
         document.getElementById('ghConfigBtn').style.display = 'none';
@@ -3460,6 +3503,7 @@ function disconnectGitHub() {
   localStorage.removeItem('gh_repo');
   localStorage.removeItem('gh_token');
   localStorage.removeItem('gh_sha');
+  _clearSyncBaseline('GitHub');
   document.getElementById('ghConfigBtn').style.display = '';
   document.getElementById('ghStatusBadge').style.display = 'none';
   document.getElementById('ghConfigModal').style.display = 'none';
@@ -3590,6 +3634,59 @@ function _remoteWorkflowDiffers(remoteData) {
   }
 }
 
+function _syncProviderKey(source) {
+  return String(source || '').toLowerCase() === 'github' ? 'github' : 'drive';
+}
+
+function _workflowFingerprint(data) {
+  var stable = _stableWorkflowString(_workflowComparableMap(data));
+  var h1 = 2166136261;
+  var h2 = 2246822519;
+  for (var i = 0; i < stable.length; i++) {
+    var code = stable.charCodeAt(i);
+    h1 = Math.imul(h1 ^ code, 16777619);
+    h2 = Math.imul(h2 ^ code, 3266489917);
+  }
+  return (h1 >>> 0).toString(36) + '-' + (h2 >>> 0).toString(36) + '-' + stable.length.toString(36);
+}
+
+function _newSyncRevision() {
+  return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+}
+
+function _prepareSyncPayload(source) {
+  var data = collectAllData();
+  data._syncRevision = _newSyncRevision();
+  data._syncSource = _syncProviderKey(source);
+  return data;
+}
+
+function _rememberSyncBaseline(source, data) {
+  var provider = _syncProviderKey(source);
+  var revision = data && data._syncRevision ? String(data._syncRevision) : '';
+  localStorage.setItem('wf_sync_revision_' + provider, revision);
+  localStorage.setItem('wf_sync_fingerprint_' + provider, _workflowFingerprint(collectAllData()));
+}
+
+function _clearSyncBaseline(source) {
+  var provider = _syncProviderKey(source);
+  localStorage.removeItem('wf_sync_revision_' + provider);
+  localStorage.removeItem('wf_sync_fingerprint_' + provider);
+}
+
+function _syncBaselineDecision(source, localData, remoteData) {
+  var provider = _syncProviderKey(source);
+  var knownFingerprint = localStorage.getItem('wf_sync_fingerprint_' + provider) || '';
+  if (!knownFingerprint) return {known:false};
+  var knownRevision = localStorage.getItem('wf_sync_revision_' + provider) || '';
+  var remoteRevision = remoteData && remoteData._syncRevision ? String(remoteData._syncRevision) : '';
+  var localChanged = _workflowFingerprint(localData) !== knownFingerprint;
+  var remoteChanged = (knownRevision || remoteRevision)
+    ? knownRevision !== remoteRevision
+    : _workflowFingerprint(remoteData) !== knownFingerprint;
+  return {known:true, localChanged:localChanged, remoteChanged:remoteChanged};
+}
+
 function _analyzeWorkflowSync(localData, remoteData, todayKey) {
   if (window.WorkflowCore && typeof window.WorkflowCore.analyzeWorkflowSync === 'function') {
     return window.WorkflowCore.analyzeWorkflowSync(localData, remoteData, todayKey);
@@ -3651,9 +3748,27 @@ window._analyzeWorkflowSync = _analyzeWorkflowSync;
 
 function _handleRemoteWorkflowData(source, remoteData, remoteTs, afterLocalChoice, silent) {
   if (_pendingSyncConflict) return true;
-  var analysis = _analyzeWorkflowSync(collectAllData(), remoteData, 'wf_day_' + localDateStr());
+  var localData = collectAllData();
+  var baseline = _syncBaselineDecision(source, localData, remoteData);
+  if (baseline.known && baseline.remoteChanged && !baseline.localChanged) {
+    _syncReconcileInProgress = true;
+    try { _applyWorkflowBackupData(remoteData, {clear:true}); }
+    finally { _syncReconcileInProgress = false; }
+    _rememberSyncBaseline(source, remoteData);
+    _refreshWorkflowAfterDataChange();
+    _setSyncStatus(source.toLowerCase(), 'ok', '已自动接收云端更新');
+    if (!silent) showToast('已接收 ' + source + ' 云端更新', 'success');
+    return false;
+  }
+  if (baseline.known && baseline.localChanged && !baseline.remoteChanged) {
+    _setSyncStatus(source.toLowerCase(), 'ok', '仅本地有更新，准备同步');
+    if (typeof afterLocalChoice === 'function') setTimeout(afterLocalChoice, 0);
+    return false;
+  }
+  var analysis = _analyzeWorkflowSync(localData, remoteData, 'wf_day_' + localDateStr());
   if (analysis.equal) {
     if (remoteTs) localStorage.setItem('wf_backup_time', String(remoteTs));
+    _rememberSyncBaseline(source, remoteData);
     _setSyncStatus(source.toLowerCase(), 'ok', silent ? '云端内容一致' : '已连接，云端内容一致');
     return false;
   }
@@ -3670,6 +3785,7 @@ function _handleRemoteWorkflowData(source, remoteData, remoteTs, afterLocalChoic
     _setSyncStatus(source.toLowerCase(), 'ok', message);
     if (!silent && mergedCount) showToast(message, 'success');
     if (analysis.needsPush && typeof afterLocalChoice === 'function') setTimeout(afterLocalChoice, 0);
+    else _rememberSyncBaseline(source, collectAllData());
     return false;
   }
   if (silent) _setSyncStatus(source.toLowerCase(), 'warn', '检测到远端内容不同，等待选择');
@@ -3882,7 +3998,7 @@ function saveToGitHub(depth, feedback) {
   var repo = localStorage.getItem('gh_repo');
   var token = localStorage.getItem('gh_token');
   if (!repo || !token) { if(feedback) showToast('未配置 GitHub 同步', 'warn'); return; }
-  var _payload = collectAllData();
+  var _payload = _prepareSyncPayload('GitHub');
   var content = JSON.stringify(_payload, null, 2);
   var _enc = new TextEncoder().encode(content);
   var _bin = ''; _enc.forEach(function(b){ _bin += String.fromCharCode(b); });
@@ -3901,6 +4017,7 @@ function saveToGitHub(depth, feedback) {
       }
       // 推送成功：本地时间戳对齐刚推送的 _lastSync，避免下次加载误判远程更新而覆盖本地
       localStorage.setItem('wf_backup_time', String(_payload._lastSync));
+      _rememberSyncBaseline('GitHub', _payload);
       _setSyncStatus('github','ok','已保存到 GitHub');
       if(feedback) showToast('已同步到 GitHub', 'success');
     } else if (res.status === 409) {
@@ -3969,10 +4086,7 @@ function _silentPullGitHub() {
       var remote;
       try { remote = JSON.parse(new TextDecoder().decode(_arr)); } catch(e) { return; }
       var remoteTs = _backupTimestamp(remote);
-      var localTs = parseInt(localStorage.getItem('wf_backup_time') || '0', 10);
-      if (remoteTs > localTs + 5000) {
-        _handleRemoteWorkflowData('GitHub', remote, remoteTs, function(){ saveToGitHub(0, true); }, true);
-      }
+      _handleRemoteWorkflowData('GitHub', remote, remoteTs, function(){ saveToGitHub(0, true); }, true);
     })
     .catch(function() {});
 }
@@ -4170,6 +4284,8 @@ window.closeSyncStatusModal = function(){ document.getElementById('syncStatusMod
 window.clearSyncCredentials = function(){
   var run = function(){
     var removed = window.WorkflowSync ? window.WorkflowSync.clearCredentials(localStorage) : 0;
+    _clearSyncBaseline('Drive');
+    _clearSyncBaseline('GitHub');
     accessToken = null;
     driveFileId = null;
     document.getElementById('ghConfigBtn').style.display = '';
@@ -4230,9 +4346,14 @@ var _lastConflictContext = null;
 function _openSyncConflict(source, remoteData, remoteTs, afterLocalChoice) {
   _pendingSyncConflict = {source: source, remoteData: remoteData, remoteTs: remoteTs, afterLocalChoice: afterLocalChoice};
   var localTs = parseInt(localStorage.getItem('wf_backup_time') || '0', 10);
+  var baseline = _syncBaselineDecision(source, collectAllData(), remoteData);
+  var reasonText = baseline.known
+    ? '判断依据：本地和云端都已偏离上次成功同步的共同版本，因此需要确认。'
+    : '判断依据：这是旧版云端文件或当前浏览器首次连接，尚无共同版本基线；为避免静默覆盖，保守地请求一次确认。完成选择并成功同步后会建立基线。';
   document.getElementById('syncConflictBody').innerHTML =
     '<div class="conflict-choice"><b>本地数据</b><span>最近时间：'+(localTs ? esc(new Date(localTs).toLocaleString('zh-CN')) : '暂无')+'</span><span style="white-space:pre-line">'+esc(_summaryTextForWorkflowData(collectAllData()))+'</span></div>'+
     '<div class="conflict-choice"><b>'+esc(source)+' 云端数据</b><span>最近时间：'+esc(new Date(remoteTs || Date.now()).toLocaleString('zh-CN'))+'</span><span style="white-space:pre-line">'+esc(_summaryTextForWorkflowData(remoteData))+'</span></div>'+
+    '<div style="color:var(--text2);font-size:12px">'+esc(reasonText)+'</div>'+
     '<div style="color:var(--text3);font-size:12px">“合并新增”会导入本地不存在的日期、周计划、小记和设置类状态；两边都改过的同日任务或设置会保留本地并列为冲突。覆盖和合并前都会自动生成本地快照。</div>';
   document.getElementById('syncConflictModal').style.display = 'flex';
 }
@@ -4470,6 +4591,14 @@ function _applyRemoteSettingConflict(key){
   localStorage.setItem(remote.key, incoming);
   return true;
 }
+function _finishConflictResolutionIfReady(){
+  if(!_lastConflictContext || (_lastConflictContext.conflicts || []).length) return false;
+  var cb = _lastConflictContext.afterLocalChoice;
+  _lastConflictContext = null;
+  if(typeof cb === 'function') setTimeout(cb, 0);
+  showToast('冲突选择已完成，正在同步最终结果', 'success');
+  return true;
+}
 window.applyRemoteConflictItem = function(idx){
   var key = _lastConflictContext && _lastConflictContext.conflicts && _lastConflictContext.conflicts[idx];
   var remote = _remoteDayFromConflict(key);
@@ -4479,6 +4608,7 @@ window.applyRemoteConflictItem = function(idx){
       showToast('已应用云端设置：' + key, 'success');
       _refreshWorkflowAfterDataChange();
       openConflictDetailsModal((_lastConflictContext && _lastConflictContext.conflicts) || []);
+      _finishConflictResolutionIfReady();
       return;
     }
     showToast('无法定位云端冲突项', 'warn');
@@ -4503,6 +4633,7 @@ window.applyRemoteConflictItem = function(idx){
   showToast('已应用云端冲突项：' + remote.date, 'success');
   _refreshWorkflowAfterDataChange();
   openConflictDetailsModal((_lastConflictContext && _lastConflictContext.conflicts) || []);
+  _finishConflictResolutionIfReady();
 };
 window.applyRemoteConflictField = function(idx, field){
   var key = _lastConflictContext && _lastConflictContext.conflicts && _lastConflictContext.conflicts[idx];
@@ -4554,12 +4685,14 @@ window.ignoreAllConflicts = function(){
   if(!_lastConflictContext || !_lastConflictContext.conflicts) return;
   _lastConflictContext.conflicts = [];
   openConflictDetailsModal([]);
-  showToast('已忽略全部冲突', 'info');
+  showToast('已保留全部本地值', 'info');
+  _finishConflictResolutionIfReady();
 };
 window.ignoreConflictItem = function(idx){
   if(!_lastConflictContext || !_lastConflictContext.conflicts) return;
   _lastConflictContext.conflicts.splice(idx, 1);
   openConflictDetailsModal(_lastConflictContext.conflicts);
+  _finishConflictResolutionIfReady();
 };
 window.exportConflictReport = function(){
   var conflicts = (_lastConflictContext && _lastConflictContext.conflicts) || [];
@@ -4589,6 +4722,7 @@ window.resolveSyncConflict = function(choice){
   if(choice === 'remote'){
     _createLocalSnapshot('before-' + c.source + '-conflict-remote', false);
     _applyWorkflowBackupData(c.remoteData, {clear:true});
+    _rememberSyncBaseline(c.source, c.remoteData);
     _setSyncStatus(c.source.toLowerCase(), 'ok', '已选择云端覆盖本地');
     document.getElementById('syncConflictModal').style.display = 'none';
     _pendingSyncConflict = null;
@@ -4599,13 +4733,14 @@ window.resolveSyncConflict = function(choice){
   if(choice === 'merge'){
     _createLocalSnapshot('before-' + c.source + '-conflict-merge', false);
     var result = _mergeWorkflowBackupData(c.remoteData);
-    _lastConflictContext = {source:c.source, remoteData:c.remoteData, conflicts:result.conflicts.slice()};
+    _lastConflictContext = {source:c.source, remoteData:c.remoteData, conflicts:result.conflicts.slice(), afterLocalChoice:c.afterLocalChoice};
     _setSyncStatus(c.source.toLowerCase(), result.conflicts.length ? 'warn' : 'ok', '合并新增 ' + result.added + ' 项，冲突 ' + result.conflicts.length + ' 项');
     document.getElementById('syncConflictModal').style.display = 'none';
     _pendingSyncConflict = null;
     showToast('已合并新增 ' + result.added + ' 项；冲突 ' + result.conflicts.length + ' 项保留本地', result.conflicts.length ? 'warn' : 'success');
     _refreshWorkflowAfterDataChange();
     if(result.conflicts.length) openConflictDetailsModal(result.conflicts);
+    else if(typeof c.afterLocalChoice === 'function') setTimeout(c.afterLocalChoice, 0);
     return;
   }
   if(choice === 'local'){
@@ -4951,7 +5086,7 @@ function _exTaskList(tasks) {
     html += '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:3px">';
     html += '<span style="font-size:10px;padding:1px 7px;border-radius:20px;background:var(--primary-bg);color:var(--primary);font-weight:600">' + _exH(typeLabel) + '</span>';
     if (t.project) html += '<span style="font-size:10px;padding:1px 7px;border-radius:20px;background:var(--info-bg,#eff6ff);color:var(--info,#2563eb);font-weight:600">📁 ' + _exH(t.project) + '</span>';
-    if (t.isCheckInTask) html += '<span style="font-size:10px;padding:1px 7px;border-radius:20px;background:var(--warn-bg);color:var(--warn);font-weight:600">📅 ' + (t.checkInDays||1) + '天' + (t.checkInCompleteType==='daily'?' (当日完成)':t.checkInCompleteType==='full'?' (完全完成)':'') + '</span>';
+    if (t.isCheckInTask) html += '<span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:1px 7px;border-radius:20px;background:var(--warn-bg);color:var(--warn);font-weight:600">' + window._checkInIconHtml(true) + '打卡 · ' + (t.checkInDays||1) + '天' + (t.checkInCompleteType==='daily'?' (当日完成)':t.checkInCompleteType==='full'?' (完全完成)':'') + '</span>';
     html += '</div>';
     html += '<div style="font-size:13px;color:' + (t.done?'var(--export-muted)':'var(--export-text)') + ';font-weight:500;text-decoration:' + (t.done?'line-through':'none') + '">' + _exMD(primary) + '</div>';
     if (t.done && t.doneAt) html += '<div style="font-size:10px;color:var(--success);margin-top:2px">完成于 ' + _exH(t.doneAt) + '</div>';
@@ -5798,6 +5933,79 @@ window.hideInputModal = function(){
   }
 })();
 
+// 系统日历 Emoji 的图案固定为 7 月 17 日；界面中改用会随本地日期更新的自绘图标。
+(function initDynamicCalendarIcons(){
+  window._checkInIconHtml = function(done){
+    return '<span class="checkin-task-icon'+(done?' is-active':'')+'" aria-hidden="true">🎯</span>';
+  };
+  function calendarDate(value){
+    if(value instanceof Date && !isNaN(value.getTime())) return value;
+    var match = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if(match) return new Date(parseInt(match[1],10), parseInt(match[2],10)-1, parseInt(match[3],10));
+    return new Date();
+  }
+  function applyCalendarDate(span, value){
+    var now = calendarDate(value);
+    span.setAttribute('data-month', (now.getMonth() + 1) + '月');
+    span.setAttribute('data-day', String(now.getDate()));
+    span.setAttribute('role', 'img');
+    span.setAttribute('aria-label', (now.getMonth() + 1) + '月' + now.getDate() + '日');
+    span.title = now.getFullYear() + '年' + (now.getMonth() + 1) + '月' + now.getDate() + '日';
+    return span;
+  }
+  function calendarSpan(value){
+    var span = document.createElement('span');
+    span.className = 'calendar-date-icon';
+    if(/^\d{4}-\d{2}-\d{2}$/.test(String(value || ''))) span.setAttribute('data-fixed-date', String(value));
+    return applyCalendarDate(span, value);
+  }
+  window._calendarIconHtml = function(value){
+    var span = calendarSpan(value);
+    return span.outerHTML;
+  };
+  function hydrate(root){
+    if(!root || !document.createTreeWalker) return;
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    var nodes = [], node;
+    while((node = walker.nextNode())) {
+      var parent = node.parentElement;
+      if(!parent || /^(SCRIPT|STYLE|TEXTAREA|INPUT|OPTION)$/.test(parent.tagName)) continue;
+      if(parent.closest && parent.closest('.calendar-date-icon')) continue;
+      if(/(?:📅|🗓️?)/.test(node.nodeValue || '')) nodes.push(node);
+    }
+    nodes.forEach(function(textNode){
+      var parts = (textNode.nodeValue || '').split(/(📅|🗓️?)/g);
+      var frag = document.createDocumentFragment();
+      parts.forEach(function(part){
+        if(part === '📅' || part.indexOf('🗓') === 0) frag.appendChild(calendarSpan());
+        else if(part) frag.appendChild(document.createTextNode(part));
+      });
+      if(textNode.parentNode) textNode.parentNode.replaceChild(frag, textNode);
+    });
+  }
+  function refresh(){
+    document.querySelectorAll('.calendar-date-icon').forEach(function(el){
+      if(!el.hasAttribute('data-fixed-date')) applyCalendarDate(el);
+    });
+  }
+  window.refreshCalendarIcons = function(){ hydrate(document.body); refresh(); };
+  function start(){
+    hydrate(document.body);
+    var queued = false;
+    function queueHydrate(){
+      if(queued) return;
+      queued = true;
+      setTimeout(function(){ queued = false; hydrate(document.body); refresh(); }, 0);
+    }
+    document.addEventListener('click', queueHydrate);
+    document.addEventListener('change', queueHydrate);
+    document.addEventListener('input', queueHydrate);
+    setInterval(function(){ hydrate(document.body); refresh(); }, 60 * 1000);
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, {once:true});
+  else start();
+})();
+
 window.triggerInstall = function(){
   if(installPromptEvent){
     installPromptEvent.prompt();
@@ -6392,7 +6600,7 @@ function _fmtCnDate(d, opts) {
 }
 function _fmtFullCnDate(dateStr) {
   var d = typeof dateStr === 'string' ? parseDateLocal(dateStr) : dateStr;
-  return localDateStr(d) + ' · ' + _fmtCnDate(d, {year:true}) + ' ' + d.toLocaleDateString('zh-CN', {weekday:'long'});
+  return _fmtCnDate(d, {year:true}) + ' ' + d.toLocaleDateString('zh-CN', {weekday:'long'});
 }
 function localDateTimeStr(d) {
   d = d || new Date();
@@ -6410,12 +6618,20 @@ function _ensureTaskChain(t){
     if(!t.checkInDays) t.checkInDays = 1;
     if(!t.checkInHistory) t.checkInHistory = [];
     if(t.done && !t.checkInCompleteType) t.checkInCompleteType = 'full';
-  } else {
-    delete t.checkInDays;
-    delete t.checkInCompleteType;
-    delete t.checkInHistory;
   }
   delete t.checkInChainId;
+  return t;
+}
+function _setCheckInEnabled(t, enabled, date){
+  if(window.WorkflowCore && typeof window.WorkflowCore.setCheckInEnabled === 'function') return window.WorkflowCore.setCheckInEnabled(t, enabled, date, _newChainId);
+  if(!t || typeof t !== 'object') return t;
+  t.isCheckInTask = !!enabled;
+  if(t.isCheckInTask){
+    if(!t.checkInDays) t.checkInDays = 1;
+    if(!t._chainId) t._chainId = _newChainId('checkin');
+    if(!Array.isArray(t.checkInHistory)) t.checkInHistory = [];
+    if(!t.checkInHistory.length) t.checkInHistory.push({date:date || '', action:'start'});
+  }
   return t;
 }
 function _normalizeDayData(data){
@@ -6594,6 +6810,7 @@ function flash(){
 }
 function esc(s){ return window.WorkflowApp ? window.WorkflowApp.escapeHtml(s) : (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 window.esc = esc;
+function _htmlJsStringArg(value){ return esc(JSON.stringify(String(value == null ? '' : value))); }
 
 // ===== Streak Counter =====
 function computeStreak(){
@@ -6885,7 +7102,7 @@ function renderMorningActions(){
   var t = _ensureMorningTaskObj(todayData);
   var project = t && t.project;
   var check = t && t.isCheckInTask;
-  var checkLabel = check ? '📅 ' + (t.checkInDays || 1) + '天' + (t.checkInCompleteType === 'daily' ? ' · 当日完成' : t.checkInCompleteType === 'full' ? ' · 完全完成' : '') : '📅 设为打卡';
+  var checkLabel = window._checkInIconHtml(check && !!t.done) + (check ? ' ' + (t.checkInDays || 1) + '天' + (t.checkInCompleteType === 'daily' ? ' · 当日完成' : t.checkInCompleteType === 'full' ? ' · 完全完成' : '') : ' 设为打卡');
   el.innerHTML =
     '<button class="morning-chip '+(project?'active':'')+'" onclick="openMorningProjectMenu(event)" title="给晨间任务添加项目标签">'+(project ? '📁 '+esc(project) : '📁 项目')+'</button>'+
     '<button class="morning-chip '+(check?'active':'')+'" onclick="toggleMorningCheckIn()" title="'+(check?'取消晨间打卡任务':'设为晨间打卡任务')+'">'+checkLabel+'</button>'+
@@ -6966,18 +7183,12 @@ window.toggleMorningCheckIn = function(){
   var t = _ensureMorningTaskObj(todayData);
   if(!t) { showToast('请先填写晨间任务', 'warn'); return; }
   if(!t.isCheckInTask){
-    t.isCheckInTask = true;
-    t.checkInDays = t.checkInDays || 1;
-    if(!t._chainId) t._chainId = _newChainId('checkin');
-    t.checkInHistory = t.checkInHistory || [];
-    if(!t.checkInHistory.length) t.checkInHistory.push({date: today, action: 'start'});
-    showToast('晨间任务已设为打卡任务', 'success');
+    var hadMorningCheckInRecord = !!((t.checkInHistory && t.checkInHistory.length) || t.checkInDays > 1);
+    _setCheckInEnabled(t, true, today);
+    showToast(hadMorningCheckInRecord ? '已恢复晨间打卡任务，原连续记录保持不变' : '晨间任务已设为打卡任务', 'success');
   } else {
-    t.isCheckInTask = false;
-    delete t.checkInDays;
-    delete t.checkInHistory;
-    delete t.checkInCompleteType;
-    showToast('已取消晨间打卡任务', 'info');
+    _setCheckInEnabled(t, false, today);
+    showToast('已取消晨间打卡；原连续记录已保留', 'info');
   }
   _syncMorningTaskObjFromFields(todayData.m);
   saveDay(today, todayData);
@@ -7007,7 +7218,7 @@ function renderProjectFilterPills() {
     html += '<div style="margin-bottom:8px"><span style="font-size:11px;color:var(--text3);margin-right:8px">项目</span>' +
       '<span class="filter-pill' + (!_activeProjectFilter ? ' active' : '') + '" onclick="setProjectFilter(\'\')">全部</span>' +
       projects.map(function(p) {
-        return '<span class="filter-pill' + (_activeProjectFilter===p?' active':'') + '" onclick="setProjectFilter(\''+esc(p)+'\')">📁 '+esc(p)+'</span>';
+        return '<span class="filter-pill' + (_activeProjectFilter===p?' active':'') + '" onclick="setProjectFilter('+_htmlJsStringArg(p)+')">📁 '+esc(p)+'</span>';
       }).join('') + '</div>';
   }
   // 类型过滤
@@ -7274,18 +7485,13 @@ window.toggleCheckInTask = function(id){
   if(!t) return;
   if(!t.isCheckInTask){
     // 设为打卡任务
-    t.isCheckInTask = true;
-    t.checkInDays = 1; // 从今天开始算第1天
-    if(!t._chainId) t._chainId = _newChainId('checkin');
-    t.checkInHistory = [{date: today, action: 'start'}];
-    showToast('已设为打卡任务，完成时可选择「当日完成」次日自动续接','success');
+    var hadCheckInRecord = !!((t.checkInHistory && t.checkInHistory.length) || t.checkInDays > 1);
+    _setCheckInEnabled(t, true, today);
+    showToast(hadCheckInRecord ? '已恢复打卡任务，原连续记录和起始时间保持不变' : '已设为打卡任务，完成时可选择「当日完成」次日自动续接','success');
   } else {
     // 取消打卡任务
-    t.isCheckInTask = false;
-    delete t.checkInDays;
-    delete t.checkInHistory;
-    delete t.checkInCompleteType;
-    showToast('已取消打卡任务','info');
+    _setCheckInEnabled(t, false, today);
+    showToast('已取消打卡；原连续记录和起始时间已保留','info');
   }
   saveDay(today, todayData);
   renderTasks();
@@ -7399,7 +7605,7 @@ window.exportToday = function(){
   }
 
   if(d.e.tomorrow){
-    lines.push('┌─ 📅 明日计划 ─────────────────────────────');
+    lines.push('┌─ 明日计划 ───────────────────────────────');
     lines.push('│  ' + d.e.tomorrow);
     lines.push('└' + '─'.repeat(46));
     lines.push('');
@@ -7518,7 +7724,7 @@ function _mdTaskLine(t, prefix){
   var title = getTaskPrimaryField(t) || '(空)';
   var line = (prefix || '- ') + (t.done ? '✅' : '⏳') + ' **' + title + '**';
   if(t.project) line += ' [📁 ' + t.project + ']';
-  if(t.isCheckInTask) line += ' [📅 ' + (t.checkInDays || 1) + '天' + (t.checkInCompleteType === 'daily' ? '·当日完成' : t.checkInCompleteType === 'full' ? '·完全完成' : '') + ']';
+  if(t.isCheckInTask) line += ' [连续记录 ' + (t.checkInDays || 1) + '天' + (t.checkInCompleteType === 'daily' ? '·当日完成' : t.checkInCompleteType === 'full' ? '·完全完成' : '') + ']';
   return line + '\n' + _mdTaskDetails(t, '  ');
 }
 
@@ -7689,7 +7895,7 @@ function renderTasks(){
     var typeClass = TYPE_CLASSES[t.type] || 'type-general';
     var title = t.what || t.question || t.source || t.problem || t.choice || '(空)';
     var isExpanded = window._taskExpandState[t.id];
-    var checkInBadge = t.isCheckInTask ? '<span style="font-size:11px;color:#f59e0b;background:rgba(245,158,11,0.1);padding:2px 6px;border-radius:4px;margin:0">📅 '+((t.checkInDays||1)+'天')+'</span>' : '';
+    var checkInBadge = t.isCheckInTask ? '<span style="display:inline-flex;align-items:center;gap:3px;font-size:11px;color:var(--warn);background:var(--warn-bg);padding:2px 6px;border-radius:6px;margin:0">'+window._checkInIconHtml(true)+'打卡 · '+((t.checkInDays||1)+'天')+'</span>' : '';
     var collapseHeader = '<div class="task-collapse-header" onclick="toggleTaskCollapse(\''+t.id+'\')" style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px 12px;border-radius:8px;background:var(--surface2)">'+
       '<span style="font-size:12px;color:var(--text4)">'+(isExpanded?'▼':'▶')+'</span>'+
       '<span class="task-type-badge '+typeClass+'" style="margin:0">'+typeLabel+'</span>'+
@@ -7706,7 +7912,7 @@ function renderTasks(){
         (t.done && t.doneAt ? '<span style="font-size:10px;color:var(--success);margin-left:4px">✓'+esc(t.doneAt)+'</span>' : '')+
         (t.time ? '<span style="font-size:10px;color:var(--text4);margin-left:4px">创建 '+esc(t.time)+'</span>' : '')+
         '<div class="task-actions">'+
-          '<button class="btn btn-secondary btn-xs" onclick="event.stopPropagation();toggleCheckInTask(\''+t.id+'\')" title="'+(t.isCheckInTask?'取消打卡任务':'设为打卡任务')+'">'+(t.isCheckInTask?'📅✓':'📅')+'</button>'+
+          '<button class="btn btn-secondary btn-xs checkin-toggle-btn '+(t.isCheckInTask?'active':'')+'" onclick="event.stopPropagation();toggleCheckInTask(\''+t.id+'\')" title="'+(t.isCheckInTask?'已是打卡任务，点击取消':'设为打卡任务')+'" aria-label="'+(t.isCheckInTask?'已是打卡任务，点击取消':'设为打卡任务')+'">'+window._checkInIconHtml(!!t.isCheckInTask)+'</button>'+
           '<button class="btn btn-secondary btn-xs" onclick="event.stopPropagation();setAsMorning(\''+t.id+'\')" title="设为晨间任务">☀️</button>'+
           '<button class="btn btn-danger btn-xs" onclick="event.stopPropagation();delTask(\''+t.id+'\')" title="删除此任务">🗑️</button>'+
         '</div>'+
@@ -8386,8 +8592,8 @@ function _histRenderTaskEdit(t){
   var projTag = t.project
     ? '<span onclick="updHistProject(\''+_histEditDate+'\',\''+t.id+'\')" title="点击修改/移除项目" style="font-size:10px;background:var(--info-bg);color:var(--info);border-radius:20px;padding:1px 7px;cursor:pointer">📁 '+esc(t.project)+'</span>'
     : '<span onclick="updHistProject(\''+_histEditDate+'\',\''+t.id+'\')" title="点击添加项目" style="font-size:10px;color:var(--text4);border:1px dashed var(--border);border-radius:20px;padding:1px 7px;cursor:pointer">📁 +</span>';
-  var checkInBadge = t.isCheckInTask ? '<span style="font-size:10px;color:#f59e0b;background:rgba(245,158,11,0.1);padding:1px 7px;border-radius:20px">📅 '+(t.checkInDays||1)+'天'+(t.checkInCompleteType==='daily'?' (当日完成)':t.checkInCompleteType==='full'?' (完全完成)':'')+'</span>' : '';
-  var checkInBtn = '<button onclick="histToggleCheckIn(\''+t.id+'\')" title="'+(t.isCheckInTask?'取消打卡任务':'设为打卡任务')+'" style="background:none;border:none;cursor:pointer;font-size:14px;opacity:.7;padding:2px 6px">'+(t.isCheckInTask?'📅✓':'📅')+'</button>';
+  var checkInBadge = t.isCheckInTask ? '<span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;color:var(--warn);background:var(--warn-bg);padding:1px 7px;border-radius:20px">'+window._checkInIconHtml(true)+'打卡 · '+(t.checkInDays||1)+'天'+(t.checkInCompleteType==='daily'?' (当日完成)':t.checkInCompleteType==='full'?' (完全完成)':'')+'</span>' : '';
+  var checkInBtn = '<button class="btn btn-secondary btn-xs checkin-toggle-btn '+(t.isCheckInTask?'active':'')+'" onclick="histToggleCheckIn(\''+t.id+'\')" title="'+(t.isCheckInTask?'已是打卡任务，点击取消':'设为打卡任务')+'" aria-label="'+(t.isCheckInTask?'已是打卡任务，点击取消':'设为打卡任务')+'">'+window._checkInIconHtml(!!t.isCheckInTask)+'</button>';
   var title = t.what || t.question || t.source || t.problem || t.choice || '(空)';
   var isExpanded = window._histTaskExpandState && window._histTaskExpandState[t.id];
   return '<div style="padding:10px 12px;background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--border);border-left:3px solid '+(t.done?'var(--success)':'var(--primary-light)')+';margin-bottom:8px">'+
@@ -8430,7 +8636,7 @@ function _histRenderEditBody(){
     filterHtml += '<div style="margin-bottom:8px"><span style="font-size:11px;color:var(--text3);margin-right:8px">项目</span>' +
       '<span class="filter-pill' + (!_histProjectFilter ? ' active' : '') + '" onclick="setHistProjectFilter(\'\')">全部</span>' +
       projects.map(function(p) {
-        return '<span class="filter-pill' + (_histProjectFilter===p?' active':'') + '" onclick="setHistProjectFilter(\''+esc(p)+'\')">📁 '+esc(p)+'</span>';
+        return '<span class="filter-pill' + (_histProjectFilter===p?' active':'') + '" onclick="setHistProjectFilter('+_htmlJsStringArg(p)+')">📁 '+esc(p)+'</span>';
       }).join('') + '</div>';
   }
   var types = {};
@@ -8487,7 +8693,7 @@ function _histRenderEditBody(){
         '<label style="display:flex;align-items:center;gap:5px;font-size:12px;margin:6px 0;cursor:pointer;color:'+(d.m.done?'var(--success)':'var(--text2)')+'"><input type="checkbox" '+(d.m.done?'checked':'')+' onchange="histEditMorningDone(this.checked)" style="width:16px;height:16px">'+(d.m.done?'✓ 完成':'○ 待完成')+'</label>'+
         '<div class="morning-actions" style="margin:4px 0 8px">'+
           '<button class="morning-chip '+(d.m.taskObj&&d.m.taskObj.project?'active':'')+'" onclick="histEditMorningProject()" title="给历史晨间任务添加项目">'+(d.m.taskObj&&d.m.taskObj.project?'📁 '+esc(d.m.taskObj.project):'📁 项目')+'</button>'+
-          '<button class="morning-chip '+(d.m.taskObj&&d.m.taskObj.isCheckInTask?'active':'')+'" onclick="histToggleMorningCheckIn()" title="切换历史晨间打卡">'+(d.m.taskObj&&d.m.taskObj.isCheckInTask?'📅 '+(d.m.taskObj.checkInDays||1)+'天':'📅 设为打卡')+'</button>'+
+          '<button class="morning-chip '+(d.m.taskObj&&d.m.taskObj.isCheckInTask?'active':'')+'" onclick="histToggleMorningCheckIn()" title="切换历史晨间打卡">'+window._checkInIconHtml(!!(d.m.taskObj&&d.m.taskObj.isCheckInTask))+(d.m.taskObj&&d.m.taskObj.isCheckInTask?' '+(d.m.taskObj.checkInDays||1)+'天':' 设为打卡')+'</button>'+
         '</div>'+
         _hMorningTa('task', d.m.task, '今日最重要的一件事')+
         _hMorningTa('marker', d.m.marker, '完成标志')+
@@ -8615,14 +8821,7 @@ window.confirmHistoryDeleteTask = function(mode){
 window.histToggleCheckIn = function(id){
   var t = (_histEditData.tasks||[]).find(function(x){return x.id===id;});
   if(t){
-    t.isCheckInTask = !t.isCheckInTask;
-    if(t.isCheckInTask && !t.checkInDays) t.checkInDays = 1;
-    if(t.isCheckInTask && !t.checkInHistory) t.checkInHistory = [{date: _histEditDate || today, action: 'start'}];
-    if(!t.isCheckInTask) {
-      delete t.checkInDays;
-      delete t.checkInCompleteType;
-      delete t.checkInHistory;
-    }
+    _setCheckInEnabled(t, !t.isCheckInTask, _histEditDate || today);
     _histRenderEditBody();
   }
 };
@@ -8654,16 +8853,9 @@ window.histToggleMorningCheckIn = function(){
   if(!_histEditData || !_histEditData.m || !_histEditData.m.task) { showToast('请先填写晨间任务', 'warn'); return; }
   var t = _ensureMorningTaskObj(_histEditData);
   if(!t.isCheckInTask){
-    t.isCheckInTask = true;
-    t.checkInDays = t.checkInDays || 1;
-    if(!t._chainId) t._chainId = _newChainId('checkin');
-    t.checkInHistory = t.checkInHistory || [];
-    if(!t.checkInHistory.length) t.checkInHistory.push({date: _histEditDate || today, action:'start'});
+    _setCheckInEnabled(t, true, _histEditDate || today);
   } else {
-    t.isCheckInTask = false;
-    delete t.checkInDays;
-    delete t.checkInHistory;
-    delete t.checkInCompleteType;
+    _setCheckInEnabled(t, false, _histEditDate || today);
   }
   _syncMorningTaskObjFromFields(_histEditData.m);
   _histRenderEditBody();
@@ -8671,7 +8863,20 @@ window.histToggleMorningCheckIn = function(){
 window.histEditMorning = function(field, val){ _histEditData.m[field]=val; _syncMorningTaskObjFromFields(_histEditData.m); };
 window.histEditMorningClosure = function(field,val){var t=_ensureMorningTaskObj(_histEditData);if(t)t[field]=val;};
 window.histEditMorningDone = function(chk){
+  var t = _ensureMorningTaskObj(_histEditData);
+  if(chk && t && t.isCheckInTask && !_histEditData.m.done){
+    window._currentCheckInTaskId = '__history_morning__';
+    window._currentCheckInMode = 'history-morning';
+    document.getElementById('checkInCompleteModal').style.display = 'flex';
+    _histRenderEditBody();
+    return;
+  }
   _histEditData.m.done=chk;
+  if(!chk && t){
+    t.done = false;
+    t.doneAt = null;
+    t.checkInCompleteType = null;
+  }
   _syncMorningTaskObjFromFields(_histEditData.m);
   _histRenderEditBody();
 };
@@ -8902,7 +9107,7 @@ window.showDetail = function(date, editMode){
         (t.project
           ? '<span onclick="updHistProject(\''+date+'\',\''+t.id+'\')" title="点击修改/移除项目" style="font-size:10px;background:var(--info-bg);color:var(--info);border-radius:20px;padding:1px 7px;cursor:pointer">📁 '+esc(t.project)+'</span>'
           : '<span onclick="updHistProject(\''+date+'\',\''+t.id+'\')" title="点击添加项目标签" style="font-size:10px;color:var(--text4);border:1px dashed var(--border);border-radius:20px;padding:1px 7px;cursor:pointer">📁 +</span>')+
-        (t.isCheckInTask ? '<span style="font-size:10px;color:#f59e0b;background:rgba(245,158,11,0.1);padding:1px 7px;border-radius:20px">📅 '+(t.checkInDays||1)+'天'+(t.checkInCompleteType==='daily'?' (当日完成)':t.checkInCompleteType==='full'?' (完全完成)':'')+'</span>' : '')+
+        (t.isCheckInTask ? '<span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;color:var(--warn);background:var(--warn-bg);padding:1px 7px;border-radius:20px">'+window._checkInIconHtml(!!t.done)+(t.checkInDays||1)+'天'+(t.checkInCompleteType==='daily'?' (当日完成)':t.checkInCompleteType==='full'?' (完全完成)':'')+'</span>' : '')+
         (t.done ? '<span style="font-size:10px;color:var(--success);font-weight:600">✅ 已完成</span>' : '<span style="font-size:10px;color:var(--warn)">⏳ 未完成</span>')+
       '</div>'+
       '<div class="math-preview" style="font-size:13px;font-weight:600;color:var(--text);line-height:1.5;margin-bottom:4px">'+_renderMDMaybe(title)+'</div>'+
@@ -8965,7 +9170,7 @@ window.showDetail = function(date, editMode){
 
   var html = '<div class="detail-box">'+
     '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">'+
-      '<h2 style="margin:0">📅 '+esc(_fmtFullCnDate(date))+'</h2>'+
+      '<h2 style="margin:0">'+esc(_fmtFullCnDate(date))+'</h2>'+
       '<button class="btn btn-primary btn-sm" style="flex-shrink:0" onclick="showDetail(\''+date+'\',true)">✏️ 编辑</button>'+
     '</div>'+
     '<div style="display:flex;gap:8px;margin-bottom:16px;padding:10px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border)">'+
@@ -9629,8 +9834,8 @@ function renderStats(){
       pills.innerHTML = '<button class="stats-proj-btn" data-proj="" style="padding:3px 10px;font-size:11px;border-radius:20px;border:1px solid '+(activeProj===''?'var(--primary)':'var(--border)')+';background:'+(activeProj===''?'var(--primary)':'var(--surface)')+';color:'+(activeProj===''?'#fff':'var(--text3)')+';cursor:pointer;transition:all var(--t)">全部</button>' +
         projects.map(function(p) {
           var isActive = activeProj === p;
-          var pEsc = p.replace(/"/g, '&quot;');
-          return '<button class="stats-proj-btn" data-proj="'+pEsc+'" style="padding:3px 10px;font-size:11px;border-radius:20px;border:1px solid '+(isActive?'var(--info)':'var(--border)')+';background:'+(isActive?'var(--info)':'var(--surface)')+';color:'+(isActive?'#fff':'var(--text3)')+';cursor:pointer;transition:all var(--t)">📁 '+p+'</button>';
+          var pEsc = esc(p);
+          return '<button class="stats-proj-btn" data-proj="'+pEsc+'" style="padding:3px 10px;font-size:11px;border-radius:20px;border:1px solid '+(isActive?'var(--info)':'var(--border)')+';background:'+(isActive?'var(--info)':'var(--surface)')+';color:'+(isActive?'#fff':'var(--text3)')+';cursor:pointer;transition:all var(--t)">📁 '+pEsc+'</button>';
         }).join('');
       // 绑定点击事件
       setTimeout(function(){
@@ -9693,6 +9898,7 @@ function renderOverviewCards(hist) {
 
   // 计算本月起始
   var monthStartStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-01';
+  var daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
 
   // 最高连续天数
   var activeHist=window._statsProj?hist.filter(function(h){return h.total>0;}):hist;
@@ -9735,12 +9941,19 @@ function renderOverviewCards(hist) {
     '</div>';
   }
 
+  function overviewIcon(kind, value) {
+    if (kind === 'records') {
+      return '<span class="stats-overview-emoji" aria-hidden="true">📚</span>';
+    }
+    return '<span class="stats-month-icon" data-month-days="'+value+'" aria-hidden="true"><b>'+value+'</b></span>';
+  }
+
   el.innerHTML = '<h3>🏆 总览</h3><div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px">' +
-    card('📅', '总记录天数', totalDays, totalDays > 0 ? '持续追踪中' : '') +
+    card(overviewIcon('records'), '总记录天数', totalDays, totalDays > 0 ? '持续追踪中' : '') +
     card('🔥', '最高连续', maxStreak + ' 天', maxStreak >= 7 ? '连续一周以上！' : maxStreak >= 3 ? '保持节奏' : '') +
     card('📋', '本周完成', weekDone, weekTotal > 0 ? '完成率 '+Math.round(weekDone/weekTotal*100)+'%' : '本周暂无') +
-    card('📆', '本月完成', monthDone, monthTotal > 0 ? '共 '+monthTotal+' 个任务' : '本月暂无') +
-    (checkInTaskCount > 0 ? card('📅', '打卡任务', checkInTaskCount + ' 次', '平均坚持 '+checkInAvgDays+' 天') : '') +
+    card(overviewIcon('month', daysInMonth), '本月完成', monthDone, monthTotal > 0 ? '共 '+monthTotal+' 个任务' : '本月暂无') +
+    (checkInTaskCount > 0 ? card(window._checkInIconHtml(true), '打卡任务', checkInTaskCount + ' 次', '平均坚持 '+checkInAvgDays+' 天') : '') +
   '</div>';
 
   // 更新平均值标签
@@ -10822,11 +11035,12 @@ window.confirmCheckInComplete = function(type) {
   if (!id) return;
 
   var mode = window._currentCheckInMode || 'today';
-  var isHistoryMode = mode === 'history';
-  var isMorningMode = mode === 'morning';
+  var isHistoryMorningMode = mode === 'history-morning';
+  var isHistoryMode = mode === 'history' || isHistoryMorningMode;
+  var isMorningMode = mode === 'morning' || isHistoryMorningMode;
   var taskList = isHistoryMode && _histEditData ? (_histEditData.tasks || []) : todayData.tasks;
   var taskDate = isHistoryMode ? (_histEditDate || today) : today;
-  var t = isMorningMode ? _ensureMorningTaskObj(todayData) : taskList.find(function(x){return x.id === id;});
+  var t = isHistoryMorningMode ? _ensureMorningTaskObj(_histEditData) : (isMorningMode ? _ensureMorningTaskObj(todayData) : taskList.find(function(x){return x.id === id;}));
   if (!t) return;
 
   if (type === 'daily') {
@@ -10836,7 +11050,7 @@ window.confirmCheckInComplete = function(type) {
     t.checkInCompleteType = 'daily'; // 标记为当日完成
     if (!t.checkInHistory) t.checkInHistory = [];
     t.checkInHistory.push({date: taskDate, action: 'daily_complete'});
-    showToast(isHistoryMode ? '📅 已在历史记录中标记为当日完成' : isMorningMode ? '📅 已记录晨间打卡，明天将自动续接' : '📅 已记录今日打卡，明天将自动续接','success');
+    showToast(isHistoryMode ? '↻ 已在历史记录中标记为当日完成' : isMorningMode ? '↻ 已记录晨间打卡，明天将自动续接' : '↻ 已记录今日打卡，明天将自动续接','success');
     haptic('success');
   } else if (type === 'full') {
     // 完全完成：任务结束，不再续接
@@ -10849,7 +11063,12 @@ window.confirmCheckInComplete = function(type) {
     haptic('success');
   }
 
-  if (isMorningMode) {
+  if (isHistoryMorningMode) {
+    _histEditData.m.done = true;
+    _histEditData.m.taskObj = t;
+    _syncMorningTaskObjFromFields(_histEditData.m);
+    _histRenderEditBody();
+  } else if (isMorningMode) {
     todayData.m.done = true;
     todayData.m.taskObj = t;
     _syncMorningTaskObjFromFields(todayData.m);
@@ -11560,10 +11779,10 @@ window.handleImportFile = function(event) {
 
 <!--
 workflow_tool build
-version: 2026.07.19.10
-sourceSha256: f64e4f923301f9dcb87f4f4d308e5ef5c001d37f3e45a26f4abb373a20c2c478
-configSha256: 585fde2278375995644a2cf9989f246a379d43fadc9ba65212d7077db27ace15
-coreSha256: df13979bffd53031020af999e844b0ca904b3b80042b681f515ec649bae248af
+version: 2026.07.20.6
+sourceSha256: 49f2e478998e2fcb9e929f6df6124e964a0148dad777e83fb7231feb56a27758
+configSha256: c5e27d0e471183658e5c9adbec0dc69e7583429ec75350a6be38a11f633cfbdf
+coreSha256: 9a31af33ad9c21ba900792ccaba6a96c083b75198de17c24b6d6db8672c76326
 appSha256: 2f24aa03f02a5b051051aad95e186b81abef342d0af6958c66b79307c3dc0db3
 exportSha256: 13ad148412f079c37fed48892779a4c15a69b986b274bf432dd0506e64c0fa2a
 syncSha256: d253ac2b5da24d6ab82cae5c41b91c72dc35ffda76ed3b160b3eb4d4025154ea
@@ -11571,5 +11790,5 @@ historySha256: d2d96792bc489871e1e12fdf2483793e1781fec5835bae872974bc6b66894a79
 tasksSha256: cf7b1e78be5c87a40720433883aa80f4c8e36fe389400e217af9bb744ad8a590
 researchSha256: 7f18bf83e2678ea03658117f346225a9af8304668c9f622903770f0292e2c5a8
 stylesSha256: 438038ffa6949e8cb705df0dbad8d9a17ed29abd17f0c072fc70f88118cf55be
-builtAt: 2026-07-19T09:49:36.575Z
+builtAt: 2026-07-20T07:56:58.632Z
 -->
