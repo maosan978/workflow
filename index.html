@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- workflow-build:9a31af33ad9c21ba900792ccaba6a96c083b75198de17c24b6d6db8672c76326 -->
+<!-- workflow-build:17345b376379086f943fd33757852f4a36323e560dfe6120e08c268e9421d83e -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -1059,7 +1059,16 @@ body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between
 .md-preview-float-btn{width:22px;height:22px;border:1px solid var(--border);border-radius:50%;background:var(--surface);color:var(--text3);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;flex:0 0 auto;transition:all var(--t)}
 .md-preview-float-btn:hover,.md-preview-float-btn.active{border-color:var(--primary-light);color:var(--primary);background:var(--primary-bg)}
 .md-preview-float-btn svg{width:13px;height:13px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;display:block}
-.md-preview-body{padding:8px 12px;box-sizing:border-box;overflow-wrap:anywhere}
+.md-preview-body{padding:8px 12px;box-sizing:border-box;overflow-wrap:anywhere;max-height:180px;overflow-y:auto;scrollbar-gutter:stable}
+.md-preview-actions{display:flex;align-items:center;gap:5px}
+.md-preview-popout-btn{width:22px;height:22px;border:1px solid var(--border);border-radius:50%;background:var(--surface);color:var(--text3);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;flex:0 0 auto}
+.md-preview-popout-btn:hover{border-color:var(--primary-light);color:var(--primary);background:var(--primary-bg)}
+.md-preview input.task-list-item-checkbox,.wf-export-md input.task-list-item-checkbox{width:15px;height:15px;margin-right:6px;vertical-align:-2px;accent-color:var(--primary);cursor:pointer}
+.work-time-card{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0 14px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-xs)}
+.work-time-card label{display:block;font-size:11px;color:var(--text3);margin-bottom:4px}.work-time-card input{width:100%;min-width:0}
+.pin-btn.active{color:var(--warn);border-color:var(--warn);background:var(--warn-bg)}
+.pinned-item{border-color:var(--warn)!important;box-shadow:0 0 0 1px var(--warn-bg)}
+.weekly-history-card{margin:8px 0 10px;padding:10px 12px;border:1px solid var(--primary-light);border-left:4px solid var(--primary);border-radius:var(--radius-sm);background:var(--primary-bg);font-size:12px;color:var(--text2)}
 .md-preview p{margin:0 0 6px}
 .md-preview p:last-child{margin:0}
 .md-preview,.math-preview{max-width:100%;min-width:0;overflow-wrap:anywhere;word-break:break-word;box-sizing:border-box}
@@ -1097,6 +1106,7 @@ body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between
 .math-fallback{font-family:Georgia,'Times New Roman',serif;font-style:italic;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:0 4px;color:var(--text)}
 .math-fallback.display{display:block;text-align:center;margin:6px 0;padding:8px 10px;font-size:15px}
 @media(max-width:600px){
+  .work-time-card{grid-template-columns:1fr 1fr;padding:10px}
   .md-preview-head{height:32px}
   .md-preview-float-btn{width:28px;height:28px}
   .md-preview-float-btn svg{width:15px;height:15px}
@@ -1190,8 +1200,8 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   else root.WorkflowConfig = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
   return {
-    appVersion: '2026.07.20.6',
-    schemaVersion: 4,
+    appVersion: '2026.07.22.1',
+    schemaVersion: 5,
     typeLabels: {
       general: '通用',
       calc: '计算前',
@@ -1207,8 +1217,8 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
       decision: 'type-decision'
     },
     schemaFields: {
-      day: ['m', 'tasks', 'e', 'r'],
-      task: ['id', 'type', 'done', 'doneAt', '_chainId', '_continuedFrom', '_mergedFrom', 'isCheckInTask', 'checkInDays', 'checkInHistory', 'checkInCompleteType', 'stepThoughts', 'workflowStage', 'actualResult', 'expectationMatch', 'evidence', 'interpretation', 'confidence', 'impact', 'nextAction', 'artifact', 'progressKind', 'projectId'],
+      day: ['m', 'tasks', 'e', 'r', 'workTime'],
+      task: ['id', 'type', 'done', 'doneAt', '_chainId', '_continuedFrom', '_mergedFrom', 'isCheckInTask', 'checkInDays', 'checkInHistory', 'checkInCompleteType', 'dailySummary', 'pinned', 'stepThoughts', 'workflowStage', 'actualResult', 'expectationMatch', 'evidence', 'interpretation', 'confidence', 'impact', 'nextAction', 'artifact', 'progressKind', 'projectId'],
       week: ['under', 'tasks', 'mainQuestion', 'evidence', 'expectationChanges', 'repeatedConfusions', 'technicalWork', 'outputs', 'nextMainQuestion', 'stopRule'],
       research: ['projects', 'questions', 'outputs']
     }
@@ -1221,10 +1231,10 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   if (typeof module === 'object' && module.exports) module.exports = factory();
   else root.WorkflowCore = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
-  var SCHEMA_VERSION = 4;
+  var SCHEMA_VERSION = 5;
 
   function emptyDay() {
-    return {m:{task:'',marker:'',done:false},tasks:[],e:{log:'',tomorrow:'',highlight:''},r:{event:'',q1:'',q2:'',q3:''}};
+    return {m:{task:'',marker:'',done:false},tasks:[],e:{log:'',tomorrow:'',highlight:''},r:{event:'',q1:'',q2:'',q3:''},workTime:{expectedHours:'',actualHours:''}};
   }
   function problemStepThoughts(t) {
     var arr = Array.isArray(t && t.stepThoughts) ? t.stepThoughts.slice(0, 6) : [];
@@ -1294,6 +1304,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
     if (d.m.taskObj) d.m.taskObj = ensureTaskChain(d.m.taskObj, newChainId);
     d.e = Object.assign({log:'',tomorrow:'',highlight:''}, d.e || {});
     d.r = Object.assign({event:'',q1:'',q2:'',q3:''}, d.r || {});
+    d.workTime = Object.assign({expectedHours:'',actualHours:''}, d.workTime || {});
     d.tasks = (d.tasks || []).map(function(t) { return ensureTaskChain(t, newChainId); });
     dedupeMorningMirrorTasks(d);
     return d;
@@ -1360,7 +1371,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
     var remote = normalizeDayData(JSON.parse(JSON.stringify(remoteData || emptyDay())));
     var addedTasks = 0;
     var conflicts = [];
-    ['m','e','r'].forEach(function(section) {
+    ['m','e','r','workTime'].forEach(function(section) {
       Object.keys(remote[section] || {}).forEach(function(k) {
         if ((local[section][k] === '' || local[section][k] === false || local[section][k] == null) && remote[section][k]) {
           local[section][k] = remote[section][k];
@@ -1932,7 +1943,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
       <div class="hdr-divider"></div>
 
       <div class="hdr-group">
-        <button class="hdr-icon-btn" id="syncBtn" onclick="manualSave()" title="手动同步 (Ctrl+S)">🔄</button>
+        <button class="hdr-icon-btn active" id="syncBtn" onclick="manualSave()" title="手动同步 (Ctrl+S)" aria-label="立即手动同步">🔄</button>
         <button class="hdr-icon-btn" id="googleAuthBtn" onclick="signInGoogle()" title="Google Drive">
           <svg width="15" height="15" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
         </button>
@@ -1993,6 +2004,10 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   <div class="personal-mode-bar">
     <button class="btn btn-secondary btn-xs" id="focusModeBtn" onclick="toggleFocusMode()" title="只保留晨间、任务和晚间区域"><span class="ico">◎</span>专注</button>
     <button class="btn btn-secondary btn-xs" onclick="enterLowEnergyMode()" title="低能量时只完成一句日志"><span class="ico">－</span>低能量</button>
+  </div>
+  <div class="work-time-card" id="workTimeCard">
+    <div><label for="yesterdayActualHours">昨日实际工作时间（小时）</label><input type="number" id="yesterdayActualHours" min="0" max="24" step="0.5" placeholder="例如 6.5" oninput="saveWorkTime()"></div>
+    <div><label for="todayExpectedHours">今日预期工作时间（小时）</label><input type="number" id="todayExpectedHours" min="0" max="24" step="0.5" placeholder="例如 8" oninput="saveWorkTime()"></div>
   </div>
 
   <div id="dailyQuote" class="daily-quote"><span class="daily-quote-text" id="dailyQuoteText"></span></div>
@@ -2261,6 +2276,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   </div>
   <!-- 概览卡片 -->
   <div class="stat-section" id="statsOverviewCards"></div>
+  <div class="stat-section"><h3>⏱ 工作时间</h3><div id="workTimeStats"></div></div>
   <div class="stat-section">
     <h3>🧪 科研成果转化</h3>
     <div id="researchOutcomeStats"></div>
@@ -2458,7 +2474,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
         <tr><td>☀️ 设为晨间</td><td>任务卡片右上角 ☀️；历史编辑中也可用</td><td>将任意任务整体设为晨间目标，原晨间任务整体回到任务列表；晨间支持项目标签、打卡任务和完整字段预览，只在位置和标注上特殊</td></tr>
         <tr><td>➕ 明日任务</td><td>晚间"明天要做的事"字段旁</td><td>将计划直接添加到明天任务清单，可选择5种任务类型</td></tr>
         <tr><td>📐 公式预览</td><td>在输入框中输入 <code>$...$</code></td><td>支持 LaTeX 数学公式（KaTeX）和 Markdown，输入后自动在下方渲染预览</td></tr>
-        <tr><td>▣ 预览小窗</td><td>在任意实时预览框标题栏点击小窗图标</td><td>该入口适用于所有输入框的 Markdown/公式实时预览；小窗可拖动、可调整大小，长内容在小窗内滚动，点击小窗右上角关闭后恢复下方预览</td></tr>
+        <tr><td>▣ 预览小窗</td><td>在任意实时预览框标题栏点击小窗或 ↗</td><td>下方预览固定高度并跟踪最新输入；网页内小窗可拖动缩放，↗ 会打开浏览器独立窗口。Markdown 任务清单可直接勾选并回写原文</td></tr>
       </table></div>
     </div></div>
   </div>
@@ -2509,7 +2525,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
       <p>支持 <b>Google Drive</b> 和 <b>GitHub</b> 双端同步，任意一端配置即可跨设备使用（手机看、电脑改）。</p>
       <p><b>Google Drive：</b>点击顶部 <svg width="13" height="13" viewBox="0 0 48 48" style="vertical-align:middle;margin:0 2px"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg> 按钮，用 Google 账号授权即可。数据存储在 Drive 应用隐藏目录，不占主目录空间。</p>
       <p><b>GitHub：</b>点击顶部 <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin:0 2px"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg> 按钮，填写仓库名（<code>用户名/仓库名</code>）和 Personal Access Token（需有 Contents 读写权限）。</p>
-      <p><b>同步机制：</b>修改内容 2 秒后自动推送；切回页面时自动拉取；每 30 秒轮询一次。两端同时配置时均生效，互为备份。手动点击 🔄 或按 <span class="help-kbd">Ctrl+S</span> 可立即触发同步。</p>
+      <p><b>同步机制：</b>修改内容 2 秒后自动推送；切回页面时自动拉取；后台每 5 分钟低调检查一次。输入框正在编辑时会延后自动拉取和冲突比较。手动点击醒目的 🔄 或按 <span class="help-kbd">Ctrl+S</span> 仍会立即触发同步。</p>
       <p><b>冲突处理：</b>工具会以最近一次成功同步为共同版本：仅本地修改时自动推送，仅云端修改时自动接收，只有两端都从共同版本继续修改时才提示冲突。首次连接旧版云端文件因没有共同版本，可能保守提示一次。弹窗可选择“合并新增”“使用云端覆盖”或“保留本地并推送”。</p>
     </div></div>
   </div>
@@ -2806,6 +2822,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
       <button class="btn btn-secondary btn-sm" onclick="openSuggestedArchive()"><span class="ico">💡</span>建议</button>
       <button class="btn btn-secondary btn-sm" onclick="openArchiveModal()"><span class="ico">🗄</span>归档</button>
       <button class="btn btn-secondary btn-sm" onclick="clearOldSnapshots()"><span class="ico">🧹</span>快照</button>
+      <button class="btn btn-danger btn-sm" onclick="clearLocalBackupsAndCache()"><span class="ico">🧽</span>清备份与缓存</button>
       <button class="btn btn-primary btn-sm" onclick="openStorageManagerModal()"><span class="ico">↻</span>刷新</button>
     </div>
   </div>
@@ -3054,8 +3071,8 @@ var FILE_NAME = 'workflow_data.json';
 var driveFileId = localStorage.getItem('drive_file_id') || null;
 var accessToken = null;
 var syncInProgress = false;
-var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 4;
-var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.07.20.6';
+var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 5;
+var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.07.22.1';
 
 var tokenClient = null;
 var _syncReconcileInProgress = false;
@@ -3390,11 +3407,11 @@ window.addEventListener('load', function() {
     showSignedIn();
     if (restoreCachedGoogleToken()) {
       loadFromDrive();
-      // 切回标签页 + 每30秒静默拉取 Drive
+      // 切回标签页 + 每5分钟静默拉取 Drive；编辑时不打断输入
       document.addEventListener('visibilitychange', function() {
         if (!document.hidden) _silentPullDrive();
       });
-      setInterval(_silentPullDrive, 30 * 1000);
+      setInterval(_silentPullDrive, 5 * 60 * 1000);
     } else {
       var _gTries = 0;
       var _gWait = setInterval(function(){
@@ -3415,7 +3432,7 @@ window.addEventListener('load', function() {
 
 /* ========== Drive 静默轮询 ========== */
 function _silentPullDrive() {
-  if (!accessToken || !driveFileId || syncInProgress) return;
+  if (!accessToken || !driveFileId || syncInProgress || _hasActiveWorkflowEditor()) return;
   fetch('https://www.googleapis.com/drive/v3/files/' + driveFileId + '?alt=media',
     { headers: { Authorization: 'Bearer ' + accessToken } })
     .then(function(r) { return r.ok ? r.json() : null; })
@@ -3449,8 +3466,8 @@ function initGitHubSync() {
   document.addEventListener('visibilitychange', function() {
     if (!document.hidden) _silentPullGitHub();
   });
-  // 每30秒轮询一次
-  setInterval(_silentPullGitHub, 30 * 1000);
+  // 每5分钟低调轮询一次；输入中不发起远端比较
+  setInterval(_silentPullGitHub, 5 * 60 * 1000);
 }
 
 function openGitHubConfig() {
@@ -3746,8 +3763,22 @@ function _analyzeWorkflowSync(localData, remoteData, todayKey) {
 }
 window._analyzeWorkflowSync = _analyzeWorkflowSync;
 
+function _hasActiveWorkflowEditor() {
+  var el = document.activeElement;
+  if (!el || el === document.body) return false;
+  if (el.isContentEditable) return true;
+  if (!/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) return false;
+  if (el.disabled || el.readOnly) return false;
+  var type = String(el.type || '').toLowerCase();
+  return !/^(button|submit|reset|checkbox|radio|file|color|range)$/.test(type);
+}
+window._hasActiveWorkflowEditor = _hasActiveWorkflowEditor;
+
 function _handleRemoteWorkflowData(source, remoteData, remoteTs, afterLocalChoice, silent) {
   if (_pendingSyncConflict) return true;
+  // 自动轮询只负责后台收敛，不能在用户输入时应用远端内容或弹冲突框。
+  // 失焦后的下一个周期/切回页面时会重新检查；手动同步不受影响。
+  if (silent && _hasActiveWorkflowEditor()) return false;
   var localData = collectAllData();
   var baseline = _syncBaselineDecision(source, localData, remoteData);
   if (baseline.known && baseline.remoteChanged && !baseline.localChanged) {
@@ -3910,7 +3941,7 @@ function _mergeDayData(localData, remoteData) {
   var remote = _normalizeDayData(JSON.parse(JSON.stringify(remoteData || emptyDay())));
   var addedTasks = 0;
   var conflicts = [];
-  ['m','e','r'].forEach(function(section){
+  ['m','e','r','workTime'].forEach(function(section){
     Object.keys(remote[section] || {}).forEach(function(k){
       if((local[section][k] === '' || local[section][k] === false || local[section][k] == null) && remote[section][k]) {
         local[section][k] = remote[section][k];
@@ -4074,7 +4105,7 @@ function loadFromGitHub() {
 function _silentPullGitHub() {
   var repo = localStorage.getItem('gh_repo');
   var token = localStorage.getItem('gh_token');
-  if (!repo || !token) return;
+  if (!repo || !token || _hasActiveWorkflowEditor()) return;
   fetch('https://api.github.com/repos/' + repo + '/contents/' + GH_FILE_PATH + '?t=' + Date.now(), { headers: ghHeaders() })
     .then(function(r) { return r.ok ? r.json() : null; })
     .then(function(j) {
@@ -4340,6 +4371,15 @@ window.clearOldSnapshots = function(){
     openStorageManagerModal();
   });
 };
+window.clearLocalBackupsAndCache = function(){
+  showConfirm('确认清除全部本地快照与浏览器 Cache Storage？\n\n日记录、周复盘、小记、设置和云端凭据都会保留。建议先下载一次 JSON 备份。','🧽',function(){
+    var keys=[];
+    for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&(k.indexOf('wf_snapshot_')===0||k==='wf_last_snapshot_at'))keys.push(k);}
+    keys.forEach(function(k){localStorage.removeItem(k);});
+    var clearCaches=(typeof caches!=='undefined'&&caches.keys)?caches.keys().then(function(names){return Promise.all(names.map(function(name){return caches.delete(name);}));}):Promise.resolve([]);
+    clearCaches.then(function(results){showToast('已清除 '+keys.length+' 项本地备份和 '+results.filter(Boolean).length+' 个浏览器缓存','success');openStorageManagerModal();}).catch(function(){showToast('本地备份已清除；浏览器缓存清理失败','warn');openStorageManagerModal();});
+  });
+};
 
 var _pendingSyncConflict = null;
 var _lastConflictContext = null;
@@ -4426,7 +4466,8 @@ function _workflowFieldLabel(k){
     problem:'问题陈述', step:'当前进展', approach:'总体思路 / 下一步', stepThoughts:'六步思路',
     choice:'面对的选择', valueRating:'价值评估', feasRating:'可行性评估',
     project:'项目标签', type:'任务类型', time:'创建时间', doneAt:'完成时间',
-    isCheckInTask:'打卡任务', checkInDays:'打卡天数', checkInCompleteType:'打卡完成方式',
+    isCheckInTask:'打卡任务', checkInDays:'打卡天数', checkInCompleteType:'打卡完成方式', dailySummary:'当日打卡小结',
+    pinned:'置顶', workTime:'工作时间', expectedHours:'预期工作时间', actualHours:'实际工作时间',
     wf_theme:'主题设置', wf_color_theme:'配色设置', wf_font:'字体大小',
     wf_schema_version:'数据结构版本', wf_growth_state:'微挑战状态',
     wf_pet_state:'研究伙伴状态', wf_continue_hidden:'续未完成隐藏项',
@@ -4978,6 +5019,9 @@ function _basicMarkdownHtml(text){
     } else if(line.match(/^(-{3,}|\*{3,}|_{3,})$/)) {
       closeList();
       html += '<hr>';
+    } else if((m = line.match(/^\s*[-*]\s+\[([ xX])\]\s+(.+)$/))) {
+      if(listType !== 'ul') { closeList(); html += '<ul class="contains-task-list">'; listType = 'ul'; }
+      html += '<li class="task-list-item"><input class="task-list-item-checkbox" type="checkbox" disabled'+(m[1].toLowerCase()==='x'?' checked':'')+'> ' + inline(m[2]) + '</li>';
     } else if((m = line.match(/^\s*[-*]\s+(.+)$/))) {
       if(listType !== 'ul') { closeList(); html += '<ul>'; listType = 'ul'; }
       html += '<li>' + inline(m[1]) + '</li>';
@@ -5051,9 +5095,9 @@ function _exThemeVars(){
 }
 function _exWrap(inner, label) {
   return '<div style="width:600px;min-width:600px;flex:0 0 600px;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Helvetica,sans-serif;color:var(--export-text);padding:32px;box-sizing:border-box;' + _exThemeVars() + '">'
-    + '<style>.wf-export-md,.wf-export-md *{color:var(--export-text)!important}.wf-export-md p{margin:0 0 6px}.wf-export-md p:last-child{margin-bottom:0}.wf-export-md h1{font-size:18px;margin:6px 0 8px;color:var(--export-text)!important}.wf-export-md h2{font-size:16px;margin:6px 0 7px;color:var(--export-text)!important}.wf-export-md h3{font-size:14px;margin:5px 0 6px;color:var(--export-text)!important}.wf-export-md ul,.wf-export-md ol{margin:4px 0 6px 18px;padding:0}.wf-export-md li{margin:2px 0}.wf-export-md code{background:rgba(148,163,184,.18);border-radius:3px;padding:1px 4px;color:var(--export-text)!important}.wf-export-md pre{background:rgba(148,163,184,.18);border-radius:6px;padding:8px;overflow:auto;color:var(--export-text)!important}.wf-export-md .katex,.wf-export-md .katex *,.katex,.katex *{color:var(--export-text)!important}.math-fallback{font-family:Georgia,\'Times New Roman\',serif;font-style:italic;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:0 4px;color:var(--export-text)!important}.math-fallback.display{display:block;text-align:center;margin:6px 0;padding:8px 10px;font-size:15px}</style>'
+    + '<style>.wf-export-md,.wf-export-md *{color:var(--export-text)!important}.wf-export-md p{margin:0 0 6px}.wf-export-md p:last-child{margin-bottom:0}.wf-export-md h1{font-size:18px;margin:6px 0 8px;color:var(--export-text)!important}.wf-export-md h2{font-size:16px;margin:6px 0 7px;color:var(--export-text)!important}.wf-export-md h3{font-size:14px;margin:5px 0 6px;color:var(--export-text)!important}.wf-export-md ul,.wf-export-md ol{margin:4px 0 6px;padding-left:24px;list-style-position:outside}.wf-export-md li{margin:2px 0;padding-left:2px}.wf-export-md code{background:rgba(148,163,184,.18);border-radius:3px;padding:1px 4px;color:var(--export-text)!important}.wf-export-md pre{background:rgba(148,163,184,.18);border-radius:6px;padding:8px;overflow:auto;color:var(--export-text)!important}.wf-export-md .katex,.wf-export-md .katex *,.katex,.katex *{color:var(--export-text)!important}.math-fallback{font-family:Georgia,\'Times New Roman\',serif;font-style:italic;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:0 4px;color:var(--export-text)!important}.math-fallback.display{display:block;text-align:center;margin:6px 0;padding:8px 10px;font-size:15px}</style>'
     + inner
-    + '<div style="margin-top:20px;padding-top:14px;border-top:1px solid var(--border);text-align:center;font-size:11px;color:var(--text4)">每日工作流 · ' + _exH(label) + '</div>'
+    + '<div style="margin-top:20px;padding-top:14px;border-top:1px solid var(--border);text-align:center;font-size:11px;color:var(--export-muted)">每日工作流 · ' + _exH(label) + '</div>'
     + '</div>';
 }
 function _exHeader(dateLabel, streakN) {
@@ -5104,6 +5148,10 @@ function _exDayInner(d, dateStr) {
   var done = tasks.filter(function(t){ return t.done; }).length;
   var total = tasks.length;
   var inner = '';
+  if (d.workTime && (d.workTime.expectedHours !== '' || d.workTime.actualHours !== '')) {
+    var wt = '<div style="display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--export-text)"><span><b>预期：</b>' + _exH(d.workTime.expectedHours === '' ? '—' : d.workTime.expectedHours) + ' 小时</span><span><b>实际：</b>' + _exH(d.workTime.actualHours === '' ? '—' : d.workTime.actualHours) + ' 小时</span></div>';
+    inner += _exSection('⏱', '工作时间', _exCard(wt, 'var(--surface2)'));
+  }
   if (d.m.task) {
     var bg = d.m.done ? 'var(--surface2)' : 'var(--primary-bg)';
     var lc = d.m.done ? 'var(--success)' : 'var(--warn)';
@@ -5343,6 +5391,9 @@ function buildStatsCardHTML() {
 function _mdDayBody(d,level){
   var hashes=new Array((level||2)+1).join('#');
   var md='';
+  if(d.workTime&&(d.workTime.expectedHours!==''||d.workTime.actualHours!=='')){
+    md+=hashes+' 工作时间\n- 预期：'+(d.workTime.expectedHours===''?'—':d.workTime.expectedHours)+' 小时\n- 实际：'+(d.workTime.actualHours===''?'—':d.workTime.actualHours)+' 小时\n\n';
+  }
   if(d.m&&d.m.task){
     md+=hashes+' 晨间任务\n'+d.m.task+(d.m.done?' ✅':' ⏳')+'\n';
     if(d.m.marker)md+='完成标志：'+d.m.marker+'\n';
@@ -5364,6 +5415,24 @@ function _mdDayBody(d,level){
   return md;
 }
 window._mdDayBody = _mdDayBody;
+
+function _prepareExportListsForCanvas(root) {
+  if(!root) return;
+  root.querySelectorAll('.wf-export-md ol').forEach(function(ol){
+    var start=parseInt(ol.getAttribute('start')||'1',10); if(!isFinite(start))start=1;
+    Array.from(ol.children).forEach(function(li,index){
+      if(li.tagName!=='LI'||li.querySelector(':scope > .wf-export-list-marker'))return;
+      var marker=document.createElement('span');
+      marker.className='wf-export-list-marker';
+      marker.textContent=(start+index)+'.';
+      marker.style.cssText='position:absolute;left:0;top:0;display:inline-block;width:24px;color:var(--export-text);font-variant-numeric:tabular-nums;text-align:right';
+      li.style.listStyle='none'; li.style.position='relative'; li.style.paddingLeft='30px';
+      li.insertBefore(marker,li.firstChild);
+    });
+    ol.style.listStyle='none'; ol.style.paddingLeft='0';
+  });
+}
+window._prepareExportListsForCanvas = _prepareExportListsForCanvas;
 
 window.doExport = async function(format) {
   var radio = document.querySelector('input[name="exportTarget"]:checked');
@@ -5547,7 +5616,7 @@ window.doExport = async function(format) {
           '}else if(_kpi++>40){clearInterval(_kpt);window.print();}' +
         '},100);<\/script>';
       var printBg=_exCssVar('--bg','#ffffff');
-      w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+filename+'</title>'+katexCss+katexJs+'<style>*{box-sizing:border-box}body{margin:0;padding:20px;background:'+printBg+';display:flex;justify-content:center;font-family:-apple-system,sans-serif}@media print{button{display:none}}</style></head><body>'+cardHTML+'</body></html>');
+      w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+filename+'</title>'+katexCss+katexJs+'<style>*{box-sizing:border-box}body{margin:0;padding:20px;background:'+printBg+';display:flex;justify-content:center;font-family:-apple-system,sans-serif}@media print{button{display:none}body{background:#fff!important}body>div{--bg:#fff;--surface:#f8fafc;--surface2:#f1f5f9;--border:#cbd5e1;--text:#0f172a;--text2:#1e293b;--text3:#334155;--text4:#475569;--export-text:#0f172a;--export-text2:#1e293b;--export-muted:#334155;background:#fff!important;color:#0f172a!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body>'+cardHTML+'</body></html>');
       w.document.close();
     } else {
       // PNG: 离屏容器 + html2canvas（卡片HTML用CSS变量，浏览器自动解析当前主题）
@@ -5563,6 +5632,7 @@ window.doExport = async function(format) {
           renderMathInElement(container, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
         }
         await new Promise(function(r){setTimeout(r,500);});
+        _prepareExportListsForCanvas(container);
         var scrollH = Math.max(container.scrollHeight, container.offsetHeight, 200);
         var canvas = await html2canvas(container, {
           scale: 2,
@@ -6606,7 +6676,7 @@ function localDateTimeStr(d) {
   d = d || new Date();
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') + ':' + String(d.getSeconds()).padStart(2, '0');
 }
-function emptyDay(){ return {m:{task:'',marker:'',done:false},tasks:[],e:{log:'',tomorrow:'',highlight:''},r:{event:'',q1:'',q2:'',q3:''}}; }
+function emptyDay(){ return {m:{task:'',marker:'',done:false},tasks:[],e:{log:'',tomorrow:'',highlight:''},r:{event:'',q1:'',q2:'',q3:''},workTime:{expectedHours:'',actualHours:''}}; }
 function _newChainId(prefix){ return (prefix || 'chain') + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,8); }
 function _ensureTaskChain(t){
   if(window.WorkflowCore) return window.WorkflowCore.ensureTaskChain(t, _newChainId);
@@ -6641,6 +6711,7 @@ function _normalizeDayData(data){
   if(d.m.taskObj) d.m.taskObj = _ensureTaskChain(d.m.taskObj);
   d.e = Object.assign({log:'',tomorrow:'',highlight:''}, d.e || {});
   d.r = Object.assign({event:'',q1:'',q2:'',q3:''}, d.r || {});
+  d.workTime = Object.assign({expectedHours:'',actualHours:''}, d.workTime || {});
   d.tasks = (d.tasks || []).map(_ensureTaskChain);
   _dedupeMorningMirrorTasks(d);
   return d;
@@ -6671,7 +6742,8 @@ var WF_MIGRATIONS = {
       try { localStorage.setItem('wf_research_state', JSON.stringify(window.WorkflowResearch.normalizeState(JSON.parse(raw)))); changed++; } catch(e) {}
     }
     return changed;
-  }
+  },
+  5: function(){ return _normalizeAllStoredDays(); }
 };
 function _normalizeAllStoredDays(){
   var changedCount = 0;
@@ -7113,6 +7185,7 @@ function _renderMorningClosureEditor(t){
   if(!window._morningClosureOpen || !t) return '';
   function update(field, expr){return 'updMorningClosure(\''+field+'\','+expr+')';}
   return '<div class="task-closure-body" style="margin:0 0 12px;padding:10px;border:1px solid var(--border);border-radius:7px;background:var(--surface2)">'+
+    (t.isCheckInTask?'<div class="field"><label>当日打卡小结</label><textarea rows="2" oninput="'+update('dailySummary','this.value')+'" placeholder="今天完成了什么、遇到什么问题">'+esc(t.dailySummary||'')+'</textarea></div>':'')+
     '<div class="row2"><div class="field"><label>闭环阶段</label><select onchange="'+update('workflowStage','this.value')+'">'+_closureOptions(t.workflowStage,[['planned','计划'],['running','进行'],['result','已有结果'],['interpreted','已解释'],['deposited','已沉淀'],['paused','暂停'],['refuted','假设被否定']])+'</select></div><div class="field"><label>进展类型</label><select onchange="'+update('progressKind','this.value')+'">'+_closureOptions(t.progressKind,[['physics','物理认识'],['technical','技术推进'],['writing','写作产出'],['reading','文献理解'],['decision','研究决策']])+'</select></div></div>'+
     '<div class="field"><label>实际得到什么</label><textarea rows="1" oninput="'+update('actualResult','this.value')+'">'+esc(t.actualResult||'')+'</textarea></div>'+
     '<div class="row2"><div class="field"><label>与预期的关系</label><select onchange="'+update('expectationMatch','this.value')+'">'+_closureOptions(t.expectationMatch,[['match','符合预期'],['partial','部分符合'],['contrary','与预期相反'],['unknown','尚不确定']])+'</select></div><div class="field"><label>证据可信度</label><select onchange="'+update('confidence','this.value')+'">'+_closureOptions(t.confidence,[['low','低'],['mid','中'],['high','高']])+'</select></div></div>'+
@@ -7338,6 +7411,10 @@ function initToday(){
   try{
   document.getElementById('hdate').textContent = new Date().toLocaleDateString('zh-CN', {year:'numeric',month:'long',day:'numeric',weekday:'long'});
   todayData = loadDay(today);
+  var _prevWorkDate = parseDateLocal(today); _prevWorkDate.setDate(_prevWorkDate.getDate()-1);
+  var _prevWorkDay = loadDay(localDateStr(_prevWorkDate));
+  var _ya = document.getElementById('yesterdayActualHours'); if(_ya) _ya.value = _prevWorkDay.workTime.actualHours;
+  var _te = document.getElementById('todayExpectedHours'); if(_te) _te.value = todayData.workTime.expectedHours;
   autoCheckInContinue(); // 自动续接打卡任务
   document.getElementById('mTask').value = todayData.m.task || '';
   document.getElementById('mMarker').value = todayData.m.marker || '';
@@ -7438,9 +7515,29 @@ window.saveToday = function(){
   }, 300);
 };
 
+window.saveWorkTime = function(){
+  if(!todayData) return;
+  var expected = document.getElementById('todayExpectedHours');
+  if(expected) todayData.workTime.expectedHours = expected.value;
+  saveDay(today, todayData);
+  var prev = parseDateLocal(today); prev.setDate(prev.getDate()-1);
+  var prevDate = localDateStr(prev), prevDay = loadDay(prevDate);
+  var actual = document.getElementById('yesterdayActualHours');
+  if(actual) prevDay.workTime.actualHours = actual.value;
+  saveDay(prevDate, prevDay);
+};
+
 window.updTask = function(id, field, val){
   var t = todayData.tasks.find(function(x){return x.id === id;});
   if(t){ t[field] = val; if(field==='project')_alignTaskResearchProject(t,val); saveDay(today, todayData); }
+};
+window.toggleTaskPin = function(id){
+  var t = todayData.tasks.find(function(x){return x.id === id;});
+  if(!t) return;
+  t.pinned = !t.pinned;
+  saveDay(today, todayData);
+  renderTasks();
+  showToast(t.pinned ? '任务已置顶' : '已取消置顶', 'success');
 };
 window.updProblemStepThought = function(id, idx, val){
   var t = todayData.tasks.find(function(x){return x.id === id;});
@@ -7698,7 +7795,8 @@ function _taskDetailItems(t){
     t.impact ? {label:'认识变化', val:t.impact} : null,
     t.nextAction ? {label:'下一步', val:t.nextAction} : null,
     t.artifact ? {label:'产物位置', val:t.artifact} : null,
-    t.progressKind ? {label:'进展类型', val:progressLabels[t.progressKind] || t.progressKind} : null
+    t.progressKind ? {label:'进展类型', val:progressLabels[t.progressKind] || t.progressKind} : null,
+    t.isCheckInTask && t.dailySummary ? {label:'当日打卡小结', val:t.dailySummary} : null
   ].reduce(function(arr, item){ return arr.concat(item || []); }, []).filter(Boolean);
 }
 function _renderTaskReadonlyDetails(t){
@@ -7801,7 +7899,8 @@ function _renderTaskClosureFields(t){
   '</div></details>';
 }
 function renderTaskFields(t){
-  return renderTaskTypeFields(t) + _renderTaskClosureFields(t);
+  var checkInSummary = t.isCheckInTask ? '<div class="field"><label>🎯 当日打卡小结</label><textarea rows="2" placeholder="今天这次打卡做了什么、结果怎样？" oninput="updTask(\''+t.id+'\',\'dailySummary\',this.value)">'+esc(t.dailySummary||'')+'</textarea></div>' : '';
+  return renderTaskTypeFields(t) + checkInSummary + _renderTaskClosureFields(t);
 }
 function optSel(cur){
   var levels = {high:'高 — 很重要', mid:'中 — 一般重要', low:'低 — 不太重要'};
@@ -7870,6 +7969,7 @@ function renderTasks(){
     return;
   }
   var sorted = todayData.tasks.slice().sort(function(a,b){
+    if(!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1;
     if(a.done === b.done) return 0;
     return a.done ? 1 : -1;
   });
@@ -7912,6 +8012,7 @@ function renderTasks(){
         (t.done && t.doneAt ? '<span style="font-size:10px;color:var(--success);margin-left:4px">✓'+esc(t.doneAt)+'</span>' : '')+
         (t.time ? '<span style="font-size:10px;color:var(--text4);margin-left:4px">创建 '+esc(t.time)+'</span>' : '')+
         '<div class="task-actions">'+
+          '<button class="btn btn-secondary btn-xs pin-btn '+(t.pinned?'active':'')+'" onclick="event.stopPropagation();toggleTaskPin(\''+t.id+'\')" title="'+(t.pinned?'取消置顶':'置顶任务')+'">📌</button>'+
           '<button class="btn btn-secondary btn-xs checkin-toggle-btn '+(t.isCheckInTask?'active':'')+'" onclick="event.stopPropagation();toggleCheckInTask(\''+t.id+'\')" title="'+(t.isCheckInTask?'已是打卡任务，点击取消':'设为打卡任务')+'" aria-label="'+(t.isCheckInTask?'已是打卡任务，点击取消':'设为打卡任务')+'">'+window._checkInIconHtml(!!t.isCheckInTask)+'</button>'+
           '<button class="btn btn-secondary btn-xs" onclick="event.stopPropagation();setAsMorning(\''+t.id+'\')" title="设为晨间任务">☀️</button>'+
           '<button class="btn btn-danger btn-xs" onclick="event.stopPropagation();delTask(\''+t.id+'\')" title="删除此任务">🗑️</button>'+
@@ -7919,7 +8020,7 @@ function renderTasks(){
       '</div>'+
       renderTaskFields(t)+
     '</div>';
-    return '<div class="task-card'+(t.done?' completed':'')+' card-enter" id="tc_'+t.id+'" data-task-id="'+t.id+'">'+
+    return '<div class="task-card'+(t.done?' completed':'')+(t.pinned?' pinned-item':'')+' card-enter" id="tc_'+t.id+'" data-task-id="'+t.id+'">'+
       '<div class="gesture-hint left" id="ghl_'+t.id+'">🗑️</div>'+
       '<div class="gesture-hint right" id="ghr_'+t.id+'">✅</div>'+
       collapseHeader+taskDetails+
@@ -8330,7 +8431,8 @@ window.renderHistory = function(){
 
     if(searchVal) {
       var taskTexts = d.tasks.map(function(t){ return [t.what,t.question,t.source,t.problem,t.choice,t.project].filter(Boolean).join(' '); }).join(' ').toLowerCase();
-      if(prev.toLowerCase().indexOf(searchVal) < 0 && date.indexOf(searchVal) < 0 && taskTexts.indexOf(searchVal) < 0) return;
+      var weekSearch = (localStorage.getItem('wf_week_'+getWkId(parseDateLocal(date))) || '').toLowerCase();
+      if(prev.toLowerCase().indexOf(searchVal) < 0 && date.indexOf(searchVal) < 0 && taskTexts.indexOf(searchVal) < 0 && weekSearch.indexOf(searchVal)<0) return;
     }
     shownKeys.push(date);
 
@@ -8397,6 +8499,7 @@ window.renderHistory = function(){
       wHtml += '<div class="history-group-head">'+
         '<span>'+wLabel+'</span>'+
         '<span style="font-weight:400;color:var(--text3)">'+statText(ws)+'</span></div>';
+      wHtml += _historyWeeklyReviewHtml(wDates[0]);
       wDates.forEach(function(date) {
         wHtml += itemByDate[date] || '';
       });
@@ -8582,6 +8685,7 @@ function _histRenderTaskEdit(t){
       _ratingControl('hist_tdf_'+t.id, t.id, 'feasRating', t.feasRating, 'feas', true)+
       '</div>';
   }
+  if(t.isCheckInTask) fieldHtml += _hEditTa(t.id,'dailySummary',t.dailySummary,'当日打卡小结');
   fieldHtml += '<details class="task-closure"'+((t.actualResult||t.evidence||t.interpretation||t.nextAction||t.workflowStage)?' open':'')+'><summary><span>结果沉淀</span><small>可编辑历史闭环</small></summary><div class="task-closure-body">'+
     '<div class="row2">'+_hEditSelect(t.id,'workflowStage',t.workflowStage,'闭环阶段',[['planned','计划'],['running','进行'],['result','已有结果'],['interpreted','已解释'],['deposited','已沉淀'],['paused','暂停'],['refuted','假设被否定']])+_hEditSelect(t.id,'progressKind',t.progressKind,'进展类型',[['physics','物理认识'],['technical','技术推进'],['writing','写作产出'],['reading','文献理解'],['decision','研究决策']])+'</div>'+
     _hEditTa(t.id,'actualResult',t.actualResult,'实际得到什么')+
@@ -8603,6 +8707,7 @@ function _histRenderTaskEdit(t){
       projTag+
       checkInBadge+
       checkInBtn+
+      '<button class="btn btn-secondary btn-xs pin-btn '+(t.pinned?'active':'')+'" onclick="histEditField(\''+t.id+'\',\'pinned\','+(!t.pinned)+');_histRenderEditBody()" title="'+(t.pinned?'取消置顶':'置顶任务')+'">📌</button>'+
       '<button onclick="histSetAsMorning(\''+t.id+'\')" title="设为晨间任务" style="background:none;border:none;cursor:pointer;font-size:14px;opacity:.7;padding:2px 6px">☀️</button>'+
       '<button onclick="histEditDeleteTask(\''+t.id+'\')" title="删除此任务" style="margin-left:auto;background:none;border:none;cursor:pointer;font-size:14px;opacity:.6;padding:2px 6px">🗑️</button>'+
     '</div>'+
@@ -8657,7 +8762,7 @@ function _histRenderEditBody(){
   // 小记
   var notesHtml = '';
   if(_histEditNotes.length){
-    notesHtml = _histEditNotes.map(function(n){
+    notesHtml = _histEditNotes.slice().sort(function(a,b){return (b.pinned?1:0)-(a.pinned?1:0)||((a.timestamp||0)-(b.timestamp||0));}).map(function(n){
       var ts = new Date(n.timestamp).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
       var preview = (n.content||'').replace(/\$[^$]+\$/g,'[公式]').slice(0,40) + ((n.content||'').length>40?'…':'');
       var isExpanded = window._histNoteExpandState && window._histNoteExpandState[n.timestamp];
@@ -8665,7 +8770,7 @@ function _histRenderEditBody(){
         '<div onclick="toggleHistNoteCollapse('+n.timestamp+')" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:'+(isExpanded?'6px':'0')+'">'+
           '<div style="flex:1;min-width:0"><span style="color:var(--text4);font-size:10px;margin-right:8px">'+ts+'</span>'+
           '<span style="color:var(--text3);font-size:11px">'+esc(preview)+'</span></div>'+
-          '<span id="hist_note_arrow_'+n.timestamp+'" style="font-size:12px;color:var(--text4);margin-left:8px">'+(isExpanded?'▼':'▶')+'</span>'+
+          '<span style="display:flex;align-items:center;gap:6px"><button type="button" onclick="event.stopPropagation();histToggleNotePin('+n.timestamp+')" title="'+(n.pinned?'取消置顶':'置顶小记')+'" class="pin-btn '+(n.pinned?'active':'')+'">'+(n.pinned?'★':'☆')+'</button><span id="hist_note_arrow_'+n.timestamp+'" style="font-size:12px;color:var(--text4)">'+(isExpanded?'▼':'▶')+'</span></span>'+
         '</div>'+
         '<div id="hist_note_body_'+n.timestamp+'" class="field" style="display:'+(isExpanded?'block':'none')+'">'+
           '<textarea oninput="histEditNote('+n.timestamp+',this.value)" rows="1" style="width:100%;min-height:34px;font-size:12px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);resize:vertical;box-sizing:border-box;line-height:1.6">'+esc(n.content)+'</textarea>'+
@@ -8683,6 +8788,7 @@ function _histRenderEditBody(){
       '</div>'+
     '</div>'+
     '<div style="font-size:11px;color:var(--text4);margin:8px 0 14px">修改后点"完成编辑"保存，会自动同步并更新统计</div>'+
+    '<div class="work-time-card"><div><label>当日预期工作时间（小时）</label><input type="number" min="0" max="24" step="0.5" value="'+esc(d.workTime.expectedHours)+'" oninput="histEditWorkTime(\'expectedHours\',this.value)"></div><div><label>当日实际工作时间（小时）</label><input type="number" min="0" max="24" step="0.5" value="'+esc(d.workTime.actualHours)+'" oninput="histEditWorkTime(\'actualHours\',this.value)"></div></div>'+
     // 晨间
     '<div class="detail-section">'+
       '<div onclick="toggleHistMorning()" style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:8px">'+
@@ -8749,7 +8855,7 @@ function _histMorningClosureHtml(t){
   if(!t) return '';
   function ta(field,label){return '<div class="field" style="margin-bottom:6px"><label>'+label+'</label><textarea rows="1" oninput="histEditMorningClosure(\''+field+'\',this.value)">'+esc(t[field]||'')+'</textarea></div>';}
   function sel(field,label,options){return '<div class="field" style="margin-bottom:6px"><label>'+label+'</label><select onchange="histEditMorningClosure(\''+field+'\',this.value)">'+_closureOptions(t[field],options)+'</select></div>';}
-  return '<details class="task-closure"'+((t.actualResult||t.evidence||t.interpretation||t.workflowStage)?' open':'')+'><summary><span>结果沉淀</span><small>历史晨间任务</small></summary><div class="task-closure-body"><div class="row2">'+sel('workflowStage','闭环阶段',[['planned','计划'],['running','进行'],['result','已有结果'],['interpreted','已解释'],['deposited','已沉淀'],['paused','暂停'],['refuted','假设被否定']])+sel('progressKind','进展类型',[['physics','物理认识'],['technical','技术推进'],['writing','写作产出'],['reading','文献理解'],['decision','研究决策']])+'</div>'+ta('actualResult','实际得到什么')+'<div class="row2">'+sel('expectationMatch','与预期的关系',[['match','符合预期'],['partial','部分符合'],['contrary','与预期相反'],['unknown','尚不确定']])+sel('confidence','证据可信度',[['low','低'],['mid','中'],['high','高']])+'</div>'+ta('evidence','关键证据')+ta('interpretation','结果解释')+ta('impact','认识变化')+'<div class="row2">'+ta('nextAction','下一步')+ta('artifact','产物位置')+'</div></div></details>';
+  return '<details class="task-closure"'+((t.dailySummary||t.actualResult||t.evidence||t.interpretation||t.workflowStage)?' open':'')+'><summary><span>结果沉淀</span><small>历史晨间任务</small></summary><div class="task-closure-body">'+(t.isCheckInTask?ta('dailySummary','当日打卡小结'):'')+'<div class="row2">'+sel('workflowStage','闭环阶段',[['planned','计划'],['running','进行'],['result','已有结果'],['interpreted','已解释'],['deposited','已沉淀'],['paused','暂停'],['refuted','假设被否定']])+sel('progressKind','进展类型',[['physics','物理认识'],['technical','技术推进'],['writing','写作产出'],['reading','文献理解'],['decision','研究决策']])+'</div>'+ta('actualResult','实际得到什么')+'<div class="row2">'+sel('expectationMatch','与预期的关系',[['match','符合预期'],['partial','部分符合'],['contrary','与预期相反'],['unknown','尚不确定']])+sel('confidence','证据可信度',[['low','低'],['mid','中'],['high','高']])+'</div>'+ta('evidence','关键证据')+ta('interpretation','结果解释')+ta('impact','认识变化')+'<div class="row2">'+ta('nextAction','下一步')+ta('artifact','产物位置')+'</div></div></details>';
 }
 function _hEveTa(field, val, label){
   return '<div class="field" style="margin-bottom:6px"><label style="font-size:10px;color:var(--text3);display:block;margin-bottom:2px">'+label+'</label>'+
@@ -8769,6 +8875,7 @@ window.setHistTypeFilter = function(type) {
   _histRenderEditBody();
 };
 window.histEditField = function(id, field, val){ var t=_histFindTask(id); if(t) t[field]=val; };
+window.histEditWorkTime = function(field,val){ if(_histEditData&&_histEditData.workTime)_histEditData.workTime[field]=val; };
 window.histEditProblemStep = function(id, idx, val){ var t=_histFindTask(id); if(t) _setProblemStepThought(t, idx, val); };
 window.histEditToggleDone = function(id){
   var t=_histFindTask(id); if(!t) return;
@@ -8915,7 +9022,7 @@ function _histEditSummary(before, after){
     var noteChanges = 0;
     _histEditNotes.forEach(function(n){
       var oldNote = _histOriginalNotes.find(function(x){ return x.timestamp === n.timestamp; });
-      if(oldNote && oldNote.content !== n.content) noteChanges++;
+      if(oldNote && (oldNote.content !== n.content || !!oldNote.pinned !== !!n.pinned)) noteChanges++;
     });
     if(noteChanges) parts.push('修改小记：' + noteChanges + ' 条');
   }
@@ -8946,6 +9053,8 @@ function _ensureEditedCheckInContinuation(date, data){
     nt.done = false;
     nt.doneAt = null;
     nt.checkInCompleteType = null;
+    nt.dailySummary = '';
+    nt.pinned = false;
     nt.time = new Date().toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'});
     nt._continuedFrom = date;
     nt.checkInDays = (src.checkInDays || 1) + 1;
@@ -8964,6 +9073,7 @@ function _ensureEditedCheckInContinuation(date, data){
 window.histEditEvening = function(field, val){ _histEditData.e[field]=val; };
 window.histEditReflect = function(field, val){ _histEditData.r[field]=val; };
 window.histEditNote = function(ts, val){ var n=_histEditNotes.find(function(x){return x.timestamp===ts;}); if(n) n.content=val; };
+window.histToggleNotePin = function(ts){var n=_histEditNotes.find(function(x){return x.timestamp===ts;});if(n){n.pinned=!n.pinned;_histRenderEditBody();}};
 window.histDeleteNote = function(ts){
   var i=_histEditNotes.findIndex(function(x){return x.timestamp===ts;});
   if(i>=0){ _histEditNotes[i]._deleted=true; _histEditNotes.splice(i,1); _histDeletedNotes.push(ts); }
@@ -9012,7 +9122,7 @@ window.histSaveEdit = function(){
       _histDeletedTasks.forEach(_hideContinueTask);
       _histDeletedNotes.forEach(function(ts){ localStorage.removeItem('wf_note_'+ts); });
       _histEditNotes.forEach(function(n){
-        localStorage.setItem('wf_note_'+n.timestamp, JSON.stringify({content:n.content, timestamp:n.timestamp}));
+        localStorage.setItem('wf_note_'+n.timestamp, JSON.stringify({content:n.content, timestamp:n.timestamp, pinned:!!n.pinned}));
       });
       _histDeletedNotes = [];
       _histDeletedTasks = [];
@@ -9041,6 +9151,16 @@ window.histCancelEdit = function(){
   showDetail(dd, false);
 };
 
+function _historyWeeklyReviewHtml(date){
+  var key='wf_week_'+getWkId(parseDateLocal(date)), raw=localStorage.getItem(key);
+  if(!raw) return '';
+  try {
+    var w=JSON.parse(raw), fields=[['本周理解',w.under],['主问题',w.mainQuestion],['关键证据',w.evidence],['预期变化',w.expectationChanges],['重复困惑',w.repeatedConfusions],['技术工作',w.technicalWork],['成果',w.outputs],['下周主问题',w.nextMainQuestion],['停止条件',w.stopRule]].filter(function(x){return x[1];});
+    if(!fields.length&&!(w.tasks||[]).length)return '';
+    return '<div class="weekly-history-card"><b>🧭 同周复盘</b>'+fields.map(function(x){return '<div style="margin-top:6px"><span style="color:var(--text3)">'+esc(x[0])+'：</span><div class="math-preview">'+_renderMDMaybe(x[1])+'</div></div>';}).join('')+((w.tasks||[]).length?'<div style="margin-top:6px;color:var(--text3)">周任务 '+(w.tasks||[]).length+' 项</div>':'')+'</div>';
+  } catch(e){return '';}
+}
+
 window.showDetail = function(date, editMode){
   if(batchMode) return;
   if(editMode){
@@ -9056,7 +9176,7 @@ window.showDetail = function(date, editMode){
     for(var _ei=0;_ei<localStorage.length;_ei++){
       var _ek=localStorage.key(_ei);
       if(_ek && _ek.startsWith('wf_note_')){
-        try{ var _en=JSON.parse(localStorage.getItem(_ek)); if(_en.timestamp && localDateStr(new Date(_en.timestamp))===date) _histEditNotes.push({content:_en.content||'', timestamp:_en.timestamp}); }catch(e){}
+        try{ var _en=JSON.parse(localStorage.getItem(_ek)); if(_en.timestamp && localDateStr(new Date(_en.timestamp))===date) _histEditNotes.push({content:_en.content||'', timestamp:_en.timestamp, pinned:!!_en.pinned}); }catch(e){}
       }
     }
     _histEditNotes.sort(function(a,b){return (a.timestamp||0)-(b.timestamp||0);});
@@ -9086,13 +9206,13 @@ window.showDetail = function(date, editMode){
       } catch(e){}
     }
   }
-  allNotes.sort(function(a,b){ return (a.timestamp||0)-(b.timestamp||0); });
+  allNotes.sort(function(a,b){ return (!!a.pinned===!!b.pinned)?((a.timestamp||0)-(b.timestamp||0)):(a.pinned?-1:1); });
   var notesHtml = '';
   if(allNotes.length){
     notesHtml = '<div class="detail-section"><b>📝 随手小记：</b>';
     allNotes.forEach(function(n){
       var ts = new Date(n.timestamp).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
-      notesHtml += '<div style="margin:6px 0;padding:8px 10px;background:var(--surface2);border-left:3px solid var(--primary);border-radius:6px;font-size:12px">'+'<div style="color:var(--text4);font-size:10px;margin-bottom:4px">'+ts+'</div>'+'<div class="math-preview" style="line-height:1.6">'+_renderMDMaybe(n.content)+'</div></div>';
+      notesHtml += '<div class="'+(n.pinned?'pinned-item':'')+'" style="margin:6px 0;padding:8px 10px;background:var(--surface2);border-left:3px solid var(--primary);border-radius:6px;font-size:12px">'+'<div style="color:var(--text4);font-size:10px;margin-bottom:4px">'+(n.pinned?'📌 ':'')+ts+'</div>'+'<div class="math-preview" style="line-height:1.6">'+_renderMDMaybe(n.content)+'</div></div>';
     });
     notesHtml += '</div>';
   }
@@ -9101,13 +9221,13 @@ window.showDetail = function(date, editMode){
     var title = t.what||t.question||t.source||t.problem||t.choice||'(空)';
     var timeInfo = [t.time?'创建 '+esc(t.time):'', t.doneAt?'→ 完成 '+esc(t.doneAt):''].filter(Boolean).join(' ');
     var details = _taskDetailItems(t);
-    return '<div style="padding:10px 12px;background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--border);border-left:3px solid '+(t.done?'var(--success)':'var(--primary-light)')+';margin-bottom:6px">'+
+    return '<div class="'+(t.pinned?'pinned-item':'')+'" style="padding:10px 12px;background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--border);border-left:3px solid '+(t.done?'var(--success)':'var(--primary-light)')+';margin-bottom:6px">'+
       '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:4px">'+
-        '<span class="task-type-badge '+(TYPE_CLASSES[t.type]||'type-general')+'" style="font-size:10px">'+(TYPE_LABELS[t.type]||'通用')+'</span>'+
+        (t.pinned?'<span title="已置顶" style="font-size:11px">📌</span>':'')+'<span class="task-type-badge '+(TYPE_CLASSES[t.type]||'type-general')+'" style="font-size:10px">'+(TYPE_LABELS[t.type]||'通用')+'</span>'+
         (t.project
           ? '<span onclick="updHistProject(\''+date+'\',\''+t.id+'\')" title="点击修改/移除项目" style="font-size:10px;background:var(--info-bg);color:var(--info);border-radius:20px;padding:1px 7px;cursor:pointer">📁 '+esc(t.project)+'</span>'
           : '<span onclick="updHistProject(\''+date+'\',\''+t.id+'\')" title="点击添加项目标签" style="font-size:10px;color:var(--text4);border:1px dashed var(--border);border-radius:20px;padding:1px 7px;cursor:pointer">📁 +</span>')+
-        (t.isCheckInTask ? '<span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;color:var(--warn);background:var(--warn-bg);padding:1px 7px;border-radius:20px">'+window._checkInIconHtml(!!t.done)+(t.checkInDays||1)+'天'+(t.checkInCompleteType==='daily'?' (当日完成)':t.checkInCompleteType==='full'?' (完全完成)':'')+'</span>' : '')+
+        (t.isCheckInTask ? '<button class="btn btn-secondary btn-xs checkin-toggle-btn active" onclick="openCheckInHistory(\''+date+'\',\''+t.id+'\')" title="查看这条打卡任务的每日详情">'+window._checkInIconHtml(true)+'打卡 · '+(t.checkInDays||1)+'天</button>' : '')+
         (t.done ? '<span style="font-size:10px;color:var(--success);font-weight:600">✅ 已完成</span>' : '<span style="font-size:10px;color:var(--warn)">⏳ 未完成</span>')+
       '</div>'+
       '<div class="math-preview" style="font-size:13px;font-weight:600;color:var(--text);line-height:1.5;margin-bottom:4px">'+_renderMDMaybe(title)+'</div>'+
@@ -9117,6 +9237,7 @@ window.showDetail = function(date, editMode){
   }
 
   function renderTaskListHtml(tasks, groupMode) {
+    tasks = tasks.slice().sort(function(a,b){ return (!!a.pinned === !!b.pinned) ? 0 : (a.pinned ? -1 : 1); });
     if (!tasks.length) return '<div style="color:var(--text4);font-size:12px;padding:8px 0">无任务记录</div>';
     if (groupMode === 'type') {
       var byType = {};
@@ -9178,6 +9299,8 @@ window.showDetail = function(date, editMode){
       '<div style="flex:1;text-align:center;border-left:1px solid var(--border);border-right:1px solid var(--border)"><div style="font-size:11px;color:var(--text3);margin-bottom:4px">任务</div><div style="font-weight:600;color:'+(tasksDone===tasksTotal && tasksTotal>0?'var(--success)':'var(--text)')+'">'+tasksDone+'/'+tasksTotal+'</div></div>'+
       '<div style="flex:1;text-align:center"><div style="font-size:11px;color:var(--text3);margin-bottom:4px">晚间</div><div style="font-weight:600;color:'+(eveningDone===eveningTotal?'var(--success)':'var(--text)')+'">'+eveningDone+'/'+eveningTotal+'</div></div>'+
     '</div>'+
+    ((d.workTime.expectedHours!==''||d.workTime.actualHours!=='')?'<div class="detail-section"><b>⏱ 工作时间：</b> 预期 '+esc(d.workTime.expectedHours||'—')+' 小时 · 实际 '+esc(d.workTime.actualHours||'—')+' 小时</div>':'')+
+    _historyWeeklyReviewHtml(date)+
     morningSectionHtml+
     _historyGrowthHtml(date)+
     taskListHtml+
@@ -9201,6 +9324,27 @@ window.showDetail = function(date, editMode){
       throwOnError:false
     });
   }
+};
+
+window.openCheckInHistory = function(date, taskId){
+  var base=loadDay(date), all=(base.tasks||[]).concat(base.m&&base.m.taskObj?[base.m.taskObj]:[]);
+  var task=all.find(function(t){return t.id===taskId;});
+  if(!task) return;
+  var rows=[];
+  for(var i=0;i<localStorage.length;i++){
+    var key=localStorage.key(i); if(!key||key.indexOf('wf_day_')!==0) continue;
+    var dayDate=key.slice(7), d=loadDay(dayDate), tasks=(d.tasks||[]).concat(d.m&&d.m.taskObj?[d.m.taskObj]:[]);
+    tasks.forEach(function(t){
+      if((task._chainId&&t._chainId===task._chainId)||(!task._chainId&&t.id===task.id)) rows.push({date:dayDate,task:t});
+    });
+  }
+  rows.sort(function(a,b){return b.date.localeCompare(a.date);});
+  var overlay=document.getElementById('checkInHistoryModal');
+  if(!overlay){overlay=document.createElement('div');overlay.id='checkInHistoryModal';overlay.className='modal-overlay';document.body.appendChild(overlay);}
+  overlay.innerHTML='<div class="modal" style="max-width:620px;max-height:84vh;overflow:auto"><div class="flex-between"><h2>🎯 打卡任务详情</h2><button class="btn btn-secondary btn-sm" onclick="document.getElementById(\'checkInHistoryModal\').style.display=\'none\'">关闭</button></div><div style="font-size:13px;font-weight:700;margin-bottom:10px">'+esc(_taskLabel(task))+'</div>'+rows.map(function(x){return '<div style="padding:10px 12px;margin-bottom:8px;border:1px solid var(--border);border-radius:8px;background:var(--surface2)"><div class="flex-between"><b>'+esc(x.date)+'</b><span style="font-size:11px;color:'+(x.task.done?'var(--success)':'var(--warn)')+'">'+(x.task.done?'已完成':'未完成')+(x.task.checkInCompleteType==='daily'?' · 当日完成':x.task.checkInCompleteType==='full'?' · 完全完成':'')+'</span></div><div class="math-preview" style="margin-top:6px;font-size:12px">'+(x.task.dailySummary?_renderMDMaybe(x.task.dailySummary):'<span style="color:var(--text4)">未填写当日小结</span>')+'</div></div>';}).join('')+'</div>';
+  overlay.style.display='flex';
+  overlay.onclick=function(e){if(e.target===overlay)overlay.style.display='none';};
+  if(typeof window.renderMath==='function')window.renderMath(overlay);
 };
 
 window.deleteHistoryDay = function(date) {
@@ -9560,7 +9704,7 @@ function getAllNotes(){
       } catch(e){}
     }
   }
-  result.sort(function(a,b){ return (b.timestamp||0) - (a.timestamp||0); });
+  result.sort(function(a,b){ if(!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1; return (b.timestamp||0) - (a.timestamp||0); });
   return result;
 }
 
@@ -9582,7 +9726,7 @@ window.renderNotes = function(){
     var isExpanded = window._noteExpandState && window._noteExpandState[n.id];
     var isEditing = window._noteEditState && window._noteEditState[n.id];
     var rendered = _renderMDMaybe(n.content || '');
-    return '<div class="note-card">'+
+    return '<div class="note-card'+(n.pinned?' pinned-item':'')+'">'+
       '<div class="note-collapse-header" onclick="toggleNoteCollapse(\''+_exH(n.id)+'\')" style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--surface2);border-radius:var(--radius-sm);cursor:pointer;margin-bottom:'+(isExpanded?'8px':'0')+'">'+
         '<span style="font-size:12px;color:var(--text4)">'+(isExpanded?'▼':'▶')+'</span>'+
         '<div style="flex:1;min-width:0">'+
@@ -9595,7 +9739,7 @@ window.renderNotes = function(){
         '<div class="field" id="note_edit_'+_exH(n.id)+'" style="display:'+(isEditing?'block':'none')+';margin-top:6px">'+
           '<textarea id="note_'+_exH(n.id)+'" class="note-textarea" oninput="saveNote(\''+_exH(n.id)+'\')">'+_exH(n.content||'')+'</textarea>'+
         '</div>'+
-        '<div style="text-align:right;margin-top:6px;display:flex;gap:6px;justify-content:flex-end"><button class="btn btn-secondary btn-xs" onclick="toggleNoteEdit(\''+_exH(n.id)+'\')" title="编辑小记">'+(isEditing?'预览':'编辑')+'</button><button class="btn btn-danger btn-xs" onclick="deleteNote(\''+_exH(n.id)+'\')" title="删除">🗑️</button></div>'+
+        '<div style="text-align:right;margin-top:6px;display:flex;gap:6px;justify-content:flex-end"><button class="btn btn-secondary btn-xs pin-btn '+(n.pinned?'active':'')+'" onclick="toggleNotePin(\''+_exH(n.id)+'\')" title="'+(n.pinned?'取消置顶':'置顶小记')+'">📌 '+(n.pinned?'已置顶':'置顶')+'</button><button class="btn btn-secondary btn-xs" onclick="toggleNoteEdit(\''+_exH(n.id)+'\')" title="编辑小记">'+(isEditing?'预览':'编辑')+'</button><button class="btn btn-danger btn-xs" onclick="deleteNote(\''+_exH(n.id)+'\')" title="删除">🗑️</button></div>'+
       '</div>'+
     '</div>';
   }).join('');
@@ -9622,6 +9766,15 @@ window.toggleNoteEdit = function(id){
   if(window._noteEditState[id]) {
     setTimeout(function(){ var el = document.getElementById('note_' + id); if(el){ el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }, 40);
   }
+};
+window.toggleNotePin = function(id){
+  try {
+    var key='wf_note_'+id, note=JSON.parse(localStorage.getItem(key)||'{}');
+    note.pinned=!note.pinned;
+    localStorage.setItem(key,JSON.stringify(note));
+    renderNotes();
+    showToast(note.pinned?'小记已置顶':'已取消置顶','success');
+  } catch(e){ showToast('置顶失败','warn'); }
 };
 
 window.toggleHistTaskCollapse = function(id){
@@ -9798,6 +9951,7 @@ function getAllHistoryData(){
         m: d.m,
         e: d.e,
         r: d.r,
+        workTime: d.workTime,
         morningTask: morningTask
       });
     }
@@ -9866,11 +10020,21 @@ function renderStats(){
     });
   }
   renderOverviewCards(hist);
+  renderWorkTimeStats(fullHist);
   renderResearchOutcomeStats(hist);
   renderLineChart(hist);
   renderPieChart(hist);
   renderExtraStats(hist,fullHist);
   renderHeatmap(hist);
+}
+
+function renderWorkTimeStats(hist){
+  var el=document.getElementById('workTimeStats'); if(!el)return;
+  var rows=(hist||[]).filter(function(h){return h.workTime&&(h.workTime.expectedHours!==''||h.workTime.actualHours!=='');});
+  var expected=0,actual=0,expectedN=0,actualN=0;
+  rows.forEach(function(h){var e=parseFloat(h.workTime.expectedHours),a=parseFloat(h.workTime.actualHours);if(isFinite(e)){expected+=e;expectedN++;}if(isFinite(a)){actual+=a;actualN++;}});
+  var diff=actual-expected;
+  el.innerHTML='<div class="outcome-grid"><div class="outcome-cell"><div class="outcome-value">'+(expectedN?expected.toFixed(1):'—')+'</div><div class="outcome-label">累计预期小时</div></div><div class="outcome-cell"><div class="outcome-value">'+(actualN?actual.toFixed(1):'—')+'</div><div class="outcome-label">累计实际小时</div></div><div class="outcome-cell"><div class="outcome-value">'+(expectedN&&actualN?(diff>=0?'+':'')+diff.toFixed(1):'—')+'</div><div class="outcome-label">实际－预期</div></div><div class="outcome-cell"><div class="outcome-value">'+rows.length+'</div><div class="outcome-label">记录天数</div></div></div>';
 }
 
 function renderResearchOutcomeStats(hist){
@@ -10821,6 +10985,8 @@ window.addContinuedTasksToToday = function() {
           if(srcMorningTask) {
             srcMorningTask.done = false;
             srcMorningTask.doneAt = null;
+            srcMorningTask.dailySummary = '';
+            srcMorningTask.pinned = false;
             srcMorningTask._continuedFrom = date;
             todayData.m = _taskToMorning(srcMorningTask);
             todayData.m.done = false;
@@ -10838,6 +11004,8 @@ window.addContinuedTasksToToday = function() {
             mt.id = Date.now().toString() + '_' + Math.random().toString(36).slice(2,6);
             mt.done = false;
             mt.doneAt = null;
+            mt.dailySummary = '';
+            mt.pinned = false;
             mt.time = new Date().toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'});
             mt._continuedFrom = date;
             if(!mt._chainId) mt._chainId = 'chain_' + Date.now() + Math.random().toString(36).slice(2,6);
@@ -10864,6 +11032,8 @@ window.addContinuedTasksToToday = function() {
         newTask.done = false;
         newTask.doneAt = null;
         newTask.checkInCompleteType = null;
+        newTask.dailySummary = '';
+        newTask.pinned = false;
         newTask.time = new Date().toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'});
         newTask._continuedFrom = date;
         newTask._chainId = chainId;
@@ -11132,6 +11302,8 @@ function autoCheckInContinue() {
         newTask.done = false;
         newTask.doneAt = null;
         newTask.checkInCompleteType = null;
+        newTask.dailySummary = '';
+        newTask.pinned = false;
         newTask.time = new Date().toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'});
         newTask._continuedFrom = yesterdayStr;
 
@@ -11177,6 +11349,8 @@ function autoCheckInContinue() {
 (function(){
   var _mdFloatMode = localStorage.getItem('wf_md_float_mode') === '1';
   var _mdFloatSource = null;
+  var _mdPopoutSource = null;
+  var _mdPopoutWindow = null;
   var _mdFloatResizeObserver = null;
 
   function setMdFloatButtonState(){
@@ -11365,10 +11539,44 @@ function autoCheckInContinue() {
     if(body) {
       body.innerHTML = html || '';
       renderMath(body);
+      enableTaskListCheckboxes(body, _mdFloatSource);
+      body.scrollTop = body.scrollHeight;
     }
     box.style.display = html ? 'flex' : 'none';
     if(html) clampMdFloatToViewport(box);
   }
+
+  function enableTaskListCheckboxes(container, sourceEl){
+    if(!container||!sourceEl)return;
+    Array.prototype.slice.call(container.querySelectorAll('input[type="checkbox"]')).forEach(function(box,index){
+      box.disabled=false; box.classList.add('task-list-item-checkbox');
+      box.onchange=function(){
+        var seen=-1;
+        sourceEl.value=String(sourceEl.value||'').replace(/(^|\n)(\s*[-*]\s+)\[([ xX])\]/g,function(all,start,prefix,state){seen++;return seen===index?start+prefix+'['+(box.checked?'x':' ')+']':all;});
+        sourceEl.dispatchEvent(new Event('input',{bubbles:true}));
+        sourceEl.dispatchEvent(new Event('change',{bubbles:true}));
+      };
+    });
+  }
+
+  function updateMdPopoutPreview(el,html){
+    if(!_mdPopoutWindow||_mdPopoutWindow.closed||_mdPopoutSource!==el)return;
+    var body=_mdPopoutWindow.document.getElementById('previewBody');
+    var title=_mdPopoutWindow.document.getElementById('previewTitle');
+    if(title)title.textContent=_inputPreviewLabel(el);
+    if(body){body.innerHTML=html||'<div style="color:#94a3b8">暂无可预览内容</div>';enableTaskListCheckboxes(body,el);body.scrollTop=body.scrollHeight;}
+  }
+
+  function openMdPopoutPreview(el){
+    _mdPopoutSource=el;
+    _mdPopoutWindow=window.open('','workflow_md_preview','popup=yes,width=620,height=720,resizable=yes,scrollbars=yes');
+    if(!_mdPopoutWindow){showToast('请允许浏览器弹出独立预览窗口','warn');return;}
+    _mdPopoutWindow.document.open();
+    _mdPopoutWindow.document.write('<!doctype html><html><head><meta charset="utf-8"><title>实时预览</title><style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f8fafc;color:#0f172a}header{position:sticky;top:0;padding:12px 16px;background:#4f46e5;color:white;font-weight:700}main{padding:18px;line-height:1.75;height:calc(100vh - 48px);overflow:auto;box-sizing:border-box}input[type=checkbox]{width:16px;height:16px;accent-color:#4f46e5}pre{white-space:pre-wrap;background:#e2e8f0;padding:10px;border-radius:8px}table{border-collapse:collapse}td,th{border:1px solid #cbd5e1;padding:5px}</style></head><body><header id="previewTitle">实时预览</header><main id="previewBody"></main></body></html>');
+    _mdPopoutWindow.document.close();
+    if(typeof el._mdUpdate==='function')el._mdUpdate();
+  }
+  window.openMdPopoutPreview=openMdPopoutPreview;
 
   function refreshMdFloatFromActive(){
     if(!_mdFloatMode) return;
@@ -11490,14 +11698,16 @@ function autoCheckInContinue() {
     preview.innerHTML =
       '<div class="md-preview-head">' +
         '<span class="md-preview-label">预览</span>' +
-        '<button class="md-preview-float-btn" type="button" title="在小窗中预览" aria-label="在小窗中预览">' +
+        '<span class="md-preview-actions"><button class="md-preview-popout-btn" type="button" title="在独立浏览器窗口中预览" aria-label="独立窗口预览">↗</button><button class="md-preview-float-btn" type="button" title="在网页内小窗中预览" aria-label="网页内小窗预览">' +
           '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/><path d="M9 9h6v6H9z"/></svg>' +
-        '</button>' +
+        '</button></span>' +
       '</div>' +
       '<div class="md-preview-body math-preview"></div>';
     field.appendChild(preview);
     var previewBody = preview.querySelector('.md-preview-body');
     var floatBtn = preview.querySelector('.md-preview-float-btn');
+    var popoutBtn = preview.querySelector('.md-preview-popout-btn');
+    if(popoutBtn)popoutBtn.addEventListener('click',function(ev){ev.preventDefault();ev.stopPropagation();openMdPopoutPreview(el);});
     if(floatBtn) {
       floatBtn.addEventListener('click', function(ev){
         ev.preventDefault();
@@ -11516,12 +11726,15 @@ function autoCheckInContinue() {
         return;
       }
       var rendered = typeof window._renderMDMaybe === 'function' ? window._renderMDMaybe(val) : renderMDMath(val);
+      updateMdPopoutPreview(el, rendered);
       if(_mdFloatMode) {
         preview.style.display = 'none';
         if(shouldUpdateMdFloat(el)) updateMdFloatPreview(el, rendered);
       } else {
         previewBody.innerHTML = rendered;
         renderMath(previewBody);
+        enableTaskListCheckboxes(previewBody, el);
+        if(document.activeElement===el)previewBody.scrollTop=previewBody.scrollHeight;
         preview.style.display = 'block';
       }
     }
@@ -11531,6 +11744,7 @@ function autoCheckInContinue() {
     el.addEventListener('keyup', update);
     el.addEventListener('change', update);
     el.addEventListener('blur', update);
+    el.addEventListener('focus', function(){ _mdFloatSource=el; _mdPopoutSource=el; update(); });
     update();
   }
 
@@ -11779,10 +11993,10 @@ window.handleImportFile = function(event) {
 
 <!--
 workflow_tool build
-version: 2026.07.20.6
-sourceSha256: 49f2e478998e2fcb9e929f6df6124e964a0148dad777e83fb7231feb56a27758
-configSha256: c5e27d0e471183658e5c9adbec0dc69e7583429ec75350a6be38a11f633cfbdf
-coreSha256: 9a31af33ad9c21ba900792ccaba6a96c083b75198de17c24b6d6db8672c76326
+version: 2026.07.22.1
+sourceSha256: 3769a69fc5bfc76e8766713ce9b3e4b0607e942d662099791e05548ad1baab84
+configSha256: 6d26a2f65cee3ec1dfe672b83a182000b1587f7a82101a4930b61614c8c50f59
+coreSha256: 17345b376379086f943fd33757852f4a36323e560dfe6120e08c268e9421d83e
 appSha256: 2f24aa03f02a5b051051aad95e186b81abef342d0af6958c66b79307c3dc0db3
 exportSha256: 13ad148412f079c37fed48892779a4c15a69b986b274bf432dd0506e64c0fa2a
 syncSha256: d253ac2b5da24d6ab82cae5c41b91c72dc35ffda76ed3b160b3eb4d4025154ea
@@ -11790,5 +12004,5 @@ historySha256: d2d96792bc489871e1e12fdf2483793e1781fec5835bae872974bc6b66894a79
 tasksSha256: cf7b1e78be5c87a40720433883aa80f4c8e36fe389400e217af9bb744ad8a590
 researchSha256: 7f18bf83e2678ea03658117f346225a9af8304668c9f622903770f0292e2c5a8
 stylesSha256: 438038ffa6949e8cb705df0dbad8d9a17ed29abd17f0c072fc70f88118cf55be
-builtAt: 2026-07-20T07:56:58.632Z
+builtAt: 2026-07-22T03:40:51.995Z
 -->
