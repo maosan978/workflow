@@ -1073,7 +1073,20 @@ body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between
 .work-time-title{font-size:13px;font-weight:750;color:var(--text);line-height:1.35}.work-time-sub{font-size:10px;color:var(--text4);margin-top:2px}
 .work-time-item{padding:9px 10px;background:color-mix(in srgb,var(--surface) 86%,transparent);border:1px solid var(--border);border-radius:var(--radius-sm);min-width:0}
 .work-time-input{display:flex;align-items:center;gap:6px}.work-time-input input{border:0!important;background:transparent!important;padding:4px 0!important;font-size:18px;font-weight:750;color:var(--text);box-shadow:none!important}.work-time-unit{font-size:10px;color:var(--text4);white-space:nowrap}
-.wk-jump{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;margin:-4px 0 14px}.wk-jump label{font-size:11px;color:var(--text3);font-weight:600}.wk-jump input{width:auto;min-width:148px;padding:6px 8px;font-size:12px}
+.wk-jump{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin:-4px 0 14px;padding:9px 10px;background:linear-gradient(135deg,var(--surface),var(--primary-bg));border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow-xs)}
+.wk-jump label{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);font-weight:700;line-height:1.25}
+.wk-jump-label-icon{width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;border-radius:7px;background:var(--primary-bg);border:1px solid var(--primary-light);color:var(--primary);flex:0 0 auto}
+.wk-jump-label-icon svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.wk-date-controls{position:relative;display:flex;align-items:center;gap:6px;min-width:0}
+.wk-jump .wk-date-input{width:132px;min-height:32px;padding:6px 9px;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xs);box-shadow:var(--shadow-xs);font-family:inherit;font-size:12px;font-weight:600;line-height:1.35;letter-spacing:.02em;transition:border-color var(--t),box-shadow var(--t),background var(--t)}
+.wk-jump .wk-date-input::placeholder{color:var(--text4);font-weight:500;letter-spacing:0}
+.wk-jump .wk-date-input:hover{border-color:var(--primary-light);background:var(--surface2)}
+.wk-jump .wk-date-input:focus{outline:none;border-color:var(--primary);box-shadow:var(--shadow-glow);background:var(--surface)}
+.wk-jump .wk-date-input[aria-invalid=true]{border-color:var(--danger);box-shadow:0 0 0 3px var(--danger-bg)}
+.wk-date-picker-native{position:absolute!important;width:1px!important;height:1px!important;right:62px;bottom:0;opacity:0;pointer-events:none;padding:0!important;border:0!important}
+.wk-date-open{width:32px;min-width:32px!important;padding:0!important;color:var(--primary)!important}
+.wk-date-open svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.wk-jump .btn{min-height:32px}
 .pin-btn.active{color:var(--warn);border-color:var(--warn);background:var(--warn-bg)}
 .pinned-item{border-color:var(--warn)!important;box-shadow:0 0 0 1px var(--warn-bg)}
 .weekly-history-card{margin:8px 0 10px;padding:10px 12px;border:1px solid var(--primary-light);border-left:4px solid var(--primary);border-radius:var(--radius-sm);background:var(--primary-bg);font-size:12px;color:var(--text2)}
@@ -1124,6 +1137,10 @@ body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between
   .md-float-resize{width:30px;height:30px;right:0;bottom:0}
   .md-float-resize::before{content:'';position:absolute;inset:-5px}
   .md-float-body{padding:10px 28px 28px 12px}
+  .wk-jump{justify-content:flex-start;padding:10px}
+  .wk-jump label{width:100%}
+  .wk-date-controls{width:100%}
+  .wk-jump .wk-date-input{flex:1;width:auto;min-width:0;font-size:16px}
 }
 /* 深色模式下KaTeX公式颜色修复 */
 .dark .katex,.dark .katex *{color:var(--text)!important}
@@ -1208,7 +1225,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   else root.WorkflowConfig = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
   return {
-    appVersion: '2026.07.22.2',
+    appVersion: '2026.07.22.4',
     schemaVersion: 5,
     typeLabels: {
       general: '通用',
@@ -2236,7 +2253,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
     <span id="wkRangeLabel" style="font-size:13px;font-weight:600;color:var(--text2);min-width:150px;text-align:center"></span>
     <button class="btn btn-secondary btn-sm" id="wkNextBtn" onclick="wkNav(1)" title="下一周">下周<span class="ico">→</span></button>
   </div>
-  <div class="wk-jump"><label for="wkDatePicker">按日期查找周复盘</label><input type="date" id="wkDatePicker" onchange="jumpToWeek(this.value)"><button class="btn btn-secondary btn-xs" onclick="jumpToCurrentWeek()">回到本周</button></div>
+  <div class="wk-jump"><label for="wkDateInput"><span class="wk-jump-label-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m15.5 15.5 4 4"></path></svg></span><span>按日期查找周复盘</span></label><div class="wk-date-controls"><input type="text" id="wkDateInput" class="wk-date-input" inputmode="numeric" maxlength="10" autocomplete="off" placeholder="YYYY-MM-DD" aria-label="输入日期，格式为年-月-日" onkeydown="if(event.key==='Enter'){event.preventDefault();jumpToWeekInput()}"><input type="date" id="wkDatePicker" class="wk-date-picker-native" tabindex="-1" aria-hidden="true" onchange="applyWkDatePicker(this.value)"><button type="button" class="btn btn-secondary btn-xs wk-date-open" onclick="openWkDatePicker()" title="打开日历选择" aria-label="打开日历选择日期"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="15" rx="2"></rect><path d="M8 3.5v4M16 3.5v4M3.5 10h17"></path></svg></button><button type="button" class="btn btn-primary btn-xs" onclick="jumpToWeekInput()">查找</button></div><button class="btn btn-secondary btn-xs" onclick="jumpToCurrentWeek()">回到本周</button></div>
   <div class="wk-summary" id="wkSummary"></div>
   <div class="card">
     <div class="card-title">🔍 本周我真正理解了什么？</div>
@@ -2570,7 +2587,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
       <span class="help-arrow">&#9660;</span>
     </div>
     <div class="help-section-body"><div class="help-section-inner">
-      <p>业务数据存在浏览器 <span class="help-badge primary">localStorage</span>，关闭标签页不丢失。“清备份与缓存”只清除本地快照和 PWA Cache Storage，保留日记录、周复盘、小记、设置和云端凭据；浏览器的“清除网站数据”则可能删除业务数据。</p>
+      <p>业务数据存在浏览器 <span class="help-badge primary">localStorage</span>，关闭标签页不丢失。“清备份与缓存”只清除本地快照和 PWA Cache Storage，保留日记录、周复盘、小记、设置和云端凭据；“完全清空”会把当前浏览器恢复到首次使用状态。</p>
       <div style="overflow-x:auto"><table class="help-table">
         <tr><th>操作</th><th>顶部按钮</th><th>说明</th></tr>
         <tr><td>本地备份</td><td>💾（备份）</td><td>下载完整 JSON 数据文件，包含所有历史记录、设置、版本号、生成时间和摘要</td></tr>
@@ -2578,6 +2595,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
         <tr><td>导出图片/文档</td><td>📤（导出）</td><td>紧凑弹窗选择内容；可用格式会随导出目标立即变化，不支持的格式会直接禁用</td></tr>
         <tr><td>手动云同步</td><td>🔄（同步）</td><td>立即推送到 GitHub 或 Drive；未配置云端时打开同步详情；快捷键 Ctrl+S</td></tr>
         <tr><td>清理缓存</td><td>顶部 🧹</td><td>打开“存储管理”后选择“清备份与缓存”；也可在“同步详情”直接点“清缓存”。操作前会再次确认</td></tr>
+        <tr><td>完全清空</td><td>存储管理</td><td>删除当前浏览器内的全部工作流记录、设置、同步凭据、快照、站点数据库和离线缓存；需要输入“彻底清空”二次确认，不会删除 Drive/GitHub 远端文件</td></tr>
         <tr><td>同步详情 / 自检</td><td>说明页按钮</td><td>查看 Drive/GitHub 最近状态，运行关键流程自检，可撤销最近高风险操作</td></tr>
         <tr><td>本地快照</td><td>说明页按钮</td><td>保留最近 5 次本地快照，可查看摘要、全部恢复或只恢复某一天</td></tr>
         <tr><td>数据健康</td><td>同步详情按钮</td><td>检查坏 JSON、重复任务 ID、打卡链字段、空小记和体积风险，可导出诊断报告</td></tr>
@@ -2839,6 +2857,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
       <button class="btn btn-secondary btn-sm" onclick="openArchiveModal()"><span class="ico">🗄</span>归档</button>
       <button class="btn btn-secondary btn-sm" onclick="clearOldSnapshots()"><span class="ico">🧹</span>快照</button>
       <button class="btn btn-danger btn-sm" onclick="clearLocalBackupsAndCache()"><span class="ico">🧽</span>清备份与缓存</button>
+      <button class="btn btn-danger btn-sm" onclick="wipeAllLocalSiteData()" title="删除当前浏览器内全部工作流数据并恢复首次使用状态"><span class="ico">⚠</span>完全清空</button>
       <button class="btn btn-primary btn-sm" onclick="openStorageManagerModal()"><span class="ico">↻</span>刷新</button>
     </div>
   </div>
@@ -3088,7 +3107,7 @@ var driveFileId = localStorage.getItem('drive_file_id') || null;
 var accessToken = null;
 var syncInProgress = false;
 var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 5;
-var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.07.22.2';
+var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.07.22.4';
 
 var tokenClient = null;
 var _syncReconcileInProgress = false;
@@ -4396,6 +4415,60 @@ window.clearLocalBackupsAndCache = function(){
     clearCaches.then(function(results){showToast('已清除 '+keys.length+' 项本地备份和 '+results.filter(Boolean).length+' 个浏览器缓存','success');openStorageManagerModal();}).catch(function(){showToast('本地备份已清除；浏览器缓存清理失败','warn');openStorageManagerModal();});
   });
 };
+function _expireWorkflowCookies(){
+  try{
+    document.cookie.split(';').forEach(function(part){
+      var name=part.split('=')[0].trim();if(!name)return;
+      document.cookie=name+'=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;SameSite=Lax';
+    });
+  }catch(e){}
+}
+function _deleteAllIndexedDatabases(){
+  if(typeof indexedDB==='undefined'||typeof indexedDB.databases!=='function')return Promise.resolve(0);
+  return indexedDB.databases().then(function(dbs){
+    var names=(dbs||[]).map(function(db){return db&&db.name;}).filter(Boolean);
+    return Promise.all(names.map(function(name){
+      return new Promise(function(resolve){
+        var settled=false,done=function(ok){if(settled)return;settled=true;resolve(ok?1:0);};
+        try{var req=indexedDB.deleteDatabase(name);req.onsuccess=function(){done(true);};req.onerror=function(){done(false);};req.onblocked=function(){done(false);};setTimeout(function(){done(false);},800);}catch(e){done(false);}
+      });
+    })).then(function(results){return results.reduce(function(sum,n){return sum+n;},0);});
+  }).catch(function(){return 0;});
+}
+window._performFullLocalReset=function(options){
+  options=options||{};
+  window._workflowResetting=true;
+  try{localStorage.clear();}catch(e){}
+  try{sessionStorage.clear();}catch(e){}
+  _expireWorkflowCookies();
+  var clearCaches=(typeof caches!=='undefined'&&caches.keys)?caches.keys().then(function(names){return Promise.all(names.map(function(name){return caches.delete(name);}));}).then(function(results){return results.filter(Boolean).length;}):Promise.resolve(0);
+  var clearWorkers=(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations)?navigator.serviceWorker.getRegistrations().then(function(regs){return Promise.all(regs.map(function(reg){return reg.unregister();}));}).then(function(results){return results.filter(Boolean).length;}):Promise.resolve(0);
+  return Promise.all([clearCaches.catch(function(){return 0;}),_deleteAllIndexedDatabases(),clearWorkers.catch(function(){return 0;})]).then(function(results){
+    try{localStorage.clear();}catch(e){}
+    try{sessionStorage.clear();}catch(e){}
+    _expireWorkflowCookies();
+    var summary={caches:results[0],databases:results[1],serviceWorkers:results[2]};
+    if(options.reload===false){window._workflowResetting=false;return summary;}
+    var next;
+    try{next=new URL(location.href);next.searchParams.set('_wf_reset',String(Date.now()));location.replace(next.href);}catch(e){location.reload();}
+    return summary;
+  });
+};
+window.wipeAllLocalSiteData=function(){
+  showConfirm('确认完全清空当前浏览器？\n\n将永久删除全部日记录、周复盘、小记、研究数据、设置、同步凭据、快照、错误/同步状态、站点数据库和离线缓存，并恢复首次使用状态。\n\nDrive/GitHub 远端文件不会删除。','⚠️',function(){
+    showInputModal('这是不可恢复的操作。请输入“彻底清空”后继续：','','⚠️',function(value){
+      if(value!=='彻底清空'){showToast('输入不匹配，未执行清空','warn');return;}
+      window._performFullLocalReset();
+    });
+  });
+};
+(function _finishFullResetNotice(){
+  try{
+    var url=new URL(location.href);if(!url.searchParams.has('_wf_reset'))return;
+    url.searchParams.delete('_wf_reset');history.replaceState(null,'',url.href);
+    setTimeout(function(){showToast('当前浏览器已完全清空，已恢复首次使用状态','success');},350);
+  }catch(e){}
+})();
 
 var _pendingSyncConflict = null;
 var _lastConflictContext = null;
@@ -6886,6 +6959,7 @@ function _dedupTasksByChain(hist){
 
 function loadWk(){ var r=localStorage.getItem(currentWkKey()); if(!r) return {under:'', tasks:[]}; try { return JSON.parse(r); } catch(e) { return {under:'', tasks:[]}; } }
 var _wkOffset = 0; // 0=本周，-1=上周，以此类推
+var _wkDateQuery = '';
 function _wkRefDate(){ var d=new Date(); d.setDate(d.getDate()+_wkOffset*7); return d; }
 function currentWkKey(){ return _wkOffset===0 ? wkKey : ('wf_week_'+getWkId(_wkRefDate())); }
 function flash(){
@@ -9420,23 +9494,62 @@ function renderWkNav(){
   }
   var nextBtn = document.getElementById('wkNextBtn');
   if(nextBtn){ nextBtn.disabled = _wkOffset>=0; nextBtn.style.opacity = _wkOffset>=0?'.4':'1'; nextBtn.style.pointerEvents = _wkOffset>=0?'none':'auto'; }
-  var picker=document.getElementById('wkDatePicker');
-  if(picker)picker.value=localDateStr(mon);
+  var queryDate=_wkDateQuery;
+  if(queryDate){
+    var parsedQuery=parseDateLocal(queryDate), queryMon=_mondayForDate(parsedQuery);
+    if(localDateStr(queryMon)!==localDateStr(mon))queryDate='';
+  }
+  var shownDate=queryDate||localDateStr(mon);
+  var picker=document.getElementById('wkDatePicker'), dateInput=document.getElementById('wkDateInput');
+  if(picker)picker.value=shownDate;
+  if(dateInput){dateInput.value=shownDate;dateInput.setAttribute('aria-invalid','false');}
 }
 window.wkNav = function(dir){
   if(_wkOffset+dir>0) return; // 不能看未来
+  _wkDateQuery='';
   _wkOffset += dir;
   initWeekly();
 };
+function _normalizeWkDateValue(value){
+  var raw=String(value||'').trim().replace(/[年月/.]/g,'-').replace(/日/g,'').replace(/\s+/g,'');
+  if(/^\d{8}$/.test(raw))raw=raw.slice(0,4)+'-'+raw.slice(4,6)+'-'+raw.slice(6,8);
+  var match=raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if(!match)return '';
+  var year=Number(match[1]),month=Number(match[2]),day=Number(match[3]);
+  var parsed=new Date(year,month-1,day);
+  if(parsed.getFullYear()!==year||parsed.getMonth()!==month-1||parsed.getDate()!==day)return '';
+  return year+'-'+String(month).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+}
+window.jumpToWeekInput=function(){
+  var input=document.getElementById('wkDateInput'), normalized=_normalizeWkDateValue(input&&input.value);
+  if(!normalized){
+    if(input){input.setAttribute('aria-invalid','true');input.focus();}
+    showToast('请输入有效日期，例如 2026-01-14','warn');
+    return false;
+  }
+  if(input){input.value=normalized;input.setAttribute('aria-invalid','false');}
+  return window.jumpToWeek(normalized);
+};
+window.openWkDatePicker=function(){
+  var picker=document.getElementById('wkDatePicker');if(!picker)return;
+  try{if(typeof picker.showPicker==='function')picker.showPicker();else picker.click();}catch(e){picker.focus();picker.click();}
+};
+window.applyWkDatePicker=function(value){
+  var input=document.getElementById('wkDateInput');if(input)input.value=value||'';
+  if(value)window.jumpToWeek(value);
+};
 window.jumpToWeek = function(dateValue){
-  if(!dateValue)return;
-  var selected=parseDateLocal(dateValue), selectedMon=_mondayForDate(selected), currentMon=_mondayForDate(new Date());
+  var normalized=_normalizeWkDateValue(dateValue);
+  if(!normalized)return false;
+  var selected=parseDateLocal(normalized), selectedMon=_mondayForDate(selected), currentMon=_mondayForDate(new Date());
   var diff=Math.round((selectedMon.getTime()-currentMon.getTime())/(7*24*60*60*1000));
-  if(diff>0){showToast('未来周暂不提供复盘编辑','info');diff=0;}
+  if(diff>0){showToast('未来周暂不提供复盘编辑','info');diff=0;normalized=localDateStr(new Date());}
+  _wkDateQuery=normalized;
   _wkOffset=diff;
   initWeekly();
+  return true;
 };
-window.jumpToCurrentWeek = function(){_wkOffset=0;initWeekly();};
+window.jumpToCurrentWeek = function(){_wkDateQuery='';_wkOffset=0;initWeekly();};
 
 window.renderWeeklySummary = function(){
   var monday = _wkMonday();
@@ -10700,7 +10813,7 @@ window.switchTab = function(name){
   });
   if(name === 'today') initToday();
   if(name === 'history') renderHistory();
-  if(name === 'weekly'){ _wkOffset = 0; initWeekly(); }
+  if(name === 'weekly'){ _wkDateQuery = ''; _wkOffset = 0; initWeekly(); }
   if(name === 'research') initResearch();
   if(name === 'stats') renderStats();
   var taskFab=document.getElementById('fabBtn'),quickFab=document.getElementById('fabQuick');
@@ -11382,6 +11495,14 @@ function autoCheckInContinue() {
   var _mdPopoutNoteId = '';
   var _mdPopoutWindow = null;
   var _mdFloatResizeObserver = null;
+  var _mdPopoutThemeVars = [
+    '--bg','--surface','--surface2','--surface3','--border','--border-light',
+    '--text','--text2','--text3','--text4','--primary','--primary-hover',
+    '--primary-bg','--primary-light','--primary-soft','--accent','--accent-bg',
+    '--success','--success-bg','--warn','--warn-bg','--danger','--danger-bg',
+    '--shadow-xs','--shadow-sm','--shadow','--shadow-md','--shadow-lg','--shadow-glow',
+    '--radius','--radius-sm','--radius-xs','--radius-lg','--t'
+  ];
 
   function setMdFloatButtonState(){
     document.querySelectorAll('.md-preview-float-btn').forEach(function(btn){
@@ -11645,12 +11766,45 @@ function autoCheckInContinue() {
   };
   window.refreshNotePopout=function(id){_refreshNotePreviewSurfaces(String(id));};
 
+  function _applyPopoutTheme(){
+    if(!_mdPopoutWindow||_mdPopoutWindow.closed)return;
+    try{
+      var sourceRoot=getComputedStyle(document.documentElement), sourceBody=getComputedStyle(document.body);
+      var targetRoot=_mdPopoutWindow.document.documentElement, targetBody=_mdPopoutWindow.document.body;
+      _mdPopoutThemeVars.forEach(function(name){targetRoot.style.setProperty(name,sourceRoot.getPropertyValue(name));});
+      targetRoot.classList.toggle('dark',document.documentElement.classList.contains('dark'));
+      targetRoot.style.colorScheme=document.documentElement.classList.contains('dark')?'dark':'light';
+      if(targetBody){
+        targetBody.style.fontFamily=sourceBody.fontFamily;
+        targetBody.style.fontSize=sourceBody.fontSize;
+        targetBody.style.fontWeight=sourceBody.fontWeight;
+      }
+      var sourceHeader=document.querySelector('.header'), targetHeader=_mdPopoutWindow.document.getElementById('previewTitle');
+      if(sourceHeader&&targetHeader){
+        var sourceHeaderStyle=getComputedStyle(sourceHeader);
+        targetHeader.style.background=sourceHeaderStyle.background;
+        targetHeader.style.color=sourceHeaderStyle.color;
+      }
+      var themeMeta=_mdPopoutWindow.document.getElementById('previewThemeColor');
+      if(themeMeta)themeMeta.setAttribute('content',sourceRoot.getPropertyValue('--primary').trim());
+    }catch(e){}
+  }
+  window._applyPopoutTheme=_applyPopoutTheme;
+
   function _openPopoutShell(title){
     _mdPopoutWindow=window.open('','workflow_md_preview','popup=yes,width=620,height=720,resizable=yes,scrollbars=yes');
     if(!_mdPopoutWindow){showToast('请允许浏览器弹出独立预览窗口','warn');return null;}
     _mdPopoutWindow.document.open();
-    _mdPopoutWindow.document.write('<!doctype html><html><head><meta charset="utf-8"><title>'+esc(title||'实时预览')+'</title><style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f8fafc;color:#0f172a}header{position:sticky;top:0;padding:12px 16px;background:#4f46e5;color:white;font-weight:700}main{padding:18px;line-height:1.75;height:calc(100vh - 48px);overflow:auto;box-sizing:border-box}input[type=checkbox]{width:16px;height:16px;accent-color:#4f46e5;cursor:pointer}pre{white-space:pre-wrap;background:#e2e8f0;padding:10px;border-radius:8px}table{border-collapse:collapse}td,th{border:1px solid #cbd5e1;padding:5px}</style></head><body><header id="previewTitle">'+esc(title||'实时预览')+'</header><main id="previewBody"></main></body></html>');
+    _mdPopoutWindow.document.write('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta id="previewThemeColor" name="theme-color" content=""><title>'+esc(title||'实时预览')+'</title><style>'+
+      '*,*::before,*::after{box-sizing:border-box}html,body{height:100%;margin:0}html{background:var(--bg);color-scheme:light}body{overflow:hidden;color:var(--text);background:linear-gradient(180deg,color-mix(in srgb,var(--primary) 7%,transparent),transparent 240px),var(--bg);transition:background var(--t),color var(--t)}'+
+      'header{height:48px;display:flex;align-items:center;position:sticky;top:0;z-index:2;padding:0 16px;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;font-size:13px;font-weight:750;letter-spacing:.01em;border-bottom:1px solid color-mix(in srgb,#fff 18%,transparent);box-shadow:var(--shadow-md)}'+
+      'main{height:calc(100vh - 76px);margin:14px;padding:16px 18px;overflow:auto;overscroll-behavior:contain;line-height:1.75;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);word-break:break-word;overflow-wrap:anywhere;scrollbar-gutter:stable}'+
+      'main>*{max-width:100%}p{margin:0 0 7px}p:last-child{margin-bottom:0}h1,h2,h3,h4,h5,h6{margin:12px 0 7px;color:var(--text);line-height:1.35}h1:first-child,h2:first-child,h3:first-child{margin-top:0}ul,ol{margin:5px 0 8px;padding-left:24px;list-style-position:outside}li{margin:2px 0;padding-left:2px}blockquote{margin:8px 0;padding:7px 11px;border-left:3px solid var(--primary);border-radius:var(--radius-xs);background:var(--surface2);color:var(--text2)}hr{border:0;border-top:1px solid var(--border);margin:10px 0}a{color:var(--primary)}'+
+      'input[type=checkbox]{width:16px;height:16px;margin-right:6px;vertical-align:-2px;accent-color:var(--primary);cursor:pointer}code{padding:1px 4px;border-radius:4px;background:var(--surface2);color:var(--text);font-family:"Fira Code","Consolas",monospace;font-size:.9em}pre{max-width:100%;margin:8px 0;padding:11px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid var(--border);border-radius:var(--radius-xs);background:var(--surface2)}pre code{padding:0;border:0;background:transparent}table{display:block;width:100%;max-width:100%;margin:8px 0;overflow-x:auto;border-collapse:collapse}td,th{padding:5px 7px;border:1px solid var(--border);text-align:left}th{background:var(--surface2)}.math-fallback{padding:0 4px;color:var(--text);background:var(--surface2);border:1px solid var(--border);border-radius:4px;font-family:Georgia,"Times New Roman",serif;font-style:italic}.math-fallback.display{display:block;margin:7px 0;padding:8px;text-align:center}.preview-empty{color:var(--text3)}'+
+      '@media(max-width:520px){header{height:44px;padding:0 12px}main{height:calc(100vh - 60px);margin:8px;padding:12px;border-radius:var(--radius-sm)}}'+
+      '</style></head><body><header id="previewTitle">'+esc(title||'实时预览')+'</header><main id="previewBody"></main></body></html>');
     _mdPopoutWindow.document.close();
+    _applyPopoutTheme();
     return _mdPopoutWindow;
   }
 
@@ -11658,8 +11812,9 @@ function autoCheckInContinue() {
     if(!_mdPopoutWindow||_mdPopoutWindow.closed||_mdPopoutSource!==el)return;
     var body=_mdPopoutWindow.document.getElementById('previewBody');
     var title=_mdPopoutWindow.document.getElementById('previewTitle');
+    _applyPopoutTheme();
     if(title)title.textContent=_inputPreviewLabel(el);
-    if(body){body.innerHTML=html||'<div style="color:#94a3b8">暂无可预览内容</div>';enableTaskListCheckboxes(body,el);syncPreviewScrollToCaret(body,el);}
+    if(body){body.innerHTML=html||'<div class="preview-empty">暂无可预览内容</div>';enableTaskListCheckboxes(body,el);syncPreviewScrollToCaret(body,el);}
   }
 
   function openMdPopoutPreview(el){
@@ -11675,6 +11830,12 @@ function autoCheckInContinue() {
     var body=_mdPopoutWindow.document.getElementById('previewBody');
     _renderStaticNoteContainer(body,String(id),note.content||'',0);
   };
+
+  if(typeof MutationObserver!=='undefined'){
+    var _mdPopoutThemeObserver=new MutationObserver(_applyPopoutTheme);
+    _mdPopoutThemeObserver.observe(document.documentElement,{attributes:true,attributeFilter:['class','style']});
+    if(document.body)_mdPopoutThemeObserver.observe(document.body,{attributes:true,attributeFilter:['class','style']});
+  }
 
   function refreshMdFloatFromActive(){
     if(!_mdFloatMode) return;
@@ -12091,9 +12252,9 @@ window.handleImportFile = function(event) {
 
 <!--
 workflow_tool build
-version: 2026.07.22.2
-sourceSha256: a0b2c8adb65dc7ee437663c92c47af21c579261c06624be96421b35f82f74d3b
-configSha256: b738c7ae40cff73e99699f54a730287a4f29209080f3c1ca2906afc04147d5b0
+version: 2026.07.22.4
+sourceSha256: b223d9e6053b49f47fab34fde9e73206d5b088ac7947412df5021ef897d7f5f9
+configSha256: 6237b9f9bf9e9bdde899c034f93803fe4e1c6d16bdc3102d16d0a5da30290d72
 coreSha256: 17345b376379086f943fd33757852f4a36323e560dfe6120e08c268e9421d83e
 appSha256: 2f24aa03f02a5b051051aad95e186b81abef342d0af6958c66b79307c3dc0db3
 exportSha256: 13ad148412f079c37fed48892779a4c15a69b986b274bf432dd0506e64c0fa2a
@@ -12102,5 +12263,5 @@ historySha256: d2d96792bc489871e1e12fdf2483793e1781fec5835bae872974bc6b66894a79
 tasksSha256: cf7b1e78be5c87a40720433883aa80f4c8e36fe389400e217af9bb744ad8a590
 researchSha256: 7f18bf83e2678ea03658117f346225a9af8304668c9f622903770f0292e2c5a8
 stylesSha256: 438038ffa6949e8cb705df0dbad8d9a17ed29abd17f0c072fc70f88118cf55be
-builtAt: 2026-07-22T04:08:47.907Z
+builtAt: 2026-07-22T04:42:08.767Z
 -->
