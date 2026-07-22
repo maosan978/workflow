@@ -1060,6 +1060,7 @@ body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between
 .md-preview-float-btn:hover,.md-preview-float-btn.active{border-color:var(--primary-light);color:var(--primary);background:var(--primary-bg)}
 .md-preview-float-btn svg{width:13px;height:13px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;display:block}
 .md-preview-body{padding:8px 12px;box-sizing:border-box;overflow-wrap:anywhere;max-height:180px;overflow-y:auto;scrollbar-gutter:stable}
+.md-caret-anchor{display:inline-block;width:0;height:1em;overflow:hidden;vertical-align:text-bottom;pointer-events:none}
 .md-preview-actions{display:flex;align-items:center;gap:5px}
 .md-preview-popout-btn{min-width:22px;height:22px;border:1px solid var(--border);border-radius:999px;background:var(--surface);color:var(--text3);display:inline-flex;align-items:center;justify-content:center;gap:3px;cursor:pointer;padding:0 6px;flex:0 0 auto;font-size:10px;font-weight:700}
 .md-preview-popout-btn:hover{border-color:var(--primary-light);color:var(--primary);background:var(--primary-bg)}
@@ -1225,7 +1226,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   else root.WorkflowConfig = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
   return {
-    appVersion: '2026.07.22.4',
+    appVersion: '2026.07.22.6',
     schemaVersion: 5,
     typeLabels: {
       general: '通用',
@@ -2503,7 +2504,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
         <tr><td>☀️ 设为晨间</td><td>任务卡片右上角 ☀️；历史编辑中也可用</td><td>将任意任务整体设为晨间目标，原晨间任务整体回到任务列表；晨间支持项目标签、打卡任务和完整字段预览，只在位置和标注上特殊</td></tr>
         <tr><td>➕ 明日任务</td><td>晚间"明天要做的事"字段旁</td><td>将计划直接添加到明天任务清单，可选择5种任务类型</td></tr>
         <tr><td>📐 公式预览</td><td>在输入框中输入 <code>$...$</code></td><td>支持 LaTeX 数学公式（KaTeX）和 Markdown，输入后自动在下方渲染预览</td></tr>
-        <tr><td>▣ 预览小窗</td><td>点击网页小窗按钮或“↗ 双屏”</td><td>下方预览按当前光标所在行跟踪；网页内小窗可拖动缩放，“↗ 双屏”会打开真正的浏览器窗口，可拖到另一块显示器并持续跟随输入</td></tr>
+        <tr><td>▣ 预览小窗</td><td>点击网页小窗按钮或“↗ 双屏”</td><td>下方预览按当前光标所在的具体字符跟踪；网页内小窗可拖动缩放，“↗ 双屏”会打开真正的浏览器窗口，可拖到另一块显示器并持续跟随输入</td></tr>
       </table></div>
     </div></div>
   </div>
@@ -3107,7 +3108,7 @@ var driveFileId = localStorage.getItem('drive_file_id') || null;
 var accessToken = null;
 var syncInProgress = false;
 var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 5;
-var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.07.22.4';
+var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.07.22.6';
 
 var tokenClient = null;
 var _syncReconcileInProgress = false;
@@ -11680,20 +11681,20 @@ function autoCheckInContinue() {
     return label && label.textContent ? label.textContent.trim() : '实时预览';
   }
 
-  function updateMdFloatPreview(el, html){
+  function updateMdFloatPreview(el, html, caretMarker){
     if(!_mdFloatMode) return;
     var box = ensureMdFloatPreview();
     var body = document.getElementById('mdFloatBody');
     var title = document.getElementById('mdFloatTitle');
     _mdFloatSource = el || _mdFloatSource;
     if(title) title.textContent = _inputPreviewLabel(_mdFloatSource);
+    box.style.display = html ? 'flex' : 'none';
     if(body) {
       body.innerHTML = html || '';
       renderMath(body);
       enableTaskListCheckboxes(body, _mdFloatSource);
-      syncPreviewScrollToCaret(body,_mdFloatSource);
+      syncPreviewScrollToCaret(body,_mdFloatSource,caretMarker);
     }
-    box.style.display = html ? 'flex' : 'none';
     if(html) clampMdFloatToViewport(box);
   }
 
@@ -11703,17 +11704,50 @@ function autoCheckInContinue() {
   }
   function _previewCaretRatio(sourceEl){
     if(!sourceEl||typeof sourceEl.selectionStart!=='number')return null;
-    var text=String(sourceEl.value||''), before=text.slice(0,sourceEl.selectionStart);
-    var totalLines=Math.max(1,text.split('\n').length), line=Math.max(0,before.split('\n').length-1);
-    return totalLines<=1?(text.length?sourceEl.selectionStart/text.length:0):line/(totalLines-1);
+    var text=String(sourceEl.value||'');
+    return text.length?Math.max(0,Math.min(1,sourceEl.selectionStart/text.length)):0;
   }
-  function syncPreviewScrollToCaret(container,sourceEl){
+  function _installPreviewCaretAnchor(container,marker){
+    if(!container||!marker)return null;
+    var doc=container.ownerDocument||document;
+    var walker=doc.createTreeWalker(container,NodeFilter.SHOW_TEXT),node;
+    while((node=walker.nextNode())){
+      if(!node.nodeValue||node.nodeValue.indexOf(marker)<0)continue;
+      var parent=node.parentElement;
+      if(parent&&parent.closest&&parent.closest('.katex-mathml,script,style'))continue;
+      var index=node.nodeValue.indexOf(marker),before=node.nodeValue.slice(0,index),after=node.nodeValue.slice(index+marker.length);
+      var anchor=doc.createElement('span');anchor.className='md-caret-anchor';anchor.setAttribute('aria-hidden','true');
+      var fragment=doc.createDocumentFragment();
+      if(before)fragment.appendChild(doc.createTextNode(before));fragment.appendChild(anchor);if(after)fragment.appendChild(doc.createTextNode(after));
+      node.parentNode.replaceChild(fragment,node);
+      return anchor;
+    }
+    return null;
+  }
+  function syncPreviewScrollToCaret(container,sourceEl,marker){
     if(!container||!sourceEl||document.activeElement!==sourceEl)return;
+    var anchor=_installPreviewCaretAnchor(container,marker);
+    if(anchor&&container.clientHeight){
+      var containerRect=container.getBoundingClientRect(),anchorRect=anchor.getBoundingClientRect();
+      var anchorTop=container.scrollTop+anchorRect.top-containerRect.top;
+      container.scrollTop=Math.max(0,Math.round(anchorTop-container.clientHeight*.45));
+      return;
+    }
     var ratio=_previewCaretRatio(sourceEl); if(ratio===null)return;
     var max=Math.max(0,container.scrollHeight-container.clientHeight);
     container.scrollTop=Math.round(max*Math.max(0,Math.min(1,ratio)));
   }
   window.syncPreviewScrollToCaret=syncPreviewScrollToCaret;
+
+  function _previewRenderPayload(value,sourceEl){
+    var source=String(value||''),marker='';
+    if(sourceEl&&document.activeElement===sourceEl&&typeof sourceEl.selectionStart==='number'){
+      marker='\uE000WF_CARET_'+Date.now()+'\uE001';
+      source=source.slice(0,sourceEl.selectionStart)+marker+source.slice(sourceEl.selectionStart);
+    }
+    var html=typeof window._renderMDMaybe==='function'?window._renderMDMaybe(source):renderMDMath(source);
+    return {html:html,marker:marker};
+  }
 
   function enableTaskListCheckboxes(container, sourceEl){
     if(!container||!sourceEl)return;
@@ -11795,12 +11829,12 @@ function autoCheckInContinue() {
     _mdPopoutWindow=window.open('','workflow_md_preview','popup=yes,width=620,height=720,resizable=yes,scrollbars=yes');
     if(!_mdPopoutWindow){showToast('请允许浏览器弹出独立预览窗口','warn');return null;}
     _mdPopoutWindow.document.open();
-    _mdPopoutWindow.document.write('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta id="previewThemeColor" name="theme-color" content=""><title>'+esc(title||'实时预览')+'</title><style>'+
+    _mdPopoutWindow.document.write('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta id="previewThemeColor" name="theme-color" content=""><title>'+esc(title||'实时预览')+'</title><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"><style>'+
       '*,*::before,*::after{box-sizing:border-box}html,body{height:100%;margin:0}html{background:var(--bg);color-scheme:light}body{overflow:hidden;color:var(--text);background:linear-gradient(180deg,color-mix(in srgb,var(--primary) 7%,transparent),transparent 240px),var(--bg);transition:background var(--t),color var(--t)}'+
       'header{height:48px;display:flex;align-items:center;position:sticky;top:0;z-index:2;padding:0 16px;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;font-size:13px;font-weight:750;letter-spacing:.01em;border-bottom:1px solid color-mix(in srgb,#fff 18%,transparent);box-shadow:var(--shadow-md)}'+
       'main{height:calc(100vh - 76px);margin:14px;padding:16px 18px;overflow:auto;overscroll-behavior:contain;line-height:1.75;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);word-break:break-word;overflow-wrap:anywhere;scrollbar-gutter:stable}'+
       'main>*{max-width:100%}p{margin:0 0 7px}p:last-child{margin-bottom:0}h1,h2,h3,h4,h5,h6{margin:12px 0 7px;color:var(--text);line-height:1.35}h1:first-child,h2:first-child,h3:first-child{margin-top:0}ul,ol{margin:5px 0 8px;padding-left:24px;list-style-position:outside}li{margin:2px 0;padding-left:2px}blockquote{margin:8px 0;padding:7px 11px;border-left:3px solid var(--primary);border-radius:var(--radius-xs);background:var(--surface2);color:var(--text2)}hr{border:0;border-top:1px solid var(--border);margin:10px 0}a{color:var(--primary)}'+
-      'input[type=checkbox]{width:16px;height:16px;margin-right:6px;vertical-align:-2px;accent-color:var(--primary);cursor:pointer}code{padding:1px 4px;border-radius:4px;background:var(--surface2);color:var(--text);font-family:"Fira Code","Consolas",monospace;font-size:.9em}pre{max-width:100%;margin:8px 0;padding:11px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid var(--border);border-radius:var(--radius-xs);background:var(--surface2)}pre code{padding:0;border:0;background:transparent}table{display:block;width:100%;max-width:100%;margin:8px 0;overflow-x:auto;border-collapse:collapse}td,th{padding:5px 7px;border:1px solid var(--border);text-align:left}th{background:var(--surface2)}.math-fallback{padding:0 4px;color:var(--text);background:var(--surface2);border:1px solid var(--border);border-radius:4px;font-family:Georgia,"Times New Roman",serif;font-style:italic}.math-fallback.display{display:block;margin:7px 0;padding:8px;text-align:center}.preview-empty{color:var(--text3)}'+
+      'input[type=checkbox]{width:16px;height:16px;margin-right:6px;vertical-align:-2px;accent-color:var(--primary);cursor:pointer}code{padding:1px 4px;border-radius:4px;background:var(--surface2);color:var(--text);font-family:"Fira Code","Consolas",monospace;font-size:.9em}pre{max-width:100%;margin:8px 0;padding:11px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid var(--border);border-radius:var(--radius-xs);background:var(--surface2)}pre code{padding:0;border:0;background:transparent}table{display:block;width:100%;max-width:100%;margin:8px 0;overflow-x:auto;border-collapse:collapse}td,th{padding:5px 7px;border:1px solid var(--border);text-align:left}th{background:var(--surface2)}.md-caret-anchor{display:inline-block;width:0;height:1em;overflow:hidden;vertical-align:text-bottom;pointer-events:none}.katex .katex-mathml{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}.math-fallback{padding:0 4px;color:var(--text);background:var(--surface2);border:1px solid var(--border);border-radius:4px;font-family:Georgia,"Times New Roman",serif;font-style:italic}.math-fallback.display{display:block;margin:7px 0;padding:8px;text-align:center}.preview-empty{color:var(--text3)}'+
       '@media(max-width:520px){header{height:44px;padding:0 12px}main{height:calc(100vh - 60px);margin:8px;padding:12px;border-radius:var(--radius-sm)}}'+
       '</style></head><body><header id="previewTitle">'+esc(title||'实时预览')+'</header><main id="previewBody"></main></body></html>');
     _mdPopoutWindow.document.close();
@@ -11808,13 +11842,13 @@ function autoCheckInContinue() {
     return _mdPopoutWindow;
   }
 
-  function updateMdPopoutPreview(el,html){
+  function updateMdPopoutPreview(el,html,caretMarker){
     if(!_mdPopoutWindow||_mdPopoutWindow.closed||_mdPopoutSource!==el)return;
     var body=_mdPopoutWindow.document.getElementById('previewBody');
     var title=_mdPopoutWindow.document.getElementById('previewTitle');
     _applyPopoutTheme();
     if(title)title.textContent=_inputPreviewLabel(el);
-    if(body){body.innerHTML=html||'<div class="preview-empty">暂无可预览内容</div>';enableTaskListCheckboxes(body,el);syncPreviewScrollToCaret(body,el);}
+    if(body){body.innerHTML=html||'<div class="preview-empty">暂无可预览内容</div>';if(html)renderMath(body);enableTaskListCheckboxes(body,el);syncPreviewScrollToCaret(body,el,caretMarker);}
   }
 
   function openMdPopoutPreview(el){
@@ -11984,17 +12018,17 @@ function autoCheckInContinue() {
         if(_mdFloatSource === el) updateMdFloatPreview(el, '');
         return;
       }
-      var rendered = typeof window._renderMDMaybe === 'function' ? window._renderMDMaybe(val) : renderMDMath(val);
-      updateMdPopoutPreview(el, rendered);
+      var payload=_previewRenderPayload(val,el),rendered=payload.html;
+      updateMdPopoutPreview(el, rendered, payload.marker);
       if(_mdFloatMode) {
         preview.style.display = 'none';
-        if(shouldUpdateMdFloat(el)) updateMdFloatPreview(el, rendered);
+        if(shouldUpdateMdFloat(el)) updateMdFloatPreview(el, rendered, payload.marker);
       } else {
+        preview.style.display = 'block';
         previewBody.innerHTML = rendered;
         renderMath(previewBody);
         enableTaskListCheckboxes(previewBody, el);
-        syncPreviewScrollToCaret(previewBody,el);
-        preview.style.display = 'block';
+        syncPreviewScrollToCaret(previewBody,el,payload.marker);
       }
     }
     el._mdUpdate = update;
@@ -12252,9 +12286,9 @@ window.handleImportFile = function(event) {
 
 <!--
 workflow_tool build
-version: 2026.07.22.4
-sourceSha256: ea6902c66cbeebdf972e6e65c7f541c98034b6976153ec1c22d6264fb102e031
-configSha256: 6237b9f9bf9e9bdde899c034f93803fe4e1c6d16bdc3102d16d0a5da30290d72
+version: 2026.07.22.6
+sourceSha256: 836a5fb18331c83b8f123ccec18097f0b5a430f74bcc8f7b173caf252fae2e37
+configSha256: ab5fe172c356f0b9deaf74754aa506dfb305c09235e7185d41733c66fb310511
 coreSha256: 17345b376379086f943fd33757852f4a36323e560dfe6120e08c268e9421d83e
 appSha256: 2f24aa03f02a5b051051aad95e186b81abef342d0af6958c66b79307c3dc0db3
 exportSha256: 13ad148412f079c37fed48892779a4c15a69b986b274bf432dd0506e64c0fa2a
@@ -12263,5 +12297,5 @@ historySha256: d2d96792bc489871e1e12fdf2483793e1781fec5835bae872974bc6b66894a79
 tasksSha256: cf7b1e78be5c87a40720433883aa80f4c8e36fe389400e217af9bb744ad8a590
 researchSha256: 7f18bf83e2678ea03658117f346225a9af8304668c9f622903770f0292e2c5a8
 stylesSha256: 438038ffa6949e8cb705df0dbad8d9a17ed29abd17f0c072fc70f88118cf55be
-builtAt: 2026-07-22T04:56:16.204Z
+builtAt: 2026-07-22T05:17:36.737Z
 -->
