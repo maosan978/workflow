@@ -1061,11 +1061,19 @@ body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between
 .md-preview-float-btn svg{width:13px;height:13px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;display:block}
 .md-preview-body{padding:8px 12px;box-sizing:border-box;overflow-wrap:anywhere;max-height:180px;overflow-y:auto;scrollbar-gutter:stable}
 .md-preview-actions{display:flex;align-items:center;gap:5px}
-.md-preview-popout-btn{width:22px;height:22px;border:1px solid var(--border);border-radius:50%;background:var(--surface);color:var(--text3);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;flex:0 0 auto}
+.md-preview-popout-btn{min-width:22px;height:22px;border:1px solid var(--border);border-radius:999px;background:var(--surface);color:var(--text3);display:inline-flex;align-items:center;justify-content:center;gap:3px;cursor:pointer;padding:0 6px;flex:0 0 auto;font-size:10px;font-weight:700}
 .md-preview-popout-btn:hover{border-color:var(--primary-light);color:var(--primary);background:var(--primary-bg)}
-.md-preview input.task-list-item-checkbox,.wf-export-md input.task-list-item-checkbox{width:15px;height:15px;margin-right:6px;vertical-align:-2px;accent-color:var(--primary);cursor:pointer}
+.md-preview input.task-list-item-checkbox,.note-reading-preview input.task-list-item-checkbox,.wf-export-md input.task-list-item-checkbox{width:15px;height:15px;margin-right:6px;vertical-align:-2px;accent-color:var(--primary);cursor:pointer}
 .work-time-card{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0 14px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-xs)}
 .work-time-card label{display:block;font-size:11px;color:var(--text3);margin-bottom:4px}.work-time-card input{width:100%;min-width:0}
+.today-work-time{position:relative;overflow:hidden;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px 12px;padding:14px;background:linear-gradient(135deg,var(--surface) 0%,var(--primary-bg) 145%);border-color:color-mix(in srgb,var(--primary) 24%,var(--border));box-shadow:var(--shadow);}
+.today-work-time:before{content:"";position:absolute;width:120px;height:120px;border-radius:50%;right:-60px;top:-72px;background:color-mix(in srgb,var(--primary) 10%,transparent);pointer-events:none}
+.work-time-head{grid-column:1/-1;display:flex;align-items:center;gap:10px;padding-bottom:3px}
+.work-time-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:var(--primary);color:#fff;box-shadow:0 5px 14px color-mix(in srgb,var(--primary) 28%,transparent);font-size:16px;flex:0 0 auto}
+.work-time-title{font-size:13px;font-weight:750;color:var(--text);line-height:1.35}.work-time-sub{font-size:10px;color:var(--text4);margin-top:2px}
+.work-time-item{padding:9px 10px;background:color-mix(in srgb,var(--surface) 86%,transparent);border:1px solid var(--border);border-radius:var(--radius-sm);min-width:0}
+.work-time-input{display:flex;align-items:center;gap:6px}.work-time-input input{border:0!important;background:transparent!important;padding:4px 0!important;font-size:18px;font-weight:750;color:var(--text);box-shadow:none!important}.work-time-unit{font-size:10px;color:var(--text4);white-space:nowrap}
+.wk-jump{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;margin:-4px 0 14px}.wk-jump label{font-size:11px;color:var(--text3);font-weight:600}.wk-jump input{width:auto;min-width:148px;padding:6px 8px;font-size:12px}
 .pin-btn.active{color:var(--warn);border-color:var(--warn);background:var(--warn-bg)}
 .pinned-item{border-color:var(--warn)!important;box-shadow:0 0 0 1px var(--warn-bg)}
 .weekly-history-card{margin:8px 0 10px;padding:10px 12px;border:1px solid var(--primary-light);border-left:4px solid var(--primary);border-radius:var(--radius-sm);background:var(--primary-bg);font-size:12px;color:var(--text2)}
@@ -1200,7 +1208,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   else root.WorkflowConfig = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
   return {
-    appVersion: '2026.07.22.1',
+    appVersion: '2026.07.22.2',
     schemaVersion: 5,
     typeLabels: {
       general: '通用',
@@ -1936,6 +1944,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
 
       <div class="hdr-group">
         <button class="hdr-icon-btn" onclick="quickBackup()" title="本地备份">💾</button>
+        <button class="hdr-icon-btn" onclick="openStorageManagerModal()" title="存储与缓存管理" aria-label="打开存储与缓存管理">🧹</button>
         <button class="hdr-icon-btn" onclick="openExportModal()" title="导出">📤</button>
         <button class="hdr-icon-btn" onclick="document.getElementById('importFileInput').click()" title="导入">📥</button>
       </div>
@@ -2005,9 +2014,10 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
     <button class="btn btn-secondary btn-xs" id="focusModeBtn" onclick="toggleFocusMode()" title="只保留晨间、任务和晚间区域"><span class="ico">◎</span>专注</button>
     <button class="btn btn-secondary btn-xs" onclick="enterLowEnergyMode()" title="低能量时只完成一句日志"><span class="ico">－</span>低能量</button>
   </div>
-  <div class="work-time-card" id="workTimeCard">
-    <div><label for="yesterdayActualHours">昨日实际工作时间（小时）</label><input type="number" id="yesterdayActualHours" min="0" max="24" step="0.5" placeholder="例如 6.5" oninput="saveWorkTime()"></div>
-    <div><label for="todayExpectedHours">今日预期工作时间（小时）</label><input type="number" id="todayExpectedHours" min="0" max="24" step="0.5" placeholder="例如 8" oninput="saveWorkTime()"></div>
+  <div class="work-time-card today-work-time" id="workTimeCard">
+    <div class="work-time-head"><span class="work-time-icon" aria-hidden="true">◷</span><div><div class="work-time-title">工作时间</div><div class="work-time-sub">回看昨天的投入，为今天留出可信的时间边界</div></div></div>
+    <div class="work-time-item"><label for="yesterdayActualHours">昨日实际</label><div class="work-time-input"><input type="number" id="yesterdayActualHours" min="0" max="24" step="0.5" placeholder="6.5" oninput="saveWorkTime()"><span class="work-time-unit">小时</span></div></div>
+    <div class="work-time-item"><label for="todayExpectedHours">今日预期</label><div class="work-time-input"><input type="number" id="todayExpectedHours" min="0" max="24" step="0.5" placeholder="8" oninput="saveWorkTime()"><span class="work-time-unit">小时</span></div></div>
   </div>
 
   <div id="dailyQuote" class="daily-quote"><span class="daily-quote-text" id="dailyQuoteText"></span></div>
@@ -2226,6 +2236,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
     <span id="wkRangeLabel" style="font-size:13px;font-weight:600;color:var(--text2);min-width:150px;text-align:center"></span>
     <button class="btn btn-secondary btn-sm" id="wkNextBtn" onclick="wkNav(1)" title="下一周">下周<span class="ico">→</span></button>
   </div>
+  <div class="wk-jump"><label for="wkDatePicker">按日期查找周复盘</label><input type="date" id="wkDatePicker" onchange="jumpToWeek(this.value)"><button class="btn btn-secondary btn-xs" onclick="jumpToCurrentWeek()">回到本周</button></div>
   <div class="wk-summary" id="wkSummary"></div>
   <div class="card">
     <div class="card-title">🔍 本周我真正理解了什么？</div>
@@ -2466,6 +2477,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
         <tr><td>📁 项目标签</td><td>点击任务卡片右上角 📁</td><td>为任务添加项目标签（如 YbNi4P2、LuNi4P2），支持按项目过滤，历史详情中显示</td></tr>
         <tr><td><span class="checkin-task-icon is-active" aria-hidden="true">🎯</span> 打卡任务</td><td>任务卡片右上角的靶心打卡按钮</td><td>带绿色勾的靶心表示已设为打卡任务；完成时可选"当日完成"（明天自动续接）或"完全完成"（彻底结束）。取消只暂停打卡属性并保留原创建时间、连续天数和历史，再次设置会恢复原记录</td></tr>
         <tr><td>日 / 周 / 月 / 年视图</td><td>历史标签顶部视图切换</td><td>按不同时间尺度浏览记录；所有视图都可点具体日期进入详情和编辑，批量操作时使用日视图</td></tr>
+        <tr><td>查找旧周复盘</td><td>本周复盘 → 按日期查找周复盘</td><td>选择目标周内任意一天即可直接跳转，不需要连续点击“上周”；“回到本周”可一键复位</td></tr>
         <tr><td>🧭 历史补偿</td><td>历史详情 → 编辑</td><td>把昨天的打卡任务改为"当日完成"后，若今天缺少同链任务，会自动补续接到今日</td></tr>
         <tr><td>📋 续未完成</td><td>任务区右上角"续未完成"按钮</td><td>从历史中选择未完成任务添加到今日；优先按续接链归并，旧数据按文字兜底，拖延天数按剩余候选中最早日期计算；支持晨间任务</td></tr>
         <tr><td>🗑️ 历史删除</td><td>历史详情 → 编辑 → 任务右上角删除</td><td>未完成任务会先询问“仅删除这一天”或“不再继续这条任务”；前者只改该日统计，后者还会从“续未完成”候选隐藏同链/旧同名任务</td></tr>
@@ -2474,7 +2486,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
         <tr><td>☀️ 设为晨间</td><td>任务卡片右上角 ☀️；历史编辑中也可用</td><td>将任意任务整体设为晨间目标，原晨间任务整体回到任务列表；晨间支持项目标签、打卡任务和完整字段预览，只在位置和标注上特殊</td></tr>
         <tr><td>➕ 明日任务</td><td>晚间"明天要做的事"字段旁</td><td>将计划直接添加到明天任务清单，可选择5种任务类型</td></tr>
         <tr><td>📐 公式预览</td><td>在输入框中输入 <code>$...$</code></td><td>支持 LaTeX 数学公式（KaTeX）和 Markdown，输入后自动在下方渲染预览</td></tr>
-        <tr><td>▣ 预览小窗</td><td>在任意实时预览框标题栏点击小窗或 ↗</td><td>下方预览固定高度并跟踪最新输入；网页内小窗可拖动缩放，↗ 会打开浏览器独立窗口。Markdown 任务清单可直接勾选并回写原文</td></tr>
+        <tr><td>▣ 预览小窗</td><td>点击网页小窗按钮或“↗ 双屏”</td><td>下方预览按当前光标所在行跟踪；网页内小窗可拖动缩放，“↗ 双屏”会打开真正的浏览器窗口，可拖到另一块显示器并持续跟随输入</td></tr>
       </table></div>
     </div></div>
   </div>
@@ -2512,6 +2524,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
         <tr><td>手机/平板</td><td>点击屏幕右下角的 <b>📝</b> 浮动按钮（蓝色圆形）</td></tr>
       </table></div>
       <p><b>查看历史小记：</b>切换到"历史"标签，点开任意一天的详情，当天的所有小记会按时间顺序显示在最前面</p>
+      <p><b>清单与双屏：</b>小记阅读态和编辑预览都可以直接勾选 <code>- [ ]</code>，勾选后保持当前项目位置；展开小记后点“↗ 双屏预览”，可把独立窗口拖到第二块显示器。</p>
     </div></div>
   </div>
 
@@ -2557,13 +2570,14 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
       <span class="help-arrow">&#9660;</span>
     </div>
     <div class="help-section-body"><div class="help-section-inner">
-      <p>数据存在浏览器 <span class="help-badge primary">localStorage</span>，关闭标签页不丢失。清空浏览器缓存会删除本地数据。</p>
+      <p>业务数据存在浏览器 <span class="help-badge primary">localStorage</span>，关闭标签页不丢失。“清备份与缓存”只清除本地快照和 PWA Cache Storage，保留日记录、周复盘、小记、设置和云端凭据；浏览器的“清除网站数据”则可能删除业务数据。</p>
       <div style="overflow-x:auto"><table class="help-table">
         <tr><th>操作</th><th>顶部按钮</th><th>说明</th></tr>
         <tr><td>本地备份</td><td>💾（备份）</td><td>下载完整 JSON 数据文件，包含所有历史记录、设置、版本号、生成时间和摘要</td></tr>
         <tr><td>导入恢复</td><td>📥（导入）</td><td>选择备份 JSON，先校验结构和显示摘要，确认后导入并刷新</td></tr>
         <tr><td>导出图片/文档</td><td>📤（导出）</td><td>紧凑弹窗选择内容；可用格式会随导出目标立即变化，不支持的格式会直接禁用</td></tr>
         <tr><td>手动云同步</td><td>🔄（同步）</td><td>立即推送到 GitHub 或 Drive；未配置云端时打开同步详情；快捷键 Ctrl+S</td></tr>
+        <tr><td>清理缓存</td><td>顶部 🧹</td><td>打开“存储管理”后选择“清备份与缓存”；也可在“同步详情”直接点“清缓存”。操作前会再次确认</td></tr>
         <tr><td>同步详情 / 自检</td><td>说明页按钮</td><td>查看 Drive/GitHub 最近状态，运行关键流程自检，可撤销最近高风险操作</td></tr>
         <tr><td>本地快照</td><td>说明页按钮</td><td>保留最近 5 次本地快照，可查看摘要、全部恢复或只恢复某一天</td></tr>
         <tr><td>数据健康</td><td>同步详情按钮</td><td>检查坏 JSON、重复任务 ID、打卡链字段、空小记和体积风险，可导出诊断报告</td></tr>
@@ -2582,6 +2596,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
         <button class="btn btn-secondary btn-sm" onclick="openSyncStatusModal()">同步详情 / 自检</button>
         <button class="btn btn-secondary btn-sm" onclick="openSnapshotsModal()">最近本地快照</button>
         <button class="btn btn-secondary btn-sm" onclick="openDataHealthModal()">数据健康检查</button>
+        <button class="btn btn-secondary btn-sm" onclick="openStorageManagerModal()">存储与缓存管理</button>
       </div>
       <p style="color:var(--text3);font-size:12px;margin-top:8px">最佳实践：配置 GitHub 或 Drive 同步，数据自动备份到云端；重大编辑和云端恢复前会保留最近 5 次本地快照，同时定期用 💾 导出 JSON 作为离线备份。</p>
     </div></div>
@@ -2755,6 +2770,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
       <button class="btn btn-secondary btn-sm" onclick="undoLastRiskyChange()"><span class="ico">↶</span>撤销</button>
       <button class="btn btn-secondary btn-sm" onclick="openArchiveModal()"><span class="ico">🗄</span>归档</button>
       <button class="btn btn-secondary btn-sm" onclick="openStorageManagerModal()"><span class="ico">💽</span>存储</button>
+      <button class="btn btn-danger btn-sm" onclick="clearLocalBackupsAndCache()"><span class="ico">🧽</span>清缓存</button>
       <button class="btn btn-secondary btn-sm" onclick="openErrorLogModal()"><span class="ico">⚠</span>错误</button>
       <button class="btn btn-secondary btn-sm" onclick="clearSyncCredentials()"><span class="ico">🔑</span>凭据</button>
       <button class="btn btn-secondary btn-sm" onclick="openDataHealthModal()"><span class="ico">🩺</span>健康</button>
@@ -3072,7 +3088,7 @@ var driveFileId = localStorage.getItem('drive_file_id') || null;
 var accessToken = null;
 var syncInProgress = false;
 var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 5;
-var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.07.22.1';
+var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.07.22.2';
 
 var tokenClient = null;
 var _syncReconcileInProgress = false;
@@ -9404,12 +9420,23 @@ function renderWkNav(){
   }
   var nextBtn = document.getElementById('wkNextBtn');
   if(nextBtn){ nextBtn.disabled = _wkOffset>=0; nextBtn.style.opacity = _wkOffset>=0?'.4':'1'; nextBtn.style.pointerEvents = _wkOffset>=0?'none':'auto'; }
+  var picker=document.getElementById('wkDatePicker');
+  if(picker)picker.value=localDateStr(mon);
 }
 window.wkNav = function(dir){
   if(_wkOffset+dir>0) return; // 不能看未来
   _wkOffset += dir;
   initWeekly();
 };
+window.jumpToWeek = function(dateValue){
+  if(!dateValue)return;
+  var selected=parseDateLocal(dateValue), selectedMon=_mondayForDate(selected), currentMon=_mondayForDate(new Date());
+  var diff=Math.round((selectedMon.getTime()-currentMon.getTime())/(7*24*60*60*1000));
+  if(diff>0){showToast('未来周暂不提供复盘编辑','info');diff=0;}
+  _wkOffset=diff;
+  initWeekly();
+};
+window.jumpToCurrentWeek = function(){_wkOffset=0;initWeekly();};
 
 window.renderWeeklySummary = function(){
   var monday = _wkMonday();
@@ -9735,15 +9762,16 @@ window.renderNotes = function(){
         '</div>'+
       '</div>'+
       '<div id="note_body_'+_exH(n.id)+'" style="display:'+(isExpanded?'block':'none')+'">'+
-        '<div id="note_render_'+_exH(n.id)+'" class="math-preview" style="display:'+(isEditing?'none':'block')+';font-size:13px;color:var(--text);line-height:1.7;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-xs);padding:10px 12px;word-break:break-word">'+rendered+'</div>'+
+        '<div id="note_render_'+_exH(n.id)+'" data-note-id="'+_exH(n.id)+'" class="math-preview note-reading-preview" style="display:'+(isEditing?'none':'block')+';font-size:13px;color:var(--text);line-height:1.7;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-xs);padding:10px 12px;word-break:break-word">'+rendered+'</div>'+
         '<div class="field" id="note_edit_'+_exH(n.id)+'" style="display:'+(isEditing?'block':'none')+';margin-top:6px">'+
           '<textarea id="note_'+_exH(n.id)+'" class="note-textarea" oninput="saveNote(\''+_exH(n.id)+'\')">'+_exH(n.content||'')+'</textarea>'+
         '</div>'+
-        '<div style="text-align:right;margin-top:6px;display:flex;gap:6px;justify-content:flex-end"><button class="btn btn-secondary btn-xs pin-btn '+(n.pinned?'active':'')+'" onclick="toggleNotePin(\''+_exH(n.id)+'\')" title="'+(n.pinned?'取消置顶':'置顶小记')+'">📌 '+(n.pinned?'已置顶':'置顶')+'</button><button class="btn btn-secondary btn-xs" onclick="toggleNoteEdit(\''+_exH(n.id)+'\')" title="编辑小记">'+(isEditing?'预览':'编辑')+'</button><button class="btn btn-danger btn-xs" onclick="deleteNote(\''+_exH(n.id)+'\')" title="删除">🗑️</button></div>'+
+        '<div style="text-align:right;margin-top:6px;display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap"><button class="btn btn-secondary btn-xs pin-btn '+(n.pinned?'active':'')+'" onclick="toggleNotePin(\''+_exH(n.id)+'\')" title="'+(n.pinned?'取消置顶':'置顶小记')+'">📌 '+(n.pinned?'已置顶':'置顶')+'</button><button class="btn btn-secondary btn-xs" onclick="openNotePopoutPreview(\''+_exH(n.id)+'\')" title="把预览移到独立浏览器窗口，可拖到另一块显示器">↗ 双屏预览</button><button class="btn btn-secondary btn-xs" onclick="toggleNoteEdit(\''+_exH(n.id)+'\')" title="编辑小记">'+(isEditing?'预览':'编辑')+'</button><button class="btn btn-danger btn-xs" onclick="deleteNote(\''+_exH(n.id)+'\')" title="删除">🗑️</button></div>'+
       '</div>'+
     '</div>';
   }).join('');
   if (typeof window.renderMath === 'function') window.renderMath(list);
+  if(typeof window.bindStaticNoteChecklists==='function')window.bindStaticNoteChecklists(list);
   // 编辑态绑定输入预览
   setTimeout(function(){
     document.querySelectorAll('.note-card .note-textarea').forEach(function(el){
@@ -9920,6 +9948,7 @@ window.saveNote = function(id){
       rendered.innerHTML = _renderMDMaybe(note.content || '');
       if(typeof window.renderMath === 'function') window.renderMath(rendered);
     }
+    if(typeof window.refreshNotePopout==='function')window.refreshNotePopout(id);
     flash();
   } catch(e){}
 };
@@ -11350,6 +11379,7 @@ function autoCheckInContinue() {
   var _mdFloatMode = localStorage.getItem('wf_md_float_mode') === '1';
   var _mdFloatSource = null;
   var _mdPopoutSource = null;
+  var _mdPopoutNoteId = '';
   var _mdPopoutWindow = null;
   var _mdFloatResizeObserver = null;
 
@@ -11540,23 +11570,88 @@ function autoCheckInContinue() {
       body.innerHTML = html || '';
       renderMath(body);
       enableTaskListCheckboxes(body, _mdFloatSource);
-      body.scrollTop = body.scrollHeight;
+      syncPreviewScrollToCaret(body,_mdFloatSource);
     }
     box.style.display = html ? 'flex' : 'none';
     if(html) clampMdFloatToViewport(box);
   }
+
+  function _replaceTaskListState(text,index,checked){
+    var seen=-1;
+    return String(text||'').replace(/(^|\n)(\s*[-*]\s+)\[([ xX])\]/g,function(all,start,prefix){seen++;return seen===index?start+prefix+'['+(checked?'x':' ')+']':all;});
+  }
+  function _previewCaretRatio(sourceEl){
+    if(!sourceEl||typeof sourceEl.selectionStart!=='number')return null;
+    var text=String(sourceEl.value||''), before=text.slice(0,sourceEl.selectionStart);
+    var totalLines=Math.max(1,text.split('\n').length), line=Math.max(0,before.split('\n').length-1);
+    return totalLines<=1?(text.length?sourceEl.selectionStart/text.length:0):line/(totalLines-1);
+  }
+  function syncPreviewScrollToCaret(container,sourceEl){
+    if(!container||!sourceEl||document.activeElement!==sourceEl)return;
+    var ratio=_previewCaretRatio(sourceEl); if(ratio===null)return;
+    var max=Math.max(0,container.scrollHeight-container.clientHeight);
+    container.scrollTop=Math.round(max*Math.max(0,Math.min(1,ratio)));
+  }
+  window.syncPreviewScrollToCaret=syncPreviewScrollToCaret;
 
   function enableTaskListCheckboxes(container, sourceEl){
     if(!container||!sourceEl)return;
     Array.prototype.slice.call(container.querySelectorAll('input[type="checkbox"]')).forEach(function(box,index){
       box.disabled=false; box.classList.add('task-list-item-checkbox');
       box.onchange=function(){
-        var seen=-1;
-        sourceEl.value=String(sourceEl.value||'').replace(/(^|\n)(\s*[-*]\s+)\[([ xX])\]/g,function(all,start,prefix,state){seen++;return seen===index?start+prefix+'['+(box.checked?'x':' ')+']':all;});
+        var oldScroll=container.scrollTop, start=sourceEl.selectionStart, end=sourceEl.selectionEnd;
+        sourceEl.value=_replaceTaskListState(sourceEl.value,index,box.checked);
+        if(typeof start==='number'&&sourceEl.setSelectionRange)sourceEl.setSelectionRange(start,end);
         sourceEl.dispatchEvent(new Event('input',{bubbles:true}));
         sourceEl.dispatchEvent(new Event('change',{bubbles:true}));
+        requestAnimationFrame(function(){container.scrollTop=oldScroll;var next=container.querySelectorAll('input[type="checkbox"]')[index];if(next)next.scrollIntoView({block:'nearest'});});
       };
     });
+  }
+
+  function _readNote(id){try{return JSON.parse(localStorage.getItem('wf_note_'+id)||'{}');}catch(e){return {};}}
+  function _renderStaticNoteContainer(container,id,content,scrollTop){
+    if(!container)return;
+    container.innerHTML=typeof window._renderMDMaybe==='function'?window._renderMDMaybe(content||''):renderMDMath(content||'');
+    renderMath(container);
+    enableStaticNoteChecklist(container,id);
+    if(typeof scrollTop==='number')container.scrollTop=scrollTop;
+  }
+  function _refreshNotePreviewSurfaces(id,preserve){
+    var note=_readNote(id), main=document.getElementById('note_render_'+id);
+    if(main)_renderStaticNoteContainer(main,id,note.content||'',main.scrollTop);
+    if(_mdPopoutNoteId===String(id)&&_mdPopoutWindow&&!_mdPopoutWindow.closed){
+      var body=_mdPopoutWindow.document.getElementById('previewBody');
+      if(body)_renderStaticNoteContainer(body,id,note.content||'',preserve&&preserve.popupScroll);
+    }
+  }
+  function enableStaticNoteChecklist(container,id){
+    if(!container||!id)return;
+    Array.prototype.slice.call(container.querySelectorAll('input[type="checkbox"]')).forEach(function(box,index){
+      box.disabled=false;box.classList.add('task-list-item-checkbox');
+      box.onchange=function(){
+        var panel=document.querySelector('.notes-panel-body'), panelScroll=panel?panel.scrollTop:0;
+        var popupBody=_mdPopoutWindow&&!_mdPopoutWindow.closed?_mdPopoutWindow.document.getElementById('previewBody'):null;
+        var note=_readNote(id);note.content=_replaceTaskListState(note.content||'',index,box.checked);note.timestamp=note.timestamp||Date.now();
+        localStorage.setItem('wf_note_'+id,JSON.stringify(note));
+        _refreshNotePreviewSurfaces(id,{popupScroll:popupBody?popupBody.scrollTop:0});
+        requestAnimationFrame(function(){if(panel)panel.scrollTop=panelScroll;});
+        flash();
+      };
+    });
+  }
+  window.bindStaticNoteChecklists=function(root){
+    (root||document).querySelectorAll('.note-reading-preview[data-note-id]').forEach(function(el){enableStaticNoteChecklist(el,el.getAttribute('data-note-id'));});
+  };
+  window.refreshNotePopout=function(id){_refreshNotePreviewSurfaces(String(id));};
+
+  function _openPopoutShell(title){
+    _mdPopoutWindow=window.open('','workflow_md_preview','popup=yes,width=620,height=720,resizable=yes,scrollbars=yes');
+    if(!_mdPopoutWindow){showToast('请允许浏览器弹出独立预览窗口','warn');return null;}
+    _mdPopoutWindow.document.open();
+    _mdPopoutWindow.document.write('<!doctype html><html><head><meta charset="utf-8"><title>'+esc(title||'实时预览')+'</title><style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f8fafc;color:#0f172a}header{position:sticky;top:0;padding:12px 16px;background:#4f46e5;color:white;font-weight:700}main{padding:18px;line-height:1.75;height:calc(100vh - 48px);overflow:auto;box-sizing:border-box}input[type=checkbox]{width:16px;height:16px;accent-color:#4f46e5;cursor:pointer}pre{white-space:pre-wrap;background:#e2e8f0;padding:10px;border-radius:8px}table{border-collapse:collapse}td,th{border:1px solid #cbd5e1;padding:5px}</style></head><body><header id="previewTitle">'+esc(title||'实时预览')+'</header><main id="previewBody"></main></body></html>');
+    _mdPopoutWindow.document.close();
+    return _mdPopoutWindow;
   }
 
   function updateMdPopoutPreview(el,html){
@@ -11564,19 +11659,22 @@ function autoCheckInContinue() {
     var body=_mdPopoutWindow.document.getElementById('previewBody');
     var title=_mdPopoutWindow.document.getElementById('previewTitle');
     if(title)title.textContent=_inputPreviewLabel(el);
-    if(body){body.innerHTML=html||'<div style="color:#94a3b8">暂无可预览内容</div>';enableTaskListCheckboxes(body,el);body.scrollTop=body.scrollHeight;}
+    if(body){body.innerHTML=html||'<div style="color:#94a3b8">暂无可预览内容</div>';enableTaskListCheckboxes(body,el);syncPreviewScrollToCaret(body,el);}
   }
 
   function openMdPopoutPreview(el){
     _mdPopoutSource=el;
-    _mdPopoutWindow=window.open('','workflow_md_preview','popup=yes,width=620,height=720,resizable=yes,scrollbars=yes');
-    if(!_mdPopoutWindow){showToast('请允许浏览器弹出独立预览窗口','warn');return;}
-    _mdPopoutWindow.document.open();
-    _mdPopoutWindow.document.write('<!doctype html><html><head><meta charset="utf-8"><title>实时预览</title><style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f8fafc;color:#0f172a}header{position:sticky;top:0;padding:12px 16px;background:#4f46e5;color:white;font-weight:700}main{padding:18px;line-height:1.75;height:calc(100vh - 48px);overflow:auto;box-sizing:border-box}input[type=checkbox]{width:16px;height:16px;accent-color:#4f46e5}pre{white-space:pre-wrap;background:#e2e8f0;padding:10px;border-radius:8px}table{border-collapse:collapse}td,th{border:1px solid #cbd5e1;padding:5px}</style></head><body><header id="previewTitle">实时预览</header><main id="previewBody"></main></body></html>');
-    _mdPopoutWindow.document.close();
+    _mdPopoutNoteId='';
+    if(!_openPopoutShell(_inputPreviewLabel(el)))return;
     if(typeof el._mdUpdate==='function')el._mdUpdate();
   }
   window.openMdPopoutPreview=openMdPopoutPreview;
+  window.openNotePopoutPreview=function(id){
+    var note=_readNote(id);_mdPopoutSource=null;_mdPopoutNoteId=String(id);
+    if(!_openPopoutShell('随手小记 · 双屏预览'))return;
+    var body=_mdPopoutWindow.document.getElementById('previewBody');
+    _renderStaticNoteContainer(body,String(id),note.content||'',0);
+  };
 
   function refreshMdFloatFromActive(){
     if(!_mdFloatMode) return;
@@ -11698,7 +11796,7 @@ function autoCheckInContinue() {
     preview.innerHTML =
       '<div class="md-preview-head">' +
         '<span class="md-preview-label">预览</span>' +
-        '<span class="md-preview-actions"><button class="md-preview-popout-btn" type="button" title="在独立浏览器窗口中预览" aria-label="独立窗口预览">↗</button><button class="md-preview-float-btn" type="button" title="在网页内小窗中预览" aria-label="网页内小窗预览">' +
+        '<span class="md-preview-actions"><button class="md-preview-popout-btn" type="button" title="打开独立浏览器窗口，可拖到另一块显示器" aria-label="双屏独立窗口预览">↗ 双屏</button><button class="md-preview-float-btn" type="button" title="在网页内小窗中预览" aria-label="网页内小窗预览">' +
           '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/><path d="M9 9h6v6H9z"/></svg>' +
         '</button></span>' +
       '</div>' +
@@ -11734,7 +11832,7 @@ function autoCheckInContinue() {
         previewBody.innerHTML = rendered;
         renderMath(previewBody);
         enableTaskListCheckboxes(previewBody, el);
-        if(document.activeElement===el)previewBody.scrollTop=previewBody.scrollHeight;
+        syncPreviewScrollToCaret(previewBody,el);
         preview.style.display = 'block';
       }
     }
@@ -11993,9 +12091,9 @@ window.handleImportFile = function(event) {
 
 <!--
 workflow_tool build
-version: 2026.07.22.1
-sourceSha256: 3769a69fc5bfc76e8766713ce9b3e4b0607e942d662099791e05548ad1baab84
-configSha256: 6d26a2f65cee3ec1dfe672b83a182000b1587f7a82101a4930b61614c8c50f59
+version: 2026.07.22.2
+sourceSha256: a0b2c8adb65dc7ee437663c92c47af21c579261c06624be96421b35f82f74d3b
+configSha256: b738c7ae40cff73e99699f54a730287a4f29209080f3c1ca2906afc04147d5b0
 coreSha256: 17345b376379086f943fd33757852f4a36323e560dfe6120e08c268e9421d83e
 appSha256: 2f24aa03f02a5b051051aad95e186b81abef342d0af6958c66b79307c3dc0db3
 exportSha256: 13ad148412f079c37fed48892779a4c15a69b986b274bf432dd0506e64c0fa2a
@@ -12004,5 +12102,5 @@ historySha256: d2d96792bc489871e1e12fdf2483793e1781fec5835bae872974bc6b66894a79
 tasksSha256: cf7b1e78be5c87a40720433883aa80f4c8e36fe389400e217af9bb744ad8a590
 researchSha256: 7f18bf83e2678ea03658117f346225a9af8304668c9f622903770f0292e2c5a8
 stylesSha256: 438038ffa6949e8cb705df0dbad8d9a17ed29abd17f0c072fc70f88118cf55be
-builtAt: 2026-07-22T03:40:51.995Z
+builtAt: 2026-07-22T04:08:47.907Z
 -->
