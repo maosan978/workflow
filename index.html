@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<!-- workflow-build:17345b376379086f943fd33757852f4a36323e560dfe6120e08c268e9421d83e -->
+<!-- workflow-build:76c73eb56ca5121ab029881c24491585af0568aced318dc94bab29a03f7c23fb -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <meta name="theme-color" content="#4f46e5">
+<meta name="workflow-version" content="2026.08.12.2">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="工作流">
@@ -87,18 +88,7 @@ input,textarea,select{-webkit-user-select:text;user-select:text}
 .research-chip{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--primary);
   border-radius:var(--radius-sm);padding:8px 10px;box-shadow:var(--shadow-sm);font-size:12px;color:var(--text2)}
 .research-chip b{display:block;color:var(--text);font-size:12px;margin-bottom:2px}
-.growth-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-  padding:14px 16px;margin:12px 0;box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
-.growth-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,var(--primary),var(--accent))}
-.growth-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:8px}
-.growth-title{font-weight:800;font-size:14px;color:var(--text)}
-.growth-sub{font-size:12px;color:var(--text3);line-height:1.6}
-.growth-prompt{font-size:13px;color:var(--text2);line-height:1.7;margin:8px 0 10px}
-.growth-meter{height:7px;background:var(--surface2);border-radius:999px;overflow:hidden}
-.growth-meter span{display:block;height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:999px;transition:width var(--t-slow)}
-.growth-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
 .growth-stat{font-size:11px;color:var(--text3);margin-left:auto}
-.growth-done{background:var(--success-bg);color:var(--success);border:1px solid var(--success-border);padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700}
 .pet-card{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;background:var(--surface);
   border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin:12px 0;box-shadow:var(--shadow-sm)}
 .pet-avatar{width:58px;height:58px;border-radius:18px;display:flex;align-items:center;justify-content:center;
@@ -685,7 +675,7 @@ html.theme-teal.dark .header{background:linear-gradient(135deg,#164e63,#134e4a,#
 .outcome-value{font-size:22px;font-weight:800;color:var(--primary)}
 .outcome-label{font-size:10px;color:var(--text3);margin-top:2px}
 .personal-mode-bar{display:flex;justify-content:flex-end;gap:6px;margin:0 0 8px;flex-wrap:wrap}
-body.focus-mode #dailyQuote,body.focus-mode #researchRibbon,body.focus-mode #growthCard,body.focus-mode #petCard,body.focus-mode #exampleBanner,body.focus-mode #exampleTasks,body.focus-mode #onboardCard,body.focus-mode #metaCard,body.focus-mode #taskEncourageStatic{display:none!important}
+body.focus-mode #dailyQuote,body.focus-mode #researchRibbon,body.focus-mode #petCard,body.focus-mode #exampleBanner,body.focus-mode #exampleTasks,body.focus-mode #onboardCard,body.focus-mode #metaCard,body.focus-mode #taskEncourageStatic{display:none!important}
 body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between,body.focus-mode #pane-today>#taskList,body.focus-mode #pane-today>#projectFilterWrap,body.focus-mode #morningCard,body.focus-mode #eveningCard{display:block}
 .wk-row select{padding:7px 6px;font-size:12px;font-family:inherit;outline:none;background:var(--bg);
   color:var(--text);border:1.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer}
@@ -1184,7 +1174,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
 
 /* ===== Unified Visual Rhythm ===== */
 .content{max-width:760px}
-.card,.task-card,.detail-box,.stat-section,.backup-section,.growth-card,.pet-card{
+.card,.task-card,.detail-box,.stat-section,.backup-section,.pet-card{
   border-color:var(--border);box-shadow:var(--shadow-xs)
 }
 .card,.detail-box,.stat-section{background:var(--surface)}
@@ -1226,8 +1216,8 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   else root.WorkflowConfig = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
   return {
-    appVersion: '2026.07.22.6',
-    schemaVersion: 5,
+    appVersion: '2026.08.12.2',
+    schemaVersion: 6,
     typeLabels: {
       general: '通用',
       calc: '计算前',
@@ -1339,7 +1329,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   function isWorkflowDataKey(k) {
     return k && (k.indexOf('wf_day_') === 0 || k.indexOf('wf_week_') === 0 || k.indexOf('wf_note_') === 0 ||
       k === 'wf_theme' || k === 'wf_color_theme' || k === 'wf_font' || k === 'wf_schema_version' ||
-      k === 'wf_growth_state' || k === 'wf_pet_state' || k === 'wf_continue_hidden' ||
+      k === 'wf_pet_state' || k === 'wf_continue_hidden' ||
       k === 'wf_research_state' || k === 'wf_focus_mode');
   }
 
@@ -1355,7 +1345,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
       else if (k.indexOf('wf_note_') === 0) { out.notes[k] = data[k]; out.rawCount++; }
       else if (isWorkflowDataKey(k)) { out.settings[k] = data[k]; out.rawCount++; }
     });
-    ['theme','colorTheme','font','schemaVersion','growthState','petState','continueHidden','researchState','focusMode'].forEach(function(k) {
+    ['theme','colorTheme','font','schemaVersion','petState','continueHidden','researchState','focusMode'].forEach(function(k) {
       if (data[k] !== undefined) out.settings[k] = data[k];
     });
     return out;
@@ -1367,7 +1357,6 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
       colorTheme: 'wf_color_theme',
       font: 'wf_font',
       schemaVersion: 'wf_schema_version',
-      growthState: 'wf_growth_state',
       petState: 'wf_pet_state',
       continueHidden: 'wf_continue_hidden',
       researchState: 'wf_research_state',
@@ -2044,23 +2033,6 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
     <div class="research-chip"><b><span class="ico">🔬</span>证据</b><span id="chipEvidence">任务完成后记录观察</span></div>
     <div class="research-chip"><b><span class="ico">🧠</span>解释</b><span id="chipReflection">晚上解释差距，而不是责备自己</span></div>
   </div>
-  <div class="growth-card" id="growthCard">
-    <div class="growth-head">
-      <div>
-        <div class="growth-title" id="growthTitle">今日研究微挑战</div>
-        <div class="growth-sub" id="growthSub">每天一个小动作，让成长有具体刻度。</div>
-      </div>
-      <span class="growth-done" id="growthDoneBadge" style="display:none">✓ 已完成</span>
-    </div>
-    <div class="growth-prompt" id="growthPrompt"></div>
-    <div class="growth-meter"><span id="growthMeterFill" style="width:0%"></span></div>
-    <div class="growth-actions">
-      <button class="btn btn-primary btn-xs" id="growthCompleteBtn" onclick="completeGrowthPrompt()"><span class="ico">✓</span>完成</button>
-      <button class="btn btn-secondary btn-xs" id="growthRerollBtn" onclick="rerollGrowthPrompt()"><span class="ico">↻</span>换一个</button>
-      <button class="btn btn-secondary btn-xs" id="growthUndoBtn" onclick="undoGrowthPrompt()" style="display:none"><span class="ico">↶</span>撤销</button>
-      <span class="growth-stat" id="growthStats"></span>
-    </div>
-  </div>
   <div class="pet-card" id="petCard">
     <div class="pet-avatar" id="petAvatar" onclick="interactPet()" title="点一点研究伙伴"></div>
     <div>
@@ -2452,8 +2424,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
       <span class="help-arrow">&#9660;</span>
     </div>
     <div class="help-section-body"><div class="help-section-inner">
-      <p><b>今日研究微挑战：</b>每天自动出现一个小的科研动作，例如写一句假设、记录异常、设计最小复现、补文献坐标。未完成前可以“换一个”；误触完成后可在当天撤销。</p>
-      <p><b>研究伙伴：</b>可选择光谱猫、晶体狐、轨道龙或参数机器人。它会根据当天晨间目标、任务完成、晚间复盘和微挑战完成情况获得成长值，等级提升后形态变化。</p>
+      <p><b>研究伙伴：</b>可选择光谱猫、晶体狐、轨道龙或参数机器人。它会根据当天晨间目标、任务完成和晚间复盘情况获得成长值，等级提升后形态变化。</p>
       <p><b>时段话语：</b>伙伴会根据早晨、中午、下午、晚上、深夜以及特定日期给出不同提醒。它的定位是陪你保持科研节奏，不替代真实记录。</p>
     </div></div>
   </div>
@@ -2497,7 +2468,8 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
         <tr><td>日 / 周 / 月 / 年视图</td><td>历史标签顶部视图切换</td><td>按不同时间尺度浏览记录；所有视图都可点具体日期进入详情和编辑，批量操作时使用日视图</td></tr>
         <tr><td>查找旧周复盘</td><td>本周复盘 → 按日期查找周复盘</td><td>选择目标周内任意一天即可直接跳转，不需要连续点击“上周”；“回到本周”可一键复位</td></tr>
         <tr><td>🧭 历史补偿</td><td>历史详情 → 编辑</td><td>把昨天的打卡任务改为"当日完成"后，若今天缺少同链任务，会自动补续接到今日</td></tr>
-        <tr><td>📋 续未完成</td><td>任务区右上角"续未完成"按钮</td><td>从历史中选择未完成任务添加到今日；优先按续接链归并，旧数据按文字兜底，拖延天数按剩余候选中最早日期计算；支持晨间任务</td></tr>
+        <tr><td>📋 续未完成</td><td>任务区右上角"续未完成"按钮</td><td>从历史中选择未完成任务添加到今日；同链以最新状态为准，后来已完成的不会再出现。可“忽略”候选，或删除该链的未完成历史副本；已完成记录不受影响</td></tr>
+        <tr><td><span class="checkin-task-icon is-active" aria-hidden="true">🎯</span> 跨日续接</td><td>次日或隔日打开今日页</td><td>自动查找每条打卡链的最新状态；即使中间一天没有打开或没有记录，活动中的任务仍会续接，只有“完全完成”或取消打卡才终止</td></tr>
         <tr><td>🗑️ 历史删除</td><td>历史详情 → 编辑 → 任务右上角删除</td><td>未完成任务会先询问“仅删除这一天”或“不再继续这条任务”；前者只改该日统计，后者还会从“续未完成”候选隐藏同链/旧同名任务</td></tr>
         <tr><td>❓ 新问题六步</td><td>创建“遇到新问题”任务</td><td>每一步都有独立思路输入框：现象、极限情况、假设、检验、数据、结论；历史详情和导出会完整显示</td></tr>
         <tr><td>结果沉淀</td><td>任务卡片结果区 → 沉淀到研究地图</td><td>结果仍保留在原日期；研究地图建立项目证据并写入时间线，重复沉淀会更新同一证据</td></tr>
@@ -2644,7 +2616,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
         <tr><th>现象</th><th>处理方式</th></tr>
         <tr><td>同步失败</td><td>打开“同步详情 / 自检”，查看 Drive 或 GitHub 最近状态；GitHub 常见原因是 Token 失效或仓库权限不足。</td></tr>
         <tr><td>多端数据不一致</td><td>出现冲突弹窗时先看本地/云端摘要；一般优先选“合并新增”，不确定时选择“稍后处理”，再导出 JSON 备份。</td></tr>
-        <tr><td>冲突详情看不懂</td><td>冲突详情会尽量显示页面上的名称，例如“晨间任务”“微挑战状态”“价值评估”；如果仍出现内部字段名，可导出冲突报告后再手动比对 JSON。</td></tr>
+        <tr><td>冲突详情看不懂</td><td>冲突详情会尽量显示页面上的名称，例如“晨间任务”“研究伙伴状态”“价值评估”；如果仍出现内部字段名，可导出冲突报告后再手动比对 JSON。</td></tr>
         <tr><td>导入后担心覆盖错</td><td>导入前会自动生成快照；可在“最近本地快照”中全部恢复，或只恢复某一天。</td></tr>
         <tr><td>打卡没有续接</td><td>检查上一天任务是否选择“当日完成”；如果是在历史编辑里补改昨天，保存后会自动补续接到今天。</td></tr>
         <tr><td>删除历史任务后续未完成变化</td><td>选择“仅删除这一天”时，若其他日期仍有同链未完成，拖延天数会从剩余最早日期重新计算；选择“不再继续”时会隐藏这条续接候选，但不删除其他历史日记录。</td></tr>
@@ -2673,7 +2645,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
 </div>
 
 <!-- ===== Tomorrow Task Type Modal ===== -->
-<div class="modal-overlay" id="tomorrowTypeModal" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+<div class="modal-overlay" id="tomorrowTypeModal" style="display:none" onclick="if(event.target===this)closeTomorrowTypeModal()">
   <div class="modal-box" style="max-width:360px;width:95%">
     <div style="font-size:15px;font-weight:700;margin-bottom:4px">选择明日任务类型</div>
     <div style="font-size:12px;color:var(--text3);margin-bottom:14px">标题将自动填入对应字段</div>
@@ -2684,7 +2656,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
       <button class="modal-opt" onclick="_addTomorrowWithType('problem')" style="text-align:left"><b>遇到新问题</b><br><span style="font-size:11px;color:var(--text3)">升级阶梯框架</span></button>
       <button class="modal-opt" onclick="_addTomorrowWithType('decision')" style="text-align:left"><b>下一步决策</b><br><span style="font-size:11px;color:var(--text3)">价值 × 可行性</span></button>
     </div>
-    <button class="btn btn-secondary btn-sm" style="width:100%;margin-top:12px" onclick="document.getElementById('tomorrowTypeModal').style.display='none'"><span class="ico">×</span>取消</button>
+    <button class="btn btn-secondary btn-sm" style="width:100%;margin-top:12px" onclick="closeTomorrowTypeModal()"><span class="ico">×</span>取消</button>
   </div>
 </div>
 
@@ -3093,7 +3065,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   <span style="flex:1"></span>
   <span id="todayBarSaved" class="kbd-hint" style="opacity:.5;font-size:10px">✓ 已自动保存</span>
   <span id="backupTime" class="kbd-hint" style="opacity:.4;font-size:9px"></span>
-  <a href="https://github.com/maosan978" target="_blank" rel="noopener" style="opacity:.3;font-size:9px;color:inherit;text-decoration:none">© 2026</a>
+  <a href="https://github.com/maosan978" target="_blank" rel="noopener" style="opacity:.3;font-size:9px;color:inherit;text-decoration:none">© <span id="copyrightYear">2026</span></a>
 </div>
 
 <script>
@@ -3107,11 +3079,15 @@ var FILE_NAME = 'workflow_data.json';
 var driveFileId = localStorage.getItem('drive_file_id') || null;
 var accessToken = null;
 var syncInProgress = false;
-var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 5;
-var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.07.22.6';
+var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 6;
+var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.08.12.2';
 
 var tokenClient = null;
 var _syncReconcileInProgress = false;
+var _drivePollTimer = null;
+var _githubPollTimer = null;
+var _syncVisibilityBound = false;
+var _driveSilentRefreshPending = false;
 var _startupCloudReadPending = {drive: false, github: false};
 try {
   _startupCloudReadPending.drive = localStorage.getItem('google_connected') === '1';
@@ -3148,6 +3124,29 @@ function _backupTimestamp(data) {
   return data && (data._lastSync || data.lastSync || 0);
 }
 
+function _bindSyncVisibilityRefresh(){
+  if(_syncVisibilityBound) return;
+  _syncVisibilityBound = true;
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden) return;
+    _checkDayRollover();
+    if(accessToken) _silentPullDrive();
+    if(localStorage.getItem('gh_repo') && localStorage.getItem('gh_token')) _silentPullGitHub();
+  });
+}
+function _ensureDrivePolling(){
+  _bindSyncVisibilityRefresh();
+  if(_drivePollTimer) return;
+  _drivePollTimer = setInterval(_silentPullDrive, 5 * 60 * 1000);
+}
+function _stopDrivePolling(){ if(_drivePollTimer){ clearInterval(_drivePollTimer); _drivePollTimer=null; } }
+function _ensureGitHubPolling(){
+  _bindSyncVisibilityRefresh();
+  if(_githubPollTimer) return;
+  _githubPollTimer = setInterval(_silentPullGitHub, 5 * 60 * 1000);
+}
+function _stopGitHubPolling(){ if(_githubPollTimer){ clearInterval(_githubPollTimer); _githubPollTimer=null; } }
+
 function initGoogleDrive() {
   if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
     console.log('Google API not loaded yet, retrying...');
@@ -3162,6 +3161,8 @@ function initGoogleDrive() {
     callback: function(tokenResponse) {
       if (tokenResponse && tokenResponse.access_token) {
         accessToken = tokenResponse.access_token;
+        _driveSilentRefreshPending = false;
+        window._driveRefreshAttempted = false;
         // 落盘令牌+过期时间，刷新时直接复用未过期令牌，避免每次刷新都跳转认证
         try {
           localStorage.setItem('google_access_token', accessToken);
@@ -3169,15 +3170,18 @@ function initGoogleDrive() {
           localStorage.setItem('google_token_expiry', String(Date.now() + _ttl * 1000));
         } catch (e) {}
         showSignedIn();
+        _ensureDrivePolling();
         var action = pendingSyncAction;
         pendingSyncAction = null;
         if (action === 'save') { saveToDrive(); }
+        else if (action === 'silent-load') { _silentPullDrive(); }
         else { loadFromDrive(); }
       }
     },
     error_callback: function(err) {
       // 静默续期失败（Google 会话已过期/未授权）——不弹窗，仅恢复"连接"按钮，等用户主动点击
       pendingSyncAction = null;
+      _driveSilentRefreshPending = false;
       if (err && (err.type === 'popup_closed' || err.type === 'popup_failed_to_open')) return;
       showSignedOut();
     }
@@ -3212,12 +3216,15 @@ function showSignedIn() {
 }
 
 function showSignedOut() {
+  accessToken = null;
+  _stopDrivePolling();
   localStorage.removeItem('google_connected');
   document.getElementById('googleAuthBtn').style.display = 'block';
   document.getElementById('googleSignout').style.display = 'none';
 }
 
 window.signOutGoogle = function() {
+  var tokenToRevoke = accessToken;
   accessToken = null;
   driveFileId = null;
   localStorage.removeItem('drive_file_id');
@@ -3226,8 +3233,8 @@ window.signOutGoogle = function() {
   localStorage.removeItem('google_token_expiry');
   _clearSyncBaseline('Drive');
   // 撤销授权，强制下次重新授权时使用正确的 scope
-  if (accessToken) {
-    fetch('https://oauth2.googleapis.com/revoke?token=' + accessToken, { method: 'POST' })
+  if (tokenToRevoke) {
+    fetch('https://oauth2.googleapis.com/revoke?token=' + tokenToRevoke, { method: 'POST' })
       .catch(() => {});
   }
   showSignedOut();
@@ -3398,7 +3405,7 @@ function restoreAllData(data, options) {
 
 function _isAutoSyncDataKey(key) {
   return key && (key.startsWith('wf_day_') || key.startsWith('wf_week_') || key.startsWith('wf_note_') ||
-    key === 'wf_growth_state' || key === 'wf_pet_state' || key === 'wf_continue_hidden' ||
+    key === 'wf_pet_state' || key === 'wf_continue_hidden' ||
     key === 'wf_research_state' || key === 'wf_focus_mode');
 }
 
@@ -3442,12 +3449,8 @@ window.addEventListener('load', function() {
   if (localStorage.getItem('google_connected') === '1') {
     showSignedIn();
     if (restoreCachedGoogleToken()) {
+      _ensureDrivePolling();
       loadFromDrive();
-      // 切回标签页 + 每5分钟静默拉取 Drive；编辑时不打断输入
-      document.addEventListener('visibilitychange', function() {
-        if (!document.hidden) _silentPullDrive();
-      });
-      setInterval(_silentPullDrive, 5 * 60 * 1000);
     } else {
       var _gTries = 0;
       var _gWait = setInterval(function(){
@@ -3471,7 +3474,18 @@ function _silentPullDrive() {
   if (!accessToken || !driveFileId || syncInProgress || _hasActiveWorkflowEditor()) return;
   fetch('https://www.googleapis.com/drive/v3/files/' + driveFileId + '?alt=media',
     { headers: { Authorization: 'Bearer ' + accessToken } })
-    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(r) {
+      if(r.status === 401){
+        if(!_driveSilentRefreshPending){
+          _driveSilentRefreshPending = true;
+          _setSyncStatus('drive','warn','令牌过期，正在静默续期');
+          refreshTokenThen('silent-load');
+        }
+        return null;
+      }
+      if(!r.ok){ _setSyncStatus('drive','error','后台检查失败 HTTP '+r.status); return null; }
+      return r.json();
+    })
     .then(function(data) {
       if (!data) return;
       var remoteTs = _backupTimestamp(data);
@@ -3497,13 +3511,8 @@ function initGitHubSync() {
   if (!repo || !token) { _markStartupCloudRead('github', false); return; }
   document.getElementById('ghConfigBtn').style.display = 'none';
   document.getElementById('ghStatusBadge').style.display = '';
+  _ensureGitHubPolling();
   loadFromGitHub();
-  // 切回标签页时静默同步
-  document.addEventListener('visibilitychange', function() {
-    if (!document.hidden) _silentPullGitHub();
-  });
-  // 每5分钟低调轮询一次；输入中不发起远端比较
-  setInterval(_silentPullGitHub, 5 * 60 * 1000);
 }
 
 function openGitHubConfig() {
@@ -3535,6 +3544,7 @@ function saveGitHubConfig() {
         document.getElementById('ghConfigBtn').style.display = 'none';
         document.getElementById('ghStatusBadge').style.display = '';
         document.getElementById('ghConfigModal').style.display = 'none';
+        _ensureGitHubPolling();
         _setSyncStatus('github','ok','GitHub 连接成功');
         showToast('GitHub 连接成功，同步中…', 'success');
         loadFromGitHub();
@@ -3553,6 +3563,7 @@ function saveGitHubConfig() {
 }
 
 function disconnectGitHub() {
+  _stopGitHubPolling();
   localStorage.removeItem('gh_repo');
   localStorage.removeItem('gh_token');
   localStorage.removeItem('gh_sha');
@@ -3582,8 +3593,6 @@ function collectAllData() {
   if (_ct) data.wf_color_theme = _ct;
   var _font = localStorage.getItem('wf_font');
   if (_font) data.wf_font = _font;
-  var _growth = localStorage.getItem('wf_growth_state');
-  if (_growth) data.wf_growth_state = _growth;
   var _pet = localStorage.getItem('wf_pet_state');
   if (_pet) data.wf_pet_state = _pet;
   var _continueHidden = localStorage.getItem('wf_continue_hidden');
@@ -3604,7 +3613,7 @@ function collectAllData() {
 function _isWorkflowDataKey(k) {
   return k && (k.startsWith('wf_day_') || k.startsWith('wf_week_') || k.startsWith('wf_note_') ||
     k === 'wf_theme' || k === 'wf_color_theme' || k === 'wf_font' || k === 'wf_schema_version' ||
-    k === 'wf_growth_state' || k === 'wf_pet_state' || k === 'wf_continue_hidden' ||
+    k === 'wf_pet_state' || k === 'wf_continue_hidden' ||
     k === 'wf_research_state' || k === 'wf_focus_mode');
 }
 
@@ -3621,7 +3630,7 @@ function _splitWorkflowBackupData(data) {
     else if (k.startsWith('wf_note_')) { out.notes[k] = data[k]; out.rawCount++; }
     else if (_isWorkflowDataKey(k)) { out.settings[k] = data[k]; out.rawCount++; }
   });
-  ['theme','colorTheme','font','schemaVersion','growthState','petState','continueHidden','researchState','focusMode'].forEach(function(k){
+  ['theme','colorTheme','font','schemaVersion','petState','continueHidden','researchState','focusMode'].forEach(function(k){
     if (data[k] !== undefined) out.settings[k] = data[k];
   });
   return out;
@@ -3634,7 +3643,6 @@ function _workflowStorageKey(k) {
     colorTheme: 'wf_color_theme',
     font: 'wf_font',
     schemaVersion: 'wf_schema_version',
-    growthState: 'wf_growth_state',
     petState: 'wf_pet_state',
     continueHidden: 'wf_continue_hidden',
     researchState: 'wf_research_state',
@@ -3933,8 +3941,6 @@ function _applyWorkflowBackupData(data, options) {
   if (split.settings.font !== undefined) localStorage.setItem('wf_font', split.settings.font || '0');
   if (split.settings.wf_schema_version !== undefined) localStorage.setItem('wf_schema_version', String(split.settings.wf_schema_version || WF_SCHEMA_VERSION));
   if (split.settings.schemaVersion !== undefined) localStorage.setItem('wf_schema_version', String(split.settings.schemaVersion || WF_SCHEMA_VERSION));
-  if (split.settings.wf_growth_state !== undefined) localStorage.setItem('wf_growth_state', typeof split.settings.wf_growth_state === 'string' ? split.settings.wf_growth_state : JSON.stringify(split.settings.wf_growth_state));
-  if (split.settings.growthState !== undefined) localStorage.setItem('wf_growth_state', typeof split.settings.growthState === 'string' ? split.settings.growthState : JSON.stringify(split.settings.growthState));
   if (split.settings.wf_pet_state !== undefined) localStorage.setItem('wf_pet_state', typeof split.settings.wf_pet_state === 'string' ? split.settings.wf_pet_state : JSON.stringify(split.settings.wf_pet_state));
   if (split.settings.petState !== undefined) localStorage.setItem('wf_pet_state', typeof split.settings.petState === 'string' ? split.settings.petState : JSON.stringify(split.settings.petState));
   if (split.settings.wf_continue_hidden !== undefined) localStorage.setItem('wf_continue_hidden', typeof split.settings.wf_continue_hidden === 'string' ? split.settings.wf_continue_hidden : JSON.stringify(split.settings.wf_continue_hidden));
@@ -4299,7 +4305,7 @@ function _estimateStorageBuckets(){
     if(k.indexOf('wf_snapshot_') === 0) return 'snapshots';
     if(k.indexOf('wf_sync_') === 0 || k === 'wf_backup_time' || k === 'wf_error_log') return 'sync';
     if(k === 'wf_theme' || k === 'wf_color_theme' || k === 'wf_font' || k === 'wf_schema_version' ||
-      k === 'wf_growth_state' || k === 'wf_pet_state' || k === 'wf_continue_hidden' ||
+      k === 'wf_pet_state' || k === 'wf_continue_hidden' ||
       k === 'wf_research_state' || k === 'wf_focus_mode') return 'settings';
     return k.indexOf('wf_') === 0 ? 'other' : null;
   }
@@ -4559,7 +4565,7 @@ function _workflowFieldLabel(k){
     isCheckInTask:'打卡任务', checkInDays:'打卡天数', checkInCompleteType:'打卡完成方式', dailySummary:'当日打卡小结',
     pinned:'置顶', workTime:'工作时间', expectedHours:'预期工作时间', actualHours:'实际工作时间',
     wf_theme:'主题设置', wf_color_theme:'配色设置', wf_font:'字体大小',
-    wf_schema_version:'数据结构版本', wf_growth_state:'微挑战状态',
+    wf_schema_version:'数据结构版本',
     wf_pet_state:'研究伙伴状态', wf_continue_hidden:'续未完成隐藏项',
     wf_research_state:'研究地图', wf_focus_mode:'专注模式'
   };
@@ -5657,7 +5663,7 @@ window.doExport = async function(format) {
     } else if (target === 'all-history') {
       md = '# 全部历史记录\n\n';
       var histKeys = [];
-      for (var hi=0;hi<localStorage.length;hi++) { var hk=localStorage.key(hi); if(hk&&hk.startsWith('wf_day_')) histKeys.push(hk.replace('wf_day_','')); }
+      for (var hi=0;hi<localStorage.length;hi++) { var hk=localStorage.key(hi); if(hk&&hk.startsWith('wf_day_')&&hk.replace('wf_day_','')<=today) histKeys.push(hk.replace('wf_day_','')); }
       histKeys.sort().reverse().forEach(function(date) {
         var d3 = loadDay(date);
         md += '## ' + date + '\n';
@@ -6064,19 +6070,8 @@ window.hideInputModal = function(){
   link.href = mUrl;
   document.head.appendChild(link);
 
-  // Service worker via blob URL (may fail in Chrome)
-  if('serviceWorker' in navigator){
-    var swCode = 'self.addEventListener("install",function(e){self.skipWaiting()});'+
-      'self.addEventListener("activate",function(e){e.waitUntil(self.clients.claim())});'+
-      'self.addEventListener("fetch",function(e){e.respondWith(fetch(e.request).catch(function(){return caches.match(e.request)}))});';
-    var swBlob = new Blob([swCode], {type:'application/javascript'});
-    var swUrl = URL.createObjectURL(swBlob);
-    navigator.serviceWorker.register(swUrl).then(function(reg){
-      console.log('SW registered');
-    }).catch(function(err){
-      console.log('SW registration skipped (expected in single-file mode):', err.message);
-    });
-  }
+  // 单文件发布无法在同源路径额外提供 service worker。Blob URL 在主流浏览器中
+  // 不能作为可靠的 Service Worker 注册地址，因此不再做无效注册；页面自己检查新版。
 
   // Install prompt handler
   window.addEventListener('beforeinstallprompt', function(e){
@@ -6092,6 +6087,38 @@ window.hideInputModal = function(){
     document.getElementById('installBanner').style.display = 'none';
   }
 })();
+
+// 单文件发布的轻量更新检查：只提示比当前版本更新的线上页面，不打断编辑。
+var _appUpdateTimer=null;
+var _appUpdateNoticeShown=false;
+function _compareAppVersions(a,b){
+  var pa=String(a||'').split('.').map(function(x){return parseInt(x,10)||0;});
+  var pb=String(b||'').split('.').map(function(x){return parseInt(x,10)||0;});
+  for(var i=0;i<Math.max(pa.length,pb.length);i++){
+    var diff=(pa[i]||0)-(pb[i]||0);
+    if(diff) return diff>0?1:-1;
+  }
+  return 0;
+}
+function _checkForAppUpdate(){
+  if(_appUpdateNoticeShown||!/^https?:$/.test(location.protocol)||_hasActiveWorkflowEditor()) return;
+  var pageUrl=location.href.split(/[?#]/)[0];
+  fetch(pageUrl+'?wf_update_check='+Date.now(),{cache:'no-store'})
+    .then(function(r){return r.ok?r.text():'';})
+    .then(function(source){
+      var m=source.match(/<meta\s+name=["']workflow-version["']\s+content=["']([^"']+)["']/i);
+      var remote=m&&m[1];
+      if(remote&&_compareAppVersions(remote,WF_APP_VERSION)>0&&!_hasActiveWorkflowEditor()){
+        _appUpdateNoticeShown=true;
+        showToast('发现新版本 '+remote+'，可刷新更新','info','刷新',function(){
+          location.replace(pageUrl+'?wf_reload='+Date.now());
+        });
+      }
+    }).catch(function(){});
+}
+window._checkForAppUpdate=_checkForAppUpdate;
+setTimeout(_checkForAppUpdate,15000);
+_appUpdateTimer=setInterval(_checkForAppUpdate,10*60*1000);
 
 // 系统日历 Emoji 的图案固定为 7 月 17 日；界面中改用会随本地日期更新的自绘图标。
 (function initDynamicCalendarIcons(){
@@ -6833,7 +6860,12 @@ var WF_MIGRATIONS = {
     }
     return changed;
   },
-  5: function(){ return _normalizeAllStoredDays(); }
+  5: function(){ return _normalizeAllStoredDays(); },
+  6: function(){
+    var changed = _normalizeAllStoredDays();
+    if(localStorage.getItem('wf_growth_state') !== null){ localStorage.removeItem('wf_growth_state'); changed++; }
+    return changed + _backfillCheckInMissedHistory();
+  }
 };
 function _normalizeAllStoredDays(){
   var changedCount = 0;
@@ -6853,9 +6885,95 @@ function _normalizeAllStoredDays(){
   });
   return changedCount;
 }
+function _backfillCheckInMissedHistory(){
+  var keys = [], days = {}, chains = {}, changedKeys = {};
+  for(var i=0;i<localStorage.length;i++){
+    var key = localStorage.key(i);
+    if(key && key.indexOf('wf_day_')===0) keys.push(key);
+  }
+  keys.sort();
+  keys.forEach(function(key){
+    try { days[key] = JSON.parse(localStorage.getItem(key)); } catch(e) {}
+  });
+  function dayEntries(day){
+    var entries = (day && day.tasks || []).map(function(task){ return task; });
+    if(day && day.m && day.m.taskObj) entries.push(day.m.taskObj);
+    return entries;
+  }
+  // v2 以前的续接副本可能各自被补成了不同链 ID。若 `_continuedFrom`
+  // 明确指向同名来源，只修正链 ID，不依赖模糊的全局同名匹配。
+  keys.forEach(function(key){
+    var day = days[key];
+    dayEntries(day).forEach(function(task){
+      var label = task ? _taskLabel(task) : '';
+      if(!task || !task._continuedFrom || !label) return;
+      var sourceDay = days['wf_day_' + task._continuedFrom];
+      var source = dayEntries(sourceDay).find(function(candidate){ return _taskLabel(candidate) === label; });
+      if(source && source._chainId && task._chainId !== source._chainId){
+        task._chainId = source._chainId;
+        changedKeys[key] = true;
+      }
+    });
+  });
+  keys.forEach(function(key){
+    var date = key.slice(7), day = days[key];
+    if(!day) return;
+    var entries = (day.tasks || []).map(function(task){ return task; });
+    if(day.m && day.m.taskObj) entries.push(day.m.taskObj);
+    entries.forEach(function(task){
+      if(!task || (!task.isCheckInTask && !task._chainId && !task._continuedFrom)) return;
+      var label = _taskLabel(task);
+      var chainKey = task._chainId ? 'cid:' + task._chainId : (task._continuedFrom && label ? 'lbl:' + label : 'uid:' + task.id);
+      if(!chains[chainKey]) chains[chainKey] = [];
+      chains[chainKey].push({date:date, task:task, storageKey:key});
+    });
+  });
+  var yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
+  var yesterdayDate = localDateStr(yesterday), added = 0;
+  function active(task){ return !!(task && task.isCheckInTask && (!task.done || task.checkInCompleteType === 'daily')); }
+  function addGapDates(fromDate, toDate, target, seen){
+    var cursor = parseDateLocal(fromDate); cursor.setDate(cursor.getDate()+1);
+    while(localDateStr(cursor) < toDate){
+      var missingDate = localDateStr(cursor);
+      if(!seen[missingDate]){
+        target.task.checkInHistory.push({date:missingDate, action:'missed'});
+        seen[missingDate] = true; added++; changedKeys[target.storageKey] = true;
+      }
+      cursor.setDate(cursor.getDate()+1);
+    }
+  }
+  Object.keys(chains).forEach(function(chainKey){
+    var occurrences = chains[chainKey].sort(function(a,b){return a.date.localeCompare(b.date);});
+    if(!occurrences.some(function(x){return x.task.isCheckInTask;})) return;
+    var target = occurrences[occurrences.length-1];
+    if(!Array.isArray(target.task.checkInHistory)) target.task.checkInHistory = [];
+    var seen = {};
+    occurrences.forEach(function(x){
+      seen[x.date] = true;
+      (x.task.checkInHistory || []).forEach(function(event){ if(event && event.date) seen[event.date] = true; });
+    });
+    for(var oi=0;oi<occurrences.length-1;oi++){
+      if(active(occurrences[oi].task)) addGapDates(occurrences[oi].date, occurrences[oi+1].date, target, seen);
+    }
+    if(active(target.task) && target.date <= yesterdayDate){
+      var end = parseDateLocal(yesterdayDate); end.setDate(end.getDate()+1);
+      addGapDates(target.date, localDateStr(end), target, seen);
+    }
+    target.task.checkInHistory.sort(function(a,b){return String(a.date||'').localeCompare(String(b.date||''));});
+  });
+  if(added || Object.keys(changedKeys).length) _createLocalSnapshot('migration-v6-checkin-history', false);
+  Object.keys(changedKeys).forEach(function(key){ localStorage.setItem(key, JSON.stringify(days[key])); });
+  return Object.keys(changedKeys).length;
+}
 function _migrateWorkflowData(){
   var version = parseInt(localStorage.getItem('wf_schema_version') || '0', 10);
-  if(version >= WF_SCHEMA_VERSION) return;
+  // 已停用字段即使被旧云端/旧备份带回，也要在当前版本启动时清除。
+  var removedLegacyGrowth = localStorage.getItem('wf_growth_state') !== null;
+  if(removedLegacyGrowth) localStorage.removeItem('wf_growth_state');
+  if(version >= WF_SCHEMA_VERSION) {
+    if(removedLegacyGrowth) _setSyncStatus('local','ok','已清除遗留微挑战记录');
+    return;
+  }
   var changedCount = 0;
   for(var nextVersion = version + 1; nextVersion <= WF_SCHEMA_VERSION; nextVersion++){
     if(typeof WF_MIGRATIONS[nextVersion] === 'function') {
@@ -6863,7 +6981,7 @@ function _migrateWorkflowData(){
     }
   }
   localStorage.setItem('wf_schema_version', String(WF_SCHEMA_VERSION));
-  if(changedCount) _setSyncStatus('local','ok','已迁移 ' + changedCount + ' 天数据');
+  if(changedCount || removedLegacyGrowth) _setSyncStatus('local','ok','已迁移 ' + (changedCount + (removedLegacyGrowth?1:0)) + ' 项数据');
 }
 
 function _createLocalSnapshot(reason, throttled){
@@ -7403,19 +7521,34 @@ function renderProjectFilterPills() {
 window.addTomorrowToTaskList = function() {
   var text = document.getElementById('eTomorrow').value.trim();
   if (!text) { showToast('请先填写明天要做的事', 'warn'); return; }
-  // 暂存文本，弹类型选择
+  // 打开弹窗时固定目标日期，避免跨过零点后确认时意外再向后顺延一天。
+  var base = parseDateLocal(today);
+  base.setDate(base.getDate() + 1);
   window._tomorrowText = text;
+  window._tomorrowTargetDate = localDateStr(base);
   document.getElementById('tomorrowTypeModal').style.display = 'flex';
+};
+
+window.closeTomorrowTypeModal = function() {
+  document.getElementById('tomorrowTypeModal').style.display = 'none';
+  window._tomorrowText = '';
+  window._tomorrowTargetDate = '';
 };
 
 window._addTomorrowWithType = function(type) {
   document.getElementById('tomorrowTypeModal').style.display = 'none';
   var text = window._tomorrowText || '';
+  var targetDate = window._tomorrowTargetDate || '';
+  window._tomorrowText = '';
+  window._tomorrowTargetDate = '';
   if (!text) return;
 
-  var d = new Date();
-  d.setDate(d.getDate() + 1);
-  var tomorrowStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(targetDate)) {
+    var d = parseDateLocal(today);
+    d.setDate(d.getDate() + 1);
+    targetDate = localDateStr(d);
+  }
+  var tomorrowStr = targetDate;
   var tomorrowData = loadDay(tomorrowStr);
 
   var exists = tomorrowData.tasks.some(function(t) {
@@ -7433,6 +7566,11 @@ window._addTomorrowWithType = function(type) {
   }
   tomorrowData.tasks.push(task);
   saveDay(tomorrowStr, tomorrowData);
+  if(tomorrowStr===today){
+    todayData=tomorrowData;
+    renderTasks();
+    updateProgress();
+  }
   showToast('已添加到 ' + tomorrowStr + ' 的任务清单', 'success');
 };
 
@@ -7501,6 +7639,8 @@ function initToday(){
   setTimeout(function(){var o=document.getElementById('loadingOverlay');if(o)o.classList.add('hidden');},2000);
   try{
   document.getElementById('hdate').textContent = new Date().toLocaleDateString('zh-CN', {year:'numeric',month:'long',day:'numeric',weekday:'long'});
+  var copyrightYear = document.getElementById('copyrightYear');
+  if(copyrightYear) copyrightYear.textContent = String(new Date().getFullYear());
   todayData = loadDay(today);
   var _prevWorkDate = parseDateLocal(today); _prevWorkDate.setDate(_prevWorkDate.getDate()-1);
   var _prevWorkDay = loadDay(localDateStr(_prevWorkDate));
@@ -7528,7 +7668,6 @@ function initToday(){
   updateBackupTime();
   checkOnboarding();
   showDailyQuote();
-  updateGrowthWidget();
   if(typeof window.refreshMDPreviews === 'function') window.refreshMDPreviews();
 
   if(localStorage.getItem('wf_tq_open') === 'true'){
@@ -8190,30 +8329,12 @@ var DAILY_QUOTES = [
   '把异常结果写清楚，它可能就是下一条线索。',
   '不要急着证明自己对，先让数据告诉你哪里不一样。'
 ];
-var GROWTH_PROMPTS = [
-  {title:'一句话假设', detail:'把今天正在做的一件事写成“如果……那么……”的假设。', points:1},
-  {title:'异常记录', detail:'找一个今天看到的异常结果，写下它和预期差在哪里。', points:1},
-  {title:'最小复现', detail:'为一个问题设计一个更小的复现实验或计算，不要求今天跑完。', points:1},
-  {title:'文献坐标', detail:'给今天的任务补一个文献坐标：作者、年份、图号或 DOI。', points:1},
-  {title:'参数理由', detail:'选一个计算参数，写清楚为什么是这个值，而不是默认值。', points:1},
-  {title:'反证一步', detail:'写下一个能推翻你当前解释的观察或计算结果。', points:1},
-  {title:'图表草稿', detail:'用一句话描述如果今天成功，最终图或表应该长什么样。', points:1},
-  {title:'术语压缩', detail:'把一个今天遇到的术语用自己的话解释给未来的自己。', points:1},
-  {title:'下一步门槛', detail:'写下明天开始前必须满足的一个具体条件。', points:1},
-  {title:'30秒说明', detail:'用 30 秒版本写清楚今天这件事为什么值得做。', points:1},
-  {title:'误差来源', detail:'列出一个结果最可能的误差来源，以及如何验证它。', points:1},
-  {title:'负结果价值', detail:'如果今天结果“不好”，写下它至少排除了哪种可能。', points:1}
-];
 var RESEARCH_PETS = {
   cat:{name:'光谱猫', stages:['🐾','🐱','😺','🧪🐱'], trait:'擅长发现谱线里的小异常'},
   fox:{name:'晶体狐', stages:['🌱','🦊','🧭🦊','💎🦊'], trait:'喜欢把结构和证据排整齐'},
   dragon:{name:'轨道龙', stages:['🥚','🐉','✨🐉','🌌🐉'], trait:'守着你的长期问题和大图景'},
   robot:{name:'参数机器人', stages:['⚙️','🤖','📈🤖','🛰️🤖'], trait:'提醒你记录参数、版本和复现路径'}
 };
-function _growthState(){
-  try { return JSON.parse(localStorage.getItem('wf_growth_state') || '{}'); } catch(e) { return {}; }
-}
-function _saveGrowthState(s){ localStorage.setItem('wf_growth_state', JSON.stringify(s)); }
 function _petState(){
   try { return JSON.parse(localStorage.getItem('wf_pet_state') || '{}'); } catch(e) { return {}; }
 }
@@ -8223,117 +8344,6 @@ function _seedForDate(date){
   String(date || localDateStr()).split('').forEach(function(ch){ n = (n * 31 + ch.charCodeAt(0)) % 100000; });
   return n;
 }
-function _currentGrowthPrompt(){
-  var s = _growthState();
-  var offsetKey = 'offset_' + today;
-  var idx = (_seedForDate(today) + (s[offsetKey] || 0)) % GROWTH_PROMPTS.length;
-  return GROWTH_PROMPTS[idx];
-}
-function _growthPromptForDate(date){
-  var s = _growthState();
-  var offsetKey = 'offset_' + date;
-  var idx = (_seedForDate(date) + (s[offsetKey] || 0)) % GROWTH_PROMPTS.length;
-  return GROWTH_PROMPTS[idx];
-}
-function _historyGrowthHtml(date){
-  var s = _growthState();
-  var completed = s.completed || {};
-  var title = completed[date];
-  var prompt = _growthPromptForDate(date);
-  if(!title && !prompt) return '';
-  var done = title !== undefined;
-  return '<div class="detail-section"><b>今日研究微挑战：</b>'+
-    '<div style="margin-top:4px;padding:8px 10px;border-radius:8px;background:'+(done?'var(--success-bg)':'var(--surface2)')+';border:1px solid '+(done?'var(--success-border)':'var(--border)')+'">'+
-      '<div style="font-size:12px;color:'+(done?'var(--success)':'var(--text3)')+';font-weight:700">'+(done?'已完成：':'未完成：')+esc(title || (prompt && prompt.title) || '微挑战')+'</div>'+
-      (prompt && prompt.detail ? '<div style="font-size:12px;color:var(--text3);line-height:1.6;margin-top:3px">'+esc(prompt.detail)+'</div>' : '')+
-    '</div></div>';
-}
-function _growthLevel(points){ return Math.floor((points || 0) / 7) + 1; }
-function _yesterdayStr(){
-  var d = new Date();
-  d.setDate(d.getDate() - 1);
-  return localDateStr(d);
-}
-function _growthStreakBeforeToday(completed){
-  var d = new Date();
-  d.setDate(d.getDate() - 1);
-  var streak = 0;
-  for(var i=0;i<365;i++) {
-    if(completed && completed[localDateStr(d)] !== undefined) streak++;
-    else break;
-    d.setDate(d.getDate() - 1);
-  }
-  return streak;
-}
-function updateGrowthWidget(){
-  var card = document.getElementById('growthCard');
-  if(!card) return;
-  var s = _growthState();
-  var prompt = _currentGrowthPrompt();
-  var points = s.points || 0;
-  var level = _growthLevel(points);
-  var inLevel = points % 7;
-  var doneToday = s.lastDone === today;
-  document.getElementById('growthTitle').textContent = '今日研究微挑战 · ' + prompt.title;
-  document.getElementById('growthPrompt').textContent = prompt.detail;
-  document.getElementById('growthStats').textContent = '研究晶体 Lv.' + level + ' · ' + points + ' 点 · 连续 ' + (s.streak || 0) + ' 天';
-  document.getElementById('growthMeterFill').style.width = Math.round(inLevel * 100 / 7) + '%';
-  document.getElementById('growthDoneBadge').style.display = doneToday ? '' : 'none';
-  document.getElementById('growthCompleteBtn').disabled = doneToday;
-  document.getElementById('growthCompleteBtn').textContent = doneToday ? '今日已完成' : '完成微挑战';
-  document.getElementById('growthRerollBtn').disabled = doneToday;
-  document.getElementById('growthUndoBtn').style.display = doneToday ? '' : 'none';
-  document.getElementById('growthSub').textContent = doneToday ? '今天的微成长已记录，明天会出现新的挑战。' : '每天一个小动作，让成长有具体刻度。';
-}
-window.rerollGrowthPrompt = function(){
-  var s = _growthState();
-  if(s.lastDone === today) { showToast('今日微挑战已完成，明天会刷新', 'info'); return; }
-  var offsetKey = 'offset_' + today;
-  s[offsetKey] = ((s[offsetKey] || 0) + 1) % GROWTH_PROMPTS.length;
-  _saveGrowthState(s);
-  updateGrowthWidget();
-};
-window.completeGrowthPrompt = function(){
-  var s = _growthState();
-  if(s.lastDone === today) { showToast('今日微挑战已记录', 'info'); return; }
-  var prompt = _currentGrowthPrompt();
-  s.undoToday = {points:s.points || 0, streak:s.streak || 0, lastDone:s.lastDone || '', completed:s.completed ? s.completed[today] : undefined};
-  s.points = (s.points || 0) + (prompt.points || 1);
-  s.streak = s.lastDone === _yesterdayStr() ? (s.streak || 0) + 1 : 1;
-  s.lastDone = today;
-  s.completed = s.completed || {};
-  s.completed[today] = prompt.title;
-  _saveGrowthState(s);
-  updateGrowthWidget();
-  showToast('已记录微成长：' + prompt.title, 'success');
-};
-window.undoGrowthPrompt = function(){
-  var s = _growthState();
-  if(s.lastDone !== today) { showToast('没有可撤销的今日微挑战记录', 'info'); return; }
-  if(s.undoToday) {
-    s.points = s.undoToday.points || 0;
-    s.streak = s.undoToday.streak || 0;
-    s.lastDone = s.undoToday.lastDone || '';
-    if(s.completed) {
-      if(s.undoToday.completed === undefined) delete s.completed[today];
-      else s.completed[today] = s.undoToday.completed;
-    }
-    delete s.undoToday;
-    _saveGrowthState(s);
-    updateGrowthWidget();
-    showToast('已撤销今日微挑战完成记录', 'info');
-    return;
-  }
-  var prompt = _currentGrowthPrompt();
-  if(s.completed) delete s.completed[today];
-  s.points = Math.max(0, (s.points || 0) - (prompt.points || 1));
-  s.streak = _growthStreakBeforeToday(s.completed);
-  s.lastDone = s.streak > 0 ? _yesterdayStr() : '';
-  delete s.undoToday;
-  _saveGrowthState(s);
-  updateGrowthWidget();
-  showToast('已撤销今日微挑战完成记录（兼容旧记录）', 'info');
-};
 function _todayCompletionScore(){
   var d = todayData || emptyDay();
   var tasks = d.tasks || [];
@@ -8342,7 +8352,6 @@ function _todayCompletionScore(){
   if(d.m && d.m.done) score += 2;
   if(tasks.length) score += Math.round(done * 4 / tasks.length);
   if(d.e && (d.e.log || d.e.tomorrow || d.e.highlight)) score += 2;
-  if(_growthState().lastDone === today) score += 1;
   return Math.min(9, score);
 }
 function _petStageIndex(level){
@@ -8478,12 +8487,54 @@ function getDayEncouragement(d){
   if(hasTask) return '🌱 写下了最重要的事，已经比没有记录好了很多。';
   return '📌 每一条记录都是你认真对待时间的证明。';
 }
+
+function _isoWeekMonday(weekId){
+  var m=String(weekId||'').match(/^(\d{4})-W(\d{2})$/);
+  if(!m) return null;
+  var year=+m[1], week=+m[2];
+  var jan4=new Date(year,0,4);
+  var jan4Dow=(jan4.getDay()+6)%7;
+  var monday=new Date(year,0,4-jan4Dow+(week-1)*7);
+  monday.setHours(0,0,0,0);
+  return getWkId(monday)===weekId ? monday : null;
+}
+
+function _historyStoredWeekIds(searchVal){
+  if(batchMode || historyViewMode!=='week') return [];
+  var currentWeek=getWkId(parseDateLocal(today));
+  var monthStart=today.slice(0,7)+'-01';
+  var ids=[];
+  for(var i=0;i<localStorage.length;i++){
+    var key=localStorage.key(i);
+    if(!key||!/^wf_week_\d{4}-W\d{2}$/.test(key)) continue;
+    var id=key.slice(8), monday=_isoWeekMonday(id);
+    if(!monday||id>currentWeek) continue;
+    var raw=localStorage.getItem(key)||'';
+    try{
+      var w=JSON.parse(raw);
+      var meaningful=['under','mainQuestion','evidence','expectationChanges','repeatedConfusions','technicalWork','outputs','nextMainQuestion','stopRule'].some(function(field){return !!String(w[field]||'').trim();}) || !!(w.tasks&&w.tasks.length);
+      if(!meaningful) continue;
+    }catch(e){ continue; }
+    if(historyRange==='week'&&id!==currentWeek) continue;
+    if(historyRange==='month'){
+      var sunday=new Date(monday); sunday.setDate(monday.getDate()+6);
+      if(localDateStr(sunday)<monthStart||localDateStr(monday)>today) continue;
+    }
+    if(searchVal&&raw.toLowerCase().indexOf(searchVal)<0&&id.toLowerCase().indexOf(searchVal)<0) continue;
+    ids.push(id);
+  }
+  return ids.sort().reverse();
+}
+
 window.renderHistory = function(){
   var searchVal = (document.getElementById('histSearch').value || '').toLowerCase();
   var keys = [];
   for(var i=0;i<localStorage.length;i++){
     var k = localStorage.key(i);
-    if(k.startsWith('wf_day_')) keys.push(k.replace('wf_day_',''));
+    if(k.startsWith('wf_day_')) {
+      var storedDate=k.replace('wf_day_','');
+      if(storedDate<=today) keys.push(storedDate);
+    }
   }
   keys.sort().reverse();
 
@@ -8500,12 +8551,16 @@ window.renderHistory = function(){
     keys = keys.filter(function(d){ return d >= monthStart; });
   }
 
+  var storedWeekIds=_historyStoredWeekIds(searchVal);
+  var dayWeekIds={};
+  keys.forEach(function(date){dayWeekIds[getWkId(parseDateLocal(date))]=true;});
+  var standaloneWeekCount=storedWeekIds.filter(function(id){return !dayWeekIds[id];}).length;
   var hc = document.getElementById('historyCount');
-  hc.style.display = keys.length ? '' : 'none';
-  hc.textContent = keys.length;
+  hc.style.display = (keys.length||standaloneWeekCount) ? '' : 'none';
+  hc.textContent = keys.length + standaloneWeekCount;
 
   var el = document.getElementById('historyContent');
-  if(!keys.length){
+  if(!keys.length&&!storedWeekIds.length){
     el.innerHTML = '<div class="empty"><span class="empty-illustration">📅</span><div class="empty-title">暂无历史记录</div><div class="empty-desc">开始记录今天的工作吧</div></div>';
     return;
   }
@@ -8571,26 +8626,25 @@ window.renderHistory = function(){
   function statText(s){ return (s.total?'任务 '+s.done+'/'+s.total:'无任务')+(s.morning?' · 晨间 '+s.morningDone+'/'+s.morning:''); }
 
   // 分组视图保留日期详情入口；批量操作统一使用带复选框的日视图。
-  if (!batchMode && historyViewMode === 'week' && shownKeys.length) {
-    var weekGroups = {}; // weekLabel -> [date]
+  if (!batchMode && historyViewMode === 'week' && (shownKeys.length||storedWeekIds.length)) {
+    var weekGroups = {}; // weekId -> [date]
     shownKeys.forEach(function(date) {
-      var d = parseDateLocal(date);
-      var dow = d.getDay(); var mon = new Date(d);
-      mon.setDate(d.getDate() - (dow===0?6:dow-1));
-      var sun = new Date(mon); sun.setDate(mon.getDate()+6);
-      var wLabel = localDateStr(mon) + ' ~ ' + localDateStr(sun);
-      if (!weekGroups[wLabel]) weekGroups[wLabel] = [];
-      weekGroups[wLabel].push(date);
+      var id=getWkId(parseDateLocal(date));
+      if (!weekGroups[id]) weekGroups[id] = [];
+      weekGroups[id].push(date);
     });
+    storedWeekIds.forEach(function(id){if(!weekGroups[id])weekGroups[id]=[];});
     var wHtml = '';
-    Object.keys(weekGroups).sort().reverse().forEach(function(wLabel) {
-      var wDates = weekGroups[wLabel];
+    Object.keys(weekGroups).sort().reverse().forEach(function(weekId) {
+      var wDates = weekGroups[weekId];
+      var mon=_isoWeekMonday(weekId), sun=new Date(mon); sun.setDate(mon.getDate()+6);
+      var wLabel=localDateStr(mon)+' ~ '+localDateStr(sun);
       var ws = groupStats(wDates);
       wHtml += '<div style="margin-bottom:16px">';
       wHtml += '<div class="history-group-head">'+
         '<span>'+wLabel+'</span>'+
         '<span style="font-weight:400;color:var(--text3)">'+statText(ws)+'</span></div>';
-      wHtml += _historyWeeklyReviewHtml(wDates[0]);
+      wHtml += _historyWeeklyReviewHtml(weekId);
       wDates.forEach(function(date) {
         wHtml += itemByDate[date] || '';
       });
@@ -9242,13 +9296,13 @@ window.histCancelEdit = function(){
   showDetail(dd, false);
 };
 
-function _historyWeeklyReviewHtml(date){
-  var key='wf_week_'+getWkId(parseDateLocal(date)), raw=localStorage.getItem(key);
+function _historyWeeklyReviewHtml(weekId){
+  var key='wf_week_'+weekId, raw=localStorage.getItem(key);
   if(!raw) return '';
   try {
     var w=JSON.parse(raw), fields=[['本周理解',w.under],['主问题',w.mainQuestion],['关键证据',w.evidence],['预期变化',w.expectationChanges],['重复困惑',w.repeatedConfusions],['技术工作',w.technicalWork],['成果',w.outputs],['下周主问题',w.nextMainQuestion],['停止条件',w.stopRule]].filter(function(x){return x[1];});
     if(!fields.length&&!(w.tasks||[]).length)return '';
-    return '<div class="weekly-history-card"><b>🧭 同周复盘</b>'+fields.map(function(x){return '<div style="margin-top:6px"><span style="color:var(--text3)">'+esc(x[0])+'：</span><div class="math-preview">'+_renderMDMaybe(x[1])+'</div></div>';}).join('')+((w.tasks||[]).length?'<div style="margin-top:6px;color:var(--text3)">周任务 '+(w.tasks||[]).length+' 项</div>':'')+'</div>';
+    return '<div class="weekly-history-card" data-week-id="'+esc(weekId)+'"><b>🧭 周复盘</b>'+fields.map(function(x){return '<div style="margin-top:6px"><span style="color:var(--text3)">'+esc(x[0])+'：</span><div class="math-preview">'+_renderMDMaybe(x[1])+'</div></div>';}).join('')+((w.tasks||[]).length?'<div style="margin-top:6px;color:var(--text3)">周任务 '+(w.tasks||[]).length+' 项</div>':'')+'</div>';
   } catch(e){return '';}
 }
 
@@ -9391,9 +9445,7 @@ window.showDetail = function(date, editMode){
       '<div style="flex:1;text-align:center"><div style="font-size:11px;color:var(--text3);margin-bottom:4px">晚间</div><div style="font-weight:600;color:'+(eveningDone===eveningTotal?'var(--success)':'var(--text)')+'">'+eveningDone+'/'+eveningTotal+'</div></div>'+
     '</div>'+
     ((d.workTime.expectedHours!==''||d.workTime.actualHours!=='')?'<div class="detail-section"><b>⏱ 工作时间：</b> 预期 '+esc(d.workTime.expectedHours||'—')+' 小时 · 实际 '+esc(d.workTime.actualHours||'—')+' 小时</div>':'')+
-    _historyWeeklyReviewHtml(date)+
     morningSectionHtml+
-    _historyGrowthHtml(date)+
     taskListHtml+
     notesHtml+
     (d.e.log ? '<div class="detail-section"><b>日志：</b><div class="math-preview">'+_renderMDMaybe(d.e.log)+'</div></div>' : '<div class="detail-section" style="color:var(--text4)">未记录日志</div>')+
@@ -9421,18 +9473,25 @@ window.openCheckInHistory = function(date, taskId){
   var base=loadDay(date), all=(base.tasks||[]).concat(base.m&&base.m.taskObj?[base.m.taskObj]:[]);
   var task=all.find(function(t){return t.id===taskId;});
   if(!task) return;
-  var rows=[];
+  var rows=[], missedDates={};
   for(var i=0;i<localStorage.length;i++){
     var key=localStorage.key(i); if(!key||key.indexOf('wf_day_')!==0) continue;
     var dayDate=key.slice(7), d=loadDay(dayDate), tasks=(d.tasks||[]).concat(d.m&&d.m.taskObj?[d.m.taskObj]:[]);
     tasks.forEach(function(t){
-      if((task._chainId&&t._chainId===task._chainId)||(!task._chainId&&t.id===task.id)) rows.push({date:dayDate,task:t});
+      if((task._chainId&&t._chainId===task._chainId)||(!task._chainId&&t.id===task.id)) {
+        rows.push({date:dayDate,task:t});
+        (t.checkInHistory || []).forEach(function(event){ if(event && event.action==='missed' && event.date) missedDates[event.date]=true; });
+      }
     });
   }
+  var actualDates={}; rows.forEach(function(row){actualDates[row.date]=true;});
+  Object.keys(missedDates).forEach(function(missedDate){
+    if(!actualDates[missedDate]) rows.push({date:missedDate,missed:true,task:{done:false,dailySummary:''}});
+  });
   rows.sort(function(a,b){return b.date.localeCompare(a.date);});
   var overlay=document.getElementById('checkInHistoryModal');
   if(!overlay){overlay=document.createElement('div');overlay.id='checkInHistoryModal';overlay.className='modal-overlay';document.body.appendChild(overlay);}
-  overlay.innerHTML='<div class="modal" style="max-width:620px;max-height:84vh;overflow:auto"><div class="flex-between"><h2>🎯 打卡任务详情</h2><button class="btn btn-secondary btn-sm" onclick="document.getElementById(\'checkInHistoryModal\').style.display=\'none\'">关闭</button></div><div style="font-size:13px;font-weight:700;margin-bottom:10px">'+esc(_taskLabel(task))+'</div>'+rows.map(function(x){return '<div style="padding:10px 12px;margin-bottom:8px;border:1px solid var(--border);border-radius:8px;background:var(--surface2)"><div class="flex-between"><b>'+esc(x.date)+'</b><span style="font-size:11px;color:'+(x.task.done?'var(--success)':'var(--warn)')+'">'+(x.task.done?'已完成':'未完成')+(x.task.checkInCompleteType==='daily'?' · 当日完成':x.task.checkInCompleteType==='full'?' · 完全完成':'')+'</span></div><div class="math-preview" style="margin-top:6px;font-size:12px">'+(x.task.dailySummary?_renderMDMaybe(x.task.dailySummary):'<span style="color:var(--text4)">未填写当日小结</span>')+'</div></div>';}).join('')+'</div>';
+  overlay.innerHTML='<div class="modal" style="max-width:620px;max-height:84vh;overflow:auto"><div class="flex-between"><h2>🎯 打卡任务详情</h2><button class="btn btn-secondary btn-sm" onclick="document.getElementById(\'checkInHistoryModal\').style.display=\'none\'">关闭</button></div><div style="font-size:13px;font-weight:700;margin-bottom:10px">'+esc(_taskLabel(task))+'</div>'+rows.map(function(x){return '<div style="padding:10px 12px;margin-bottom:8px;border:1px solid var(--border);border-radius:8px;background:var(--surface2)"><div class="flex-between"><b>'+esc(x.date)+'</b><span style="font-size:11px;color:'+(x.task.done?'var(--success)':'var(--warn)')+'">'+(x.missed?'未操作 · 已补记录':x.task.done?'已完成':'未完成')+(x.task.checkInCompleteType==='daily'?' · 当日完成':x.task.checkInCompleteType==='full'?' · 完全完成':'')+'</span></div><div class="math-preview" style="margin-top:6px;font-size:12px">'+(x.missed?'<span style="color:var(--text4)">当天没有任务操作记录</span>':x.task.dailySummary?_renderMDMaybe(x.task.dailySummary):'<span style="color:var(--text4)">未填写当日小结</span>')+'</div></div>';}).join('')+'</div>';
   overlay.style.display='flex';
   overlay.onclick=function(e){if(e.target===overlay)overlay.style.display='none';};
   if(typeof window.renderMath==='function')window.renderMath(overlay);
@@ -10078,10 +10137,12 @@ window.deleteNote = function(id){
 // ===== Statistics =====
 function getAllHistoryData(){
   var result = [];
+  var currentDate=localDateStr();
   for(var i=0;i<localStorage.length;i++){
     var k = localStorage.key(i);
     if(k.startsWith('wf_day_')){
       var date = k.replace('wf_day_','');
+      if(date>currentDate) continue;
       var d = loadDay(date);
       var morningTask = d.m && d.m.task ? _morningToTask(d.m) : null;
       var statTasks = d.tasks.slice();
@@ -10110,7 +10171,9 @@ function _statsTasks(h){
 }
 
 function renderStats(){
-  var hist = getAllHistoryData();
+  // “明日任务”会提前创建未来日记录；它属于计划，不应提前计入历史和连续天数。
+  var currentDate = localDateStr();
+  var hist = getAllHistoryData().filter(function(h){ return h.date <= currentDate; });
   var fullHist = hist;
   // 渲染项目筛选器
   var projects = [];
@@ -10926,7 +10989,20 @@ function _checkDayRollover() {
   var current = localDateStr();
   if (current === today) return false;
   var previous = today;
-  try { if (todayData && typeof window.saveToday === 'function') window.saveToday(); } catch(e) { console.warn('save before day rollover failed', e); }
+  var cancelledCheckIn=false;
+  var checkInModal=document.getElementById('checkInCompleteModal');
+  var checkInMode=window._currentCheckInMode||'today';
+  if(checkInModal&&checkInModal.style.display!=='none'&&checkInMode.indexOf('history')!==0){
+    closeCheckInCompleteModal();
+    cancelledCheckIn=true;
+  }
+  try {
+    if (todayData && typeof window.saveToday === 'function') {
+      window.saveToday(); // 先把仍在输入框中的最后内容收回内存
+      clearTimeout(window.saveToday._t);
+      saveDay(previous,todayData); // 再用旧日期立即落盘，不能让防抖定时器写到新一天
+    }
+  } catch(e) { console.warn('save before day rollover failed', e); }
   today = current;
   wkKey = 'wf_week_' + getWkId();
   initToday();
@@ -10935,7 +11011,8 @@ function _checkDayRollover() {
   if (active && active.id === 'tab-research') initResearch();
   if (active && active.id === 'tab-history') renderHistory();
   if (active && active.id === 'tab-stats') renderStats();
-  showToast('日期已从 ' + previous + ' 切换到 ' + current, 'info');
+  showToast('日期已从 ' + previous + ' 切换到 ' + current + (cancelledCheckIn?'；跨日后的打卡完成选择已取消，请在今日任务中重新操作':''), 'info');
+  _checkForAppUpdate();
   return true;
 }
 window._checkDayRollover = _checkDayRollover;
@@ -10946,67 +11023,77 @@ _scheduleDayRolloverCheck();
 /* ===== Continue Unfinished Tasks Module ===== */
 var _selectedContinueTasks = [];
 var _addedContinueTasks = [];
+var _continueTaskGroups = [];
 var _selectedNoteIds = [];
 var _pendingNotesExportAction = null;
 
+function _continueGroupKey(t, isMorning) {
+  if (t && t._chainId) return 'cid:' + t._chainId;
+  var label = _taskLabel(t || {});
+  if (t && t._continuedFrom && label) return 'lbl:' + label;
+  if (isMorning && label) return 'morning:' + label;
+  return 'uid:' + ((t && t.id) || label);
+}
+
 function _getUnfinishedFromHistory() {
-  // 收集所有历史未完成任务；续接链按 _chainId 归并，旧数据按文字兜底。
+  // 先按任务链收集全部状态，再仅保留“最新状态仍未完成”的链。
+  // 这样同一链后来已完全完成时，早期未完成副本不会再次出现。
   var keys = [];
   for (var i = 0; i < localStorage.length; i++) {
     var k = localStorage.key(i);
-    if (k && k.startsWith('wf_day_') && k !== 'wf_day_' + today) keys.push(k);
+    if (k && k.startsWith('wf_day_') && k.replace('wf_day_','') < today) keys.push(k);
   }
   keys.sort(); // 升序：最早的先处理，方便记录 firstDate
 
   var todayTs = new Date(today + 'T00:00:00');
-  var groupMap = {}; // groupKey -> {label, firstDate, count, task, key, daysUnfinished}
+  var groupMap = {}; // groupKey -> {latest state + unfinished history}
   var hidden = _continueHiddenMap();
+
+  function collectTask(t, date, key, isMorning) {
+    var label = _taskLabel(t);
+    if (!label) return;
+    var groupKey = _continueGroupKey(t, isMorning);
+    var group = groupMap[groupKey] || {firstDate:'', count:0};
+    if (!t.done) {
+      group.count++;
+      if (!group.firstDate || date < group.firstDate) group.firstDate = date;
+    }
+    if (!group.latestDate || date >= group.latestDate) {
+      group.latestDate = date;
+      group.label = label;
+      group.task = t;
+      group.key = key;
+      group.done = !!t.done;
+    }
+    groupMap[groupKey] = group;
+  }
 
   keys.forEach(function(k) {
     var date = k.replace('wf_day_', '');
     try {
       var d = JSON.parse(localStorage.getItem(k));
-      // 晨间任务
-      if (d.m && d.m.task && !d.m.done) {
-        var mLabel = d.m.task;
-        if(hidden['lbl:' + mLabel]) return;
+      // 晨间任务也参与“最新状态”判断，完成状态可以终止旧的未完成候选。
+      if (d.m && d.m.task) {
         var mKey = date + '::__morning__';
         var mTask = _morningToTask(d.m) || {type:'general', what:d.m.task, verify:d.m.marker || ''};
         mTask._isMorning = true;
-        mTask.id = '__morning__';
+        mTask.id = mTask.id || '__morning__';
+        mTask.done = !!d.m.done;
         mTask.task = d.m.task;
         mTask.marker = d.m.marker || '';
-        var mGroupKey = 'morning:' + mLabel;
-        if (!groupMap[mGroupKey]) {
-          groupMap[mGroupKey] = { label: mLabel, firstDate: date, count: 1, task: mTask, key: mKey };
-        } else {
-          groupMap[mGroupKey].count++;
-          groupMap[mGroupKey].label = mLabel;
-          groupMap[mGroupKey].task = mTask; // 保留最新版本
-          groupMap[mGroupKey].key = mKey;
-        }
+        collectTask(mTask, date, mKey, true);
       }
-      // 普通任务（仅未完成的）
-      (d.tasks || []).filter(function(t) { return !t.done; }).forEach(function(t) {
-        var label = t.what || t.question || t.source || t.problem || t.choice || '';
-        if (!label) return;
-        if (hidden[_continueHideKey(t, label)]) return;
-        var tKey = date + '::' + t.id;
-        var groupKey = _taskChainKey(t);
-        if (!groupMap[groupKey]) {
-          groupMap[groupKey] = { label: label, firstDate: date, count: 1, task: t, key: tKey };
-        } else {
-          groupMap[groupKey].count++;
-          groupMap[groupKey].label = label;
-          groupMap[groupKey].task = t; // 保留最新字段版本
-          groupMap[groupKey].key = tKey;
-        }
+      (d.tasks || []).forEach(function(t) {
+        collectTask(t, date, date + '::' + t.id, false);
       });
     } catch(e) {}
   });
 
   // 转成数组，计算未完成天数，按天数降序排列
-  var result = Object.keys(groupMap).map(function(groupKey) {
+  var result = Object.keys(groupMap).filter(function(groupKey) {
+    var item = groupMap[groupKey];
+    return item && !item.done && item.count > 0 && !hidden[_continueHideKey(item.task, item.label)];
+  }).map(function(groupKey) {
     var item = groupMap[groupKey];
     var firstTs = new Date(item.firstDate + 'T00:00:00');
     var days = Math.round((todayTs - firstTs) / 86400000);
@@ -11021,6 +11108,7 @@ function _ctGetTaskLabel(t) {
 }
 
 function _ctRenderList(items) {
+  _continueTaskGroups = items;
   var el = document.getElementById('continueTasksList');
   if (!items.length) {
     el.innerHTML = '<div style="text-align:center;padding:32px 0;color:var(--text3);font-size:13px">没有历史未完成任务</div>';
@@ -11036,7 +11124,7 @@ function _ctRenderList(items) {
   if (todayData.m && todayData.m.task) todayLabels.add(todayData.m.task);
 
   var html = '';
-  items.forEach(function(item) {
+  items.forEach(function(item, itemIndex) {
     var t = item.task;
     var key = item.key;
     var label = item.label;
@@ -11059,7 +11147,7 @@ function _ctRenderList(items) {
     else if (isDup) rowStyle += 'background:var(--warn-bg);opacity:.7;cursor:default;';
     else rowStyle += 'background:var(--surface);';
 
-    html += '<label style="'+rowStyle+'"' + (isDisabled ? '' : ' onmouseover="this.style.background=\'var(--surface2)\'" onmouseout="this.style.background=\'var(--surface)\'"') + '>';
+    html += '<div style="'+rowStyle+'"' + (isDisabled ? '' : ' onmouseover="this.style.background=\'var(--surface2)\'" onmouseout="this.style.background=\'var(--surface)\'"') + '>';
     html += '<input type="checkbox" data-key="'+key+'" '+(checked||isAdded?'checked':'')+' '+(isDisabled?'disabled':'')+' onchange="_ctCheckChange(this)" style="margin-top:2px;flex-shrink:0">';
     html += '<div style="flex:1;min-width:0">';
     html += '<span style="font-size:11px;border-radius:4px;padding:1px 5px;margin-right:5px;'+typeBg+'">'+typeLabel+'</span>';
@@ -11070,10 +11158,63 @@ function _ctRenderList(items) {
     if (t._isMorning && t.marker) html += '<div style="font-size:11px;color:var(--text3);margin-top:2px">完成标志：'+esc(t.marker)+'</div>';
     if (!t._isMorning && t.expect) html += '<div style="font-size:11px;color:var(--text3);margin-top:2px">预期：'+esc(t.expect)+'</div>';
     if (!t._isMorning && t.question && t.type !== 'reading') html += '<div style="font-size:11px;color:var(--text3);margin-top:2px">问题：'+esc(t.question)+'</div>';
-    html += '</div></label>';
+    html += '</div>';
+    html += '<div style="display:flex;gap:4px;flex-shrink:0">'+
+      '<button class="btn btn-secondary btn-xs" onclick="ignoreContinueTask('+itemIndex+')" title="以后不再显示这条任务链">忽略</button>'+
+      '<button class="btn btn-danger btn-xs" onclick="deleteContinueTaskHistory('+itemIndex+')" title="删除历史中的未完成副本">删除</button>'+
+      '</div></div>';
   });
   el.innerHTML = html;
 }
+
+window.ignoreContinueTask = function(index) {
+  var item = _continueTaskGroups[index];
+  if (!item) return;
+  _hideContinueTask(item.task);
+  _selectedContinueTasks = _selectedContinueTasks.filter(function(key){ return key !== item.key; });
+  _ctRenderList(_getUnfinishedFromHistory());
+  var count = document.getElementById('continueSelectedCount');
+  if (count) count.textContent = _selectedContinueTasks.length;
+  showToast('已忽略这条未完成任务', 'info');
+};
+
+window.deleteContinueTaskHistory = function(index) {
+  var item = _continueTaskGroups[index];
+  if (!item) return;
+  showConfirm('删除“' + item.label + '”在历史中的所有未完成副本？\n已完成记录会保留。', '🗑️', function(){
+    _createLocalSnapshot('delete-unfinished-chain', false);
+    var removed = 0;
+    var keys = [];
+    for (var i=0;i<localStorage.length;i++) {
+      var key = localStorage.key(i);
+      if (key && key.indexOf('wf_day_')===0 && key.slice(7) < today) keys.push(key);
+    }
+    keys.forEach(function(key){
+      try {
+        var d = JSON.parse(localStorage.getItem(key));
+        var changed = false;
+        if (d.m && d.m.task && !d.m.done) {
+          var mt = _morningToTask(d.m) || {type:'general',what:d.m.task};
+          if (_continueGroupKey(mt, true) === item.groupKey) {
+            d.m = {task:'', marker:'', done:false};
+            removed++; changed = true;
+          }
+        }
+        var before = (d.tasks || []).length;
+        d.tasks = (d.tasks || []).filter(function(t){
+          return t.done || _continueGroupKey(t, false) !== item.groupKey;
+        });
+        removed += before - d.tasks.length;
+        if (changed || before !== d.tasks.length) localStorage.setItem(key, JSON.stringify(d));
+      } catch(e) {}
+    });
+    _selectedContinueTasks = [];
+    _ctRenderList(_getUnfinishedFromHistory());
+    var count = document.getElementById('continueSelectedCount');
+    if (count) count.textContent = '0';
+    showToast(removed ? ('已删除 ' + removed + ' 条未完成历史副本') : '没有可删除的未完成副本', removed ? 'success' : 'info');
+  });
+};
 
 function _ctCheckChange(cb) {
   var key = cb.dataset.key;
@@ -11399,43 +11540,64 @@ window.confirmCheckInComplete = function(type) {
 // 自动续接打卡任务
 function autoCheckInContinue() {
   try {
-    // 计算昨天的日期
+    // 找到今天以前每条任务链的最新状态。不能只看昨天：如果昨天没有打开
+    // 应用、因而没有生成记录，仍应从更早的活动链续接到今天。
     var yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     var yesterdayStr = localDateStr(yesterday);
-
-    // 加载昨天的数据
-    var yesterdayData = loadDay(yesterdayStr);
-    if (!yesterdayData || !yesterdayData.tasks) return;
-
-    // 查找昨天的打卡任务：已完成且选择"当日完成"，或未完成的
-    var checkInTasks = yesterdayData.tasks.filter(function(t) {
-      if (!t.isCheckInTask) return false;
-      // 如果已完成，必须是"当日完成"才续接
-      if (t.done) return t.checkInCompleteType === 'daily';
-      // 如果未完成，也续接
-      return true;
-    });
-    if(yesterdayData.m && yesterdayData.m.taskObj && yesterdayData.m.taskObj.isCheckInTask) {
-      var mt = _morningToTask(yesterdayData.m);
-      if(mt && (!mt.done || mt.checkInCompleteType === 'daily')) {
-        mt._fromMorning = true;
-        checkInTasks.unshift(mt);
+    var dayKeys = [];
+    for (var i=0;i<localStorage.length;i++) {
+      var storageKey = localStorage.key(i);
+      if (storageKey && storageKey.indexOf('wf_day_')===0) {
+        var storageDate = storageKey.slice(7);
+        if (storageDate < today) dayKeys.push(storageKey);
       }
     }
-
-    if (checkInTasks.length === 0) return;
+    dayKeys.sort();
+    var latestByChain = {};
+    dayKeys.forEach(function(storageKey){
+      var sourceDate = storageKey.slice(7);
+      var sourceDay;
+      try { sourceDay = JSON.parse(localStorage.getItem(storageKey)); } catch(e) { return; }
+      if (!sourceDay) return;
+      var occurrences = (sourceDay.tasks || []).map(function(task){ return {task:task, fromMorning:false}; });
+      if (sourceDay.m && sourceDay.m.taskObj) {
+        var morningTask = _morningToTask(sourceDay.m);
+        if (morningTask) occurrences.push({task:morningTask, fromMorning:true});
+      }
+      occurrences.forEach(function(entry){
+        var task = entry.task;
+        // isCheckInTask=false 且仍有链 ID 的状态也必须覆盖旧状态；这是取消打卡。
+        if (!task || (!task.isCheckInTask && !task._chainId && !task._continuedFrom)) return;
+        var chainKey = _taskChainKey(task);
+        latestByChain[chainKey] = {
+          task:task,
+          fromMorning:entry.fromMorning,
+          sourceDate:sourceDate,
+          sourceDay:sourceDay,
+          storageKey:storageKey
+        };
+      });
+    });
+    var checkInTasks = Object.keys(latestByChain).map(function(key){ return latestByChain[key]; }).filter(function(entry){
+      var task = entry.task;
+      return task.isCheckInTask && (!task.done || task.checkInCompleteType === 'daily');
+    });
+    if (!checkInTasks.length) return;
 
     // 检查今天是否已经有这些打卡任务（防止重复续接）
-    var yesterdayChanged = false;
     var todayChanged = false;
-    checkInTasks.forEach(function(srcTask) {
+    checkInTasks.forEach(function(entry) {
+      var srcTask = entry.task;
       var beforeChain = srcTask._chainId;
       _ensureTaskChain(srcTask);
-      if(!beforeChain && srcTask._chainId) yesterdayChanged = true;
+      if(!beforeChain && srcTask._chainId) {
+        if (entry.fromMorning && entry.sourceDay.m) entry.sourceDay.m.taskObj = srcTask;
+        localStorage.setItem(entry.storageKey, JSON.stringify(entry.sourceDay));
+      }
       var label = getTaskPrimaryField(srcTask);
       var exists = (todayData.m && todayData.m.taskObj && srcTask._chainId && todayData.m.taskObj._chainId === srcTask._chainId) || todayData.tasks.some(function(t) {
-        return (t._chainId && t._chainId === srcTask._chainId) || (label && getTaskPrimaryField(t) === label && t._continuedFrom === yesterdayStr);
+        return (t._chainId && t._chainId === srcTask._chainId) || (label && getTaskPrimaryField(t) === label && t._continuedFrom === entry.sourceDate);
       });
 
       if (!exists) {
@@ -11448,22 +11610,32 @@ function autoCheckInContinue() {
         newTask.dailySummary = '';
         newTask.pinned = false;
         newTask.time = new Date().toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'});
-        newTask._continuedFrom = yesterdayStr;
+        newTask._continuedFrom = entry.sourceDate;
 
         // 设置或传播续接链ID
         if (!newTask._chainId) {
           newTask._chainId = 'chain_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
           srcTask._chainId = newTask._chainId;
-          localStorage.setItem('wf_day_' + yesterdayStr, JSON.stringify(yesterdayData));
+          localStorage.setItem(entry.storageKey, JSON.stringify(entry.sourceDay));
         }
 
         // 增加打卡天数
         newTask.checkInDays = (srcTask.checkInDays || 1) + 1;
         if (!newTask.checkInHistory) newTask.checkInHistory = [];
-        newTask.checkInHistory.push({date: today, action: 'auto_continue'});
-        delete newTask._fromMorning;
+        if (entry.sourceDate < yesterdayStr) {
+          var seenDates = {};
+          newTask.checkInHistory.forEach(function(event){ if(event && event.date) seenDates[event.date] = true; });
+          var missedCursor = parseDateLocal(entry.sourceDate);
+          missedCursor.setDate(missedCursor.getDate() + 1);
+          while (localDateStr(missedCursor) <= yesterdayStr) {
+            var missedDate = localDateStr(missedCursor);
+            if (!seenDates[missedDate]) newTask.checkInHistory.push({date:missedDate, action:'missed'});
+            missedCursor.setDate(missedCursor.getDate() + 1);
+          }
+        }
+        newTask.checkInHistory.push({date: today, action: entry.sourceDate === yesterdayStr ? 'auto_continue' : 'auto_continue_gap'});
 
-        if(srcTask._fromMorning && !todayData.m.task) {
+        if(entry.fromMorning && !todayData.m.task) {
           todayData.m = _taskToMorning(newTask);
           todayData.m.done = false;
         } else {
@@ -11473,14 +11645,20 @@ function autoCheckInContinue() {
       }
     });
 
-    if (todayChanged || yesterdayChanged) {
-      if(yesterdayChanged) localStorage.setItem('wf_day_' + yesterdayStr, JSON.stringify(yesterdayData));
-      saveDay(today, todayData);
-    }
+    if (todayChanged) saveDay(today, todayData);
   } catch(e) {
     console.error('autoCheckInContinue error:', e);
   }
 }
+
+// 可复查的维护入口：供数据自检与真实浏览器回归复用同一业务实现。
+window.WorkflowMaintenance = {
+  currentDate: function(){ return today; },
+  weekIdForDate: function(date){ return getWkId(parseDateLocal(date)); },
+  migrate: function(){ _migrateWorkflowData(); },
+  continueCheckIns: function(){ todayData = loadDay(today); autoCheckInContinue(); return JSON.parse(JSON.stringify(todayData)); },
+  unfinishedCandidates: function(){ return _getUnfinishedFromHistory(); }
+};
 
 /* ===== End Check-in Task Complete Module ===== */
 
@@ -12286,10 +12464,10 @@ window.handleImportFile = function(event) {
 
 <!--
 workflow_tool build
-version: 2026.07.22.6
-sourceSha256: 836a5fb18331c83b8f123ccec18097f0b5a430f74bcc8f7b173caf252fae2e37
-configSha256: ab5fe172c356f0b9deaf74754aa506dfb305c09235e7185d41733c66fb310511
-coreSha256: 17345b376379086f943fd33757852f4a36323e560dfe6120e08c268e9421d83e
+version: 2026.08.12.2
+sourceSha256: a0e7198ba27ee716d39e18aa8d149d3355316cb581b25bc53a7659d5286ae072
+configSha256: 6ff181f8a2bea65a54d5dbccc1ebcd9d6db00640c5c533e1d2c73c762dd52da1
+coreSha256: 76c73eb56ca5121ab029881c24491585af0568aced318dc94bab29a03f7c23fb
 appSha256: 2f24aa03f02a5b051051aad95e186b81abef342d0af6958c66b79307c3dc0db3
 exportSha256: 13ad148412f079c37fed48892779a4c15a69b986b274bf432dd0506e64c0fa2a
 syncSha256: d253ac2b5da24d6ab82cae5c41b91c72dc35ffda76ed3b160b3eb4d4025154ea
@@ -12297,5 +12475,5 @@ historySha256: d2d96792bc489871e1e12fdf2483793e1781fec5835bae872974bc6b66894a79
 tasksSha256: cf7b1e78be5c87a40720433883aa80f4c8e36fe389400e217af9bb744ad8a590
 researchSha256: 7f18bf83e2678ea03658117f346225a9af8304668c9f622903770f0292e2c5a8
 stylesSha256: 438038ffa6949e8cb705df0dbad8d9a17ed29abd17f0c072fc70f88118cf55be
-builtAt: 2026-07-22T05:17:36.737Z
+builtAt: 2026-08-12T07:33:19.279Z
 -->
