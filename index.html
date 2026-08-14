@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- workflow-build:76c73eb56ca5121ab029881c24491585af0568aced318dc94bab29a03f7c23fb -->
+<!-- workflow-build:a37b0de74e36858958583978b532413971fc99908dcb2d41a494d5c17bc326f9 -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <meta name="theme-color" content="#4f46e5">
-<meta name="workflow-version" content="2026.08.12.2">
+<meta name="workflow-version" content="2026.08.14.2">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="工作流">
@@ -1216,8 +1216,8 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   else root.WorkflowConfig = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
   return {
-    appVersion: '2026.08.12.2',
-    schemaVersion: 6,
+    appVersion: '2026.08.14.2',
+    schemaVersion: 7,
     typeLabels: {
       general: '通用',
       calc: '计算前',
@@ -1247,7 +1247,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   if (typeof module === 'object' && module.exports) module.exports = factory();
   else root.WorkflowCore = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
-  var SCHEMA_VERSION = 5;
+  var SCHEMA_VERSION = 7;
 
   function emptyDay() {
     return {m:{task:'',marker:'',done:false},tasks:[],e:{log:'',tomorrow:'',highlight:''},r:{event:'',q1:'',q2:'',q3:''},workTime:{expectedHours:'',actualHours:''}};
@@ -1317,7 +1317,18 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   function normalizeDayData(data, newChainId) {
     var d = Object.assign(emptyDay(), data || {});
     d.m = Object.assign({task:'',marker:'',done:false}, d.m || {});
-    if (d.m.taskObj) d.m.taskObj = ensureTaskChain(d.m.taskObj, newChainId);
+    if (d.m.taskObj) {
+      d.m.taskObj = ensureTaskChain(d.m.taskObj, newChainId);
+      var morningText = String(d.m.task || '').trim();
+      var objectText = String(taskLabel(d.m.taskObj) || '').trim();
+      // 旧版本可能留下“晨间标题为空、taskObj 也没有标题、但仍带打卡链”的幽灵对象。
+      // 有实际标题时优先恢复兼容字段；两边都为空时删除不可见对象，避免继续跨日续接。
+      if (!morningText && objectText) d.m.task = objectText;
+      else if (!morningText && !objectText) {
+        delete d.m.taskObj;
+        d.m.done = false;
+      }
+    }
     d.e = Object.assign({log:'',tomorrow:'',highlight:''}, d.e || {});
     d.r = Object.assign({event:'',q1:'',q2:'',q3:''}, d.r || {});
     d.workTime = Object.assign({expectedHours:'',actualHours:''}, d.workTime || {});
@@ -2476,7 +2487,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
         <tr><td>☀️ 设为晨间</td><td>任务卡片右上角 ☀️；历史编辑中也可用</td><td>将任意任务整体设为晨间目标，原晨间任务整体回到任务列表；晨间支持项目标签、打卡任务和完整字段预览，只在位置和标注上特殊</td></tr>
         <tr><td>➕ 明日任务</td><td>晚间"明天要做的事"字段旁</td><td>将计划直接添加到明天任务清单，可选择5种任务类型</td></tr>
         <tr><td>📐 公式预览</td><td>在输入框中输入 <code>$...$</code></td><td>支持 LaTeX 数学公式（KaTeX）和 Markdown，输入后自动在下方渲染预览</td></tr>
-        <tr><td>▣ 预览小窗</td><td>点击网页小窗按钮或“↗ 双屏”</td><td>下方预览按当前光标所在的具体字符跟踪；网页内小窗可拖动缩放，“↗ 双屏”会打开真正的浏览器窗口，可拖到另一块显示器并持续跟随输入</td></tr>
+        <tr><td>▣ 预览小窗</td><td>点击网页小窗按钮或“↗ 双屏”</td><td>下方预览按当前光标所在的具体字符跟踪；“↗ 双屏”在支持的浏览器中使用可置顶小窗，不支持时降级为独立浏览器窗口并可拖到另一块显示器。两个窗口都会锁定打开它的输入框，点击其他输入框不会覆盖；要切换内容，请点击另一输入框旁的对应预览按钮</td></tr>
       </table></div>
     </div></div>
   </div>
@@ -3079,8 +3090,8 @@ var FILE_NAME = 'workflow_data.json';
 var driveFileId = localStorage.getItem('drive_file_id') || null;
 var accessToken = null;
 var syncInProgress = false;
-var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 6;
-var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.08.12.2';
+var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 7;
+var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.08.14.2';
 
 var tokenClient = null;
 var _syncReconcileInProgress = false;
@@ -4587,6 +4598,7 @@ function _friendlySnapshotReason(reason){
   if(reason.indexOf('before-restore-snapshot') === 0) return '恢复快照前';
   if(reason.indexOf('before-undo-last-risky-change') === 0) return '撤销操作前';
   if(reason.indexOf('before-data-health-repair') === 0) return '数据健康修复前';
+  if(reason.indexOf('migration-v') === 0) return '旧数据兼容修复前';
   if(reason.indexOf('before-apply-remote-conflict') === 0) return '应用云端冲突前';
   if(reason.indexOf('before-apply-all-remote-conflicts') === 0) return '批量应用云端冲突前';
   if(reason.indexOf('before-') === 0 && reason.indexOf('-conflict-remote') !== -1) return '云端覆盖本地前';
@@ -6825,7 +6837,12 @@ function _normalizeDayData(data){
   if(window.WorkflowCore) return window.WorkflowCore.normalizeDayData(data, _newChainId);
   var d = Object.assign(emptyDay(), data || {});
   d.m = Object.assign({task:'',marker:'',done:false}, d.m || {});
-  if(d.m.taskObj) d.m.taskObj = _ensureTaskChain(d.m.taskObj);
+  if(d.m.taskObj){
+    d.m.taskObj = _ensureTaskChain(d.m.taskObj);
+    var morningText=String(d.m.task||'').trim(), objectText=String(getTaskPrimaryField(d.m.taskObj)||'').trim();
+    if(!morningText&&objectText)d.m.task=objectText;
+    else if(!morningText&&!objectText){delete d.m.taskObj;d.m.done=false;}
+  }
   d.e = Object.assign({log:'',tomorrow:'',highlight:''}, d.e || {});
   d.r = Object.assign({event:'',q1:'',q2:'',q3:''}, d.r || {});
   d.workTime = Object.assign({expectedHours:'',actualHours:''}, d.workTime || {});
@@ -6865,7 +6882,8 @@ var WF_MIGRATIONS = {
     var changed = _normalizeAllStoredDays();
     if(localStorage.getItem('wf_growth_state') !== null){ localStorage.removeItem('wf_growth_state'); changed++; }
     return changed + _backfillCheckInMissedHistory();
-  }
+  },
+  7: function(){ return _repairLegacyCheckInTerminalState(); }
 };
 function _normalizeAllStoredDays(){
   var changedCount = 0;
@@ -6884,6 +6902,52 @@ function _normalizeAllStoredDays(){
     } catch(e) {}
   });
   return changedCount;
+}
+function _repairLegacyCheckInTerminalState(){
+  var keys=[],days={},rawByKey={},changedKeys={},fullByLabel={};
+  for(var i=0;i<localStorage.length;i++){
+    var key=localStorage.key(i);
+    if(key&&key.indexOf('wf_day_')===0)keys.push(key);
+  }
+  keys.sort();
+  keys.forEach(function(key){
+    try{
+      var raw=localStorage.getItem(key), normalized=_normalizeDayData(JSON.parse(raw));
+      rawByKey[key]=raw;days[key]=normalized;
+      if(JSON.stringify(normalized)!==raw)changedKeys[key]=true;
+    }catch(e){}
+  });
+  function entries(day){
+    var list=(day&&day.tasks||[]).slice();
+    if(day&&day.m&&day.m.taskObj)list.push(day.m.taskObj);
+    return list;
+  }
+  keys.forEach(function(key){
+    var date=key.slice(7);
+    entries(days[key]).forEach(function(task){
+      var label=_checkInTerminalLabel(task);
+      if(label&&task.done&&task.checkInCompleteType==='full'&&(!fullByLabel[label]||date>fullByLabel[label]))fullByLabel[label]=date;
+    });
+  });
+  keys.forEach(function(key){
+    var date=key.slice(7),day=days[key];if(!day)return;
+    var before=(day.tasks||[]).length;
+    day.tasks=(day.tasks||[]).filter(function(task){
+      var terminal=fullByLabel[_checkInTerminalLabel(task)];
+      return !(terminal&&date>terminal&&task.isCheckInTask&&!task.done&&task._continuedFrom&&task._continuedFrom<=terminal);
+    });
+    if(day.tasks.length!==before)changedKeys[key]=true;
+    if(day.m&&day.m.taskObj){
+      var terminal=fullByLabel[_checkInTerminalLabel(day.m.taskObj)];
+      if(terminal&&date>terminal&&day.m.taskObj.isCheckInTask&&!day.m.done&&day.m.taskObj._continuedFrom&&day.m.taskObj._continuedFrom<=terminal){
+        day.m={task:'',marker:'',done:false};changedKeys[key]=true;
+      }
+    }
+  });
+  var changed=Object.keys(changedKeys);
+  if(changed.length)_createLocalSnapshot('migration-v7-checkin-terminal',false);
+  changed.forEach(function(key){localStorage.setItem(key,JSON.stringify(days[key]));});
+  return changed.length;
 }
 function _backfillCheckInMissedHistory(){
   var keys = [], days = {}, chains = {}, changedKeys = {};
@@ -6971,7 +7035,8 @@ function _migrateWorkflowData(){
   var removedLegacyGrowth = localStorage.getItem('wf_growth_state') !== null;
   if(removedLegacyGrowth) localStorage.removeItem('wf_growth_state');
   if(version >= WF_SCHEMA_VERSION) {
-    if(removedLegacyGrowth) _setSyncStatus('local','ok','已清除遗留微挑战记录');
+    var repairedCurrent = version >= 7 ? _repairLegacyCheckInTerminalState() : 0;
+    if(removedLegacyGrowth || repairedCurrent) _setSyncStatus('local','ok','已修复 ' + (repairedCurrent + (removedLegacyGrowth?1:0)) + ' 项遗留数据');
     return;
   }
   var changedCount = 0;
@@ -7009,6 +7074,7 @@ function _createLocalSnapshot(reason, throttled){
 
 // ===== 续接任务链：标签联动 + 统计去重 =====
 function _taskLabel(t){ return t.what || t.question || t.source || t.problem || t.choice || ''; }
+function _checkInTerminalLabel(t){return String(_taskLabel(t)||'').replace(/\s+/g,' ').trim().toLowerCase();}
 // 链归属键：同一续接链归为一组；手动同名任务各自独立
 function _taskChainKey(t){
   if(t._chainId) return 'cid:'+t._chainId;
@@ -11047,12 +11113,15 @@ function _getUnfinishedFromHistory() {
 
   var todayTs = new Date(today + 'T00:00:00');
   var groupMap = {}; // groupKey -> {latest state + unfinished history}
+  var latestFullByLabel = {};
   var hidden = _continueHiddenMap();
 
   function collectTask(t, date, key, isMorning) {
     var label = _taskLabel(t);
     if (!label) return;
     var groupKey = _continueGroupKey(t, isMorning);
+    var terminalLabel=_checkInTerminalLabel(t);
+    if(terminalLabel&&t.done&&t.checkInCompleteType==='full'&&(!latestFullByLabel[terminalLabel]||date>latestFullByLabel[terminalLabel]))latestFullByLabel[terminalLabel]=date;
     var group = groupMap[groupKey] || {firstDate:'', count:0};
     if (!t.done) {
       group.count++;
@@ -11092,7 +11161,8 @@ function _getUnfinishedFromHistory() {
   // 转成数组，计算未完成天数，按天数降序排列
   var result = Object.keys(groupMap).filter(function(groupKey) {
     var item = groupMap[groupKey];
-    return item && !item.done && item.count > 0 && !hidden[_continueHideKey(item.task, item.label)];
+    var terminalDate=item&&latestFullByLabel[_checkInTerminalLabel(item.task)];
+    return item && !item.done && item.count > 0 && !(terminalDate&&terminalDate>=item.latestDate) && !hidden[_continueHideKey(item.task, item.label)];
   }).map(function(groupKey) {
     var item = groupMap[groupKey];
     var firstTs = new Date(item.firstDate + 'T00:00:00');
@@ -11555,6 +11625,7 @@ function autoCheckInContinue() {
     }
     dayKeys.sort();
     var latestByChain = {};
+    var latestFullByLabel = {};
     dayKeys.forEach(function(storageKey){
       var sourceDate = storageKey.slice(7);
       var sourceDay;
@@ -11570,6 +11641,8 @@ function autoCheckInContinue() {
         // isCheckInTask=false 且仍有链 ID 的状态也必须覆盖旧状态；这是取消打卡。
         if (!task || (!task.isCheckInTask && !task._chainId && !task._continuedFrom)) return;
         var chainKey = _taskChainKey(task);
+        var terminalLabel=_checkInTerminalLabel(task);
+        if(terminalLabel&&task.done&&task.checkInCompleteType==='full'&&(!latestFullByLabel[terminalLabel]||sourceDate>latestFullByLabel[terminalLabel]))latestFullByLabel[terminalLabel]=sourceDate;
         latestByChain[chainKey] = {
           task:task,
           fromMorning:entry.fromMorning,
@@ -11581,7 +11654,8 @@ function autoCheckInContinue() {
     });
     var checkInTasks = Object.keys(latestByChain).map(function(key){ return latestByChain[key]; }).filter(function(entry){
       var task = entry.task;
-      return task.isCheckInTask && (!task.done || task.checkInCompleteType === 'daily');
+      var terminalDate=latestFullByLabel[_checkInTerminalLabel(task)];
+      return task.isCheckInTask && (!task.done || task.checkInCompleteType === 'daily') && !(terminalDate&&terminalDate>=entry.sourceDate);
     });
     if (!checkInTasks.length) return;
 
@@ -11860,11 +11934,10 @@ window.WorkflowMaintenance = {
   }
 
   function updateMdFloatPreview(el, html, caretMarker){
-    if(!_mdFloatMode) return;
+    if(!_mdFloatMode || !el || _mdFloatSource !== el) return;
     var box = ensureMdFloatPreview();
     var body = document.getElementById('mdFloatBody');
     var title = document.getElementById('mdFloatTitle');
-    _mdFloatSource = el || _mdFloatSource;
     if(title) title.textContent = _inputPreviewLabel(_mdFloatSource);
     box.style.display = html ? 'flex' : 'none';
     if(body) {
@@ -12003,8 +12076,8 @@ window.WorkflowMaintenance = {
   }
   window._applyPopoutTheme=_applyPopoutTheme;
 
-  function _openPopoutShell(title){
-    _mdPopoutWindow=window.open('','workflow_md_preview','popup=yes,width=620,height=720,resizable=yes,scrollbars=yes');
+  function _openPopoutShell(title,targetWindow){
+    _mdPopoutWindow=targetWindow||window.open('','workflow_md_preview','popup=yes,width=620,height=720,resizable=yes,scrollbars=yes');
     if(!_mdPopoutWindow){showToast('请允许浏览器弹出独立预览窗口','warn');return null;}
     _mdPopoutWindow.document.open();
     _mdPopoutWindow.document.write('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta id="previewThemeColor" name="theme-color" content=""><title>'+esc(title||'实时预览')+'</title><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"><style>'+
@@ -12020,6 +12093,21 @@ window.WorkflowMaintenance = {
     return _mdPopoutWindow;
   }
 
+  function _openPersistentPopoutShell(title,onReady){
+    var pip=window.documentPictureInPicture;
+    if(pip&&typeof pip.requestWindow==='function'){
+      pip.requestWindow({width:620,height:720}).then(function(pipWindow){
+        if(_openPopoutShell(title,pipWindow)&&typeof onReady==='function')onReady();
+      }).catch(function(){
+        if(_openPopoutShell(title)&&typeof onReady==='function')onReady();
+      });
+      return true;
+    }
+    if(!_openPopoutShell(title))return false;
+    if(typeof onReady==='function')onReady();
+    return true;
+  }
+
   function updateMdPopoutPreview(el,html,caretMarker){
     if(!_mdPopoutWindow||_mdPopoutWindow.closed||_mdPopoutSource!==el)return;
     var body=_mdPopoutWindow.document.getElementById('previewBody');
@@ -12032,15 +12120,15 @@ window.WorkflowMaintenance = {
   function openMdPopoutPreview(el){
     _mdPopoutSource=el;
     _mdPopoutNoteId='';
-    if(!_openPopoutShell(_inputPreviewLabel(el)))return;
-    if(typeof el._mdUpdate==='function')el._mdUpdate();
+    _openPersistentPopoutShell(_inputPreviewLabel(el),function(){if(typeof el._mdUpdate==='function')el._mdUpdate();});
   }
   window.openMdPopoutPreview=openMdPopoutPreview;
   window.openNotePopoutPreview=function(id){
     var note=_readNote(id);_mdPopoutSource=null;_mdPopoutNoteId=String(id);
-    if(!_openPopoutShell('随手小记 · 双屏预览'))return;
-    var body=_mdPopoutWindow.document.getElementById('previewBody');
-    _renderStaticNoteContainer(body,String(id),note.content||'',0);
+    _openPersistentPopoutShell('随手小记 · 双屏预览',function(){
+      var body=_mdPopoutWindow.document.getElementById('previewBody');
+      _renderStaticNoteContainer(body,String(id),note.content||'',0);
+    });
   };
 
   if(typeof MutationObserver!=='undefined'){
@@ -12051,18 +12139,12 @@ window.WorkflowMaintenance = {
 
   function refreshMdFloatFromActive(){
     if(!_mdFloatMode) return;
-    var el = (document.activeElement && document.activeElement._mdAttached) ? document.activeElement : _mdFloatSource;
+    var el = _mdFloatSource;
     if(el && typeof el._mdUpdate === 'function') el._mdUpdate();
   }
 
   function shouldUpdateMdFloat(el){
-    if(!_mdFloatMode || !el) return false;
-    if(_mdFloatSource === el) return true;
-    if(document.activeElement === el) {
-      _mdFloatSource = el;
-      return true;
-    }
-    return false;
+    return !!(_mdFloatMode && el && _mdFloatSource === el);
   }
 
   window.toggleMdFloatPreview = function(force){
@@ -12193,7 +12275,12 @@ window.WorkflowMaintenance = {
       var val = el.value || el.textContent || '';
       if (!needsRender(val)) {
         preview.style.display = 'none';
-        if(_mdFloatSource === el) updateMdFloatPreview(el, '');
+        // 小窗只跟随用户通过对应按钮明确选择的输入框；普通焦点变化不能换源。
+        var plainHtml=String(val||'').trim()?renderMDMath(String(val)):'<div style="color:var(--text4);padding:8px 0">当前输入框暂无可预览内容</div>';
+        updateMdPopoutPreview(el,plainHtml,'');
+        if(_mdFloatMode&&_mdFloatSource===el){
+          updateMdFloatPreview(el,plainHtml,'');
+        }
         return;
       }
       var payload=_previewRenderPayload(val,el),rendered=payload.html;
@@ -12215,7 +12302,7 @@ window.WorkflowMaintenance = {
     el.addEventListener('keyup', update);
     el.addEventListener('change', update);
     el.addEventListener('blur', update);
-    el.addEventListener('focus', function(){ _mdFloatSource=el; _mdPopoutSource=el; update(); });
+    el.addEventListener('focus', update);
     update();
   }
 
@@ -12464,10 +12551,10 @@ window.handleImportFile = function(event) {
 
 <!--
 workflow_tool build
-version: 2026.08.12.2
-sourceSha256: a0e7198ba27ee716d39e18aa8d149d3355316cb581b25bc53a7659d5286ae072
-configSha256: 6ff181f8a2bea65a54d5dbccc1ebcd9d6db00640c5c533e1d2c73c762dd52da1
-coreSha256: 76c73eb56ca5121ab029881c24491585af0568aced318dc94bab29a03f7c23fb
+version: 2026.08.14.2
+sourceSha256: 83fd42271710272109a9f8a7ff256b5e7cf2511d51794254d4512585ef08b719
+configSha256: 32b7515fc746b67cbfaa53d299754c9c92d41c7b3afef6e8939df73ad8395cdb
+coreSha256: a37b0de74e36858958583978b532413971fc99908dcb2d41a494d5c17bc326f9
 appSha256: 2f24aa03f02a5b051051aad95e186b81abef342d0af6958c66b79307c3dc0db3
 exportSha256: 13ad148412f079c37fed48892779a4c15a69b986b274bf432dd0506e64c0fa2a
 syncSha256: d253ac2b5da24d6ab82cae5c41b91c72dc35ffda76ed3b160b3eb4d4025154ea
@@ -12475,5 +12562,5 @@ historySha256: d2d96792bc489871e1e12fdf2483793e1781fec5835bae872974bc6b66894a79
 tasksSha256: cf7b1e78be5c87a40720433883aa80f4c8e36fe389400e217af9bb744ad8a590
 researchSha256: 7f18bf83e2678ea03658117f346225a9af8304668c9f622903770f0292e2c5a8
 stylesSha256: 438038ffa6949e8cb705df0dbad8d9a17ed29abd17f0c072fc70f88118cf55be
-builtAt: 2026-08-12T07:33:19.279Z
+builtAt: 2026-08-14T08:55:51.745Z
 -->
