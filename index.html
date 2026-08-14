@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <meta name="theme-color" content="#4f46e5">
-<meta name="workflow-version" content="2026.08.14.2">
+<meta name="workflow-version" content="2026.08.14.3">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="工作流">
@@ -1216,7 +1216,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   else root.WorkflowConfig = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
   return {
-    appVersion: '2026.08.14.2',
+    appVersion: '2026.08.14.3',
     schemaVersion: 7,
     typeLabels: {
       general: '通用',
@@ -3091,7 +3091,7 @@ var driveFileId = localStorage.getItem('drive_file_id') || null;
 var accessToken = null;
 var syncInProgress = false;
 var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 7;
-var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.08.14.2';
+var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.08.14.3';
 
 var tokenClient = null;
 var _syncReconcileInProgress = false;
@@ -3587,6 +3587,8 @@ function disconnectGitHub() {
 }
 
 function collectAllData() {
+  if(typeof _flushWeeklyInputSave==='function')_flushWeeklyInputSave();
+  if(typeof _flushResearchStateSave==='function')_flushResearchStateSave();
   var data = {};
   try {
     for (var i = 0; i < localStorage.length; i++) {
@@ -3967,6 +3969,8 @@ function _applyWorkflowBackupData(data, options) {
 
 function _refreshWorkflowAfterDataChange() {
   try {
+    if(typeof window._resetResearchStateCache==='function')window._resetResearchStateCache();
+    if(typeof window._resetWeeklyInputCache==='function')window._resetWeeklyInputCache();
     today = localDateStr();
     wkKey = 'wf_week_' + getWkId();
     if(typeof applyTheme === 'function') applyTheme(getTheme());
@@ -6190,16 +6194,14 @@ _appUpdateTimer=setInterval(_checkForAppUpdate,10*60*1000);
   window.refreshCalendarIcons = function(){ hydrate(document.body); refresh(); };
   function start(){
     hydrate(document.body);
-    var queued = false;
+    var queued=false;
     function queueHydrate(){
-      if(queued) return;
-      queued = true;
-      setTimeout(function(){ queued = false; hydrate(document.body); refresh(); }, 0);
+      if(queued)return;queued=true;
+      setTimeout(function(){queued=false;hydrate(document.body);refresh();},0);
     }
-    document.addEventListener('click', queueHydrate);
-    document.addEventListener('change', queueHydrate);
-    document.addEventListener('input', queueHydrate);
-    setInterval(function(){ hydrate(document.body); refresh(); }, 60 * 1000);
+    document.addEventListener('click',queueHydrate);
+    document.addEventListener('change',queueHydrate);
+    setInterval(refresh,60*1000);
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, {once:true});
   else start();
@@ -6859,10 +6861,26 @@ function loadDay(d){
     return emptyDay();
   }
 }
-function saveDay(d,data){
+var _derivedUiRefreshTimer=null;
+var _autoSnapshotScheduled=false;
+function _refreshDerivedTodayUi(){
+  clearTimeout(_derivedUiRefreshTimer);_derivedUiRefreshTimer=null;
+  updateProgress();updateStreak();updateClearCompletedBtn();checkAllDone();
+}
+function _scheduleDerivedTodayUi(){clearTimeout(_derivedUiRefreshTimer);_derivedUiRefreshTimer=setTimeout(_refreshDerivedTodayUi,400);}
+function _scheduleAutoSnapshot(){
+  if(_autoSnapshotScheduled)return;
+  var last=parseInt(localStorage.getItem('wf_last_snapshot_at')||'0',10);
+  if(Date.now()-last<10*60*1000)return;
+  _autoSnapshotScheduled=true;
+  var run=function(){_autoSnapshotScheduled=false;_createLocalSnapshot('auto-save',true);};
+  if(typeof requestIdleCallback==='function')requestIdleCallback(run,{timeout:2000});else setTimeout(run,600);
+}
+function saveDay(d,data,options){
   data = _normalizeDayData(data);
-  _createLocalSnapshot('auto-save', true);
-  localStorage.setItem(dayKey(d), JSON.stringify(data)); flash(); updateProgress(); updateStreak(); updateClearCompletedBtn(); checkAllDone();
+  _scheduleAutoSnapshot();
+  localStorage.setItem(dayKey(d), JSON.stringify(data));flash();
+  if(options&&options.deferUi)_scheduleDerivedTodayUi();else _refreshDerivedTodayUi();
 }
 
 var WF_MIGRATIONS = {
@@ -7469,7 +7487,7 @@ function _renderMorningClosureEditor(t){
 }
 function _refreshMorningTaskPreview(){var mp=document.getElementById('morningTaskObjPreview');if(!mp)return;var t=todayData&&todayData.m&&todayData.m.taskObj;mp.innerHTML=t?_renderTaskReadonlyDetails(t)+_renderMorningClosureEditor(t):'';if(typeof window.refreshMDPreviews==='function')window.refreshMDPreviews();}
 window.toggleMorningClosure=function(){window._morningClosureOpen=!window._morningClosureOpen;renderMorningActions();_refreshMorningTaskPreview();};
-window.updMorningClosure=function(field,val){var t=_ensureMorningTaskObj(todayData);if(!t)return;t[field]=val;saveDay(today,todayData);};
+window.updMorningClosure=function(field,val){var t=_ensureMorningTaskObj(todayData);if(!t)return;t[field]=val;_queueTodayInputSave(true);};
 window.openMorningProjectMenu = function(event){
   var t = _ensureMorningTaskObj(todayData);
   if(!t) { showToast('请先填写晨间任务', 'warn'); return; }
@@ -7754,8 +7772,6 @@ window.saveToday = function(){
   el = document.getElementById('mTask'); if(el) todayData.m.task = el.value;
   el = document.getElementById('mMarker'); if(el) todayData.m.marker = el.value;
   _syncMorningTaskObjFromFields(todayData.m);
-  _refreshMorningTaskPreview();
-  renderMorningActions();
   el = document.getElementById('eLog'); if(el) todayData.e.log = el.value;
   el = document.getElementById('eTomorrow'); if(el) todayData.e.tomorrow = el.value;
   el = document.getElementById('eHighlight'); if(el) todayData.e.highlight = el.value;
@@ -7763,53 +7779,33 @@ window.saveToday = function(){
   el = document.getElementById('rQ1'); if(el) todayData.r.q1 = el.value;
   el = document.getElementById('rQ2'); if(el) todayData.r.q2 = el.value;
   el = document.getElementById('rQ3'); if(el) todayData.r.q3 = el.value;
-  todayData.tasks.forEach(function(t){
-    if(t.done) return;
-    var el;
-    switch(t.type){
-      case 'general':
-        el = document.getElementById('tgw_'+t.id); if(el) t.what = el.value;
-        el = document.getElementById('tge_'+t.id); if(el) t.expect = el.value;
-        el = document.getElementById('tgb_'+t.id); if(el) t.because = el.value;
-        el = document.getElementById('tgv_'+t.id); if(el) t.verify = el.value;
-        break;
-      case 'calc':
-        el = document.getElementById('tcq_'+t.id); if(el) t.question = el.value;
-        el = document.getElementById('tcp_'+t.id); if(el) t.predict = el.value;
-        el = document.getElementById('tcb_'+t.id); if(el) t.because = el.value;
-        el = document.getElementById('tcv_'+t.id); if(el) t.verify = el.value;
-        el = document.getElementById('tcs_'+t.id); if(el) t.simpleTest = el.value;
-        break;
-      case 'reading':
-        el = document.getElementById('trs_'+t.id); if(el) t.source = el.value;
-        el = document.getElementById('trq_'+t.id); if(el) t.question = el.value;
-        el = document.getElementById('trm_'+t.id); if(el) t.method = el.value;
-        el = document.getElementById('trc_'+t.id); if(el) t.conclusion = el.value;
-        el = document.getElementById('tru_'+t.id); if(el) t.unanswered = el.value;
-        el = document.getElementById('tri_'+t.id); if(el) t.inspiration = el.value;
-        break;
-      case 'problem':
-        el = document.getElementById('tpr_'+t.id); if(el) t.problem = el.value;
-        el = document.getElementById('tps_'+t.id); if(el) t.step = parseInt(el.value);
-        t.stepThoughts = _problemStepThoughts(t);
-        for(var _psi=0; _psi<6; _psi++){
-          el = document.getElementById('tpst_'+t.id+'_'+_psi); if(el) t.stepThoughts[_psi] = el.value;
-        }
-        el = document.getElementById('tpa_'+t.id); if(el) t.approach = el.value;
-        break;
-      case 'decision':
-        el = document.getElementById('tdc_'+t.id); if(el) t.choice = el.value;
-        el = document.getElementById('tdv_'+t.id); if(el) t.valueRating = el.value;
-        el = document.getElementById('tdf_'+t.id); if(el) t.feasRating = el.value;
-        el = document.getElementById('tdcl_'+t.id); if(el) t.conclusion = el.value;
-        break;
-    }
-  });
-  clearTimeout(saveToday._t);
-  saveToday._t = setTimeout(function(){
-    saveDay(today, todayData);
-  }, 300);
+  // 动态任务字段的 oninput 已通过 updTask/updProblemStepThought 同步到 todayData；
+  // 此处不再为每个普通输入字符重新扫描当天全部任务 DOM。
+  var activeId=document.activeElement&&document.activeElement.id;
+  _queueTodayInputSave(activeId==='mTask'||activeId==='mMarker'||activeId==='mDone');
 };
+
+var _todayInputNeedsMorningRefresh=false;
+function _commitTodayInputSave(){
+  clearTimeout(window.saveToday&&window.saveToday._t);
+  if(window.saveToday)window.saveToday._t=null;
+  if(!todayData)return;
+  if(_todayInputNeedsMorningRefresh){_refreshMorningTaskPreview();renderMorningActions();}
+  _todayInputNeedsMorningRefresh=false;
+  window._todayInputSaveCount=(window._todayInputSaveCount||0)+1;
+  saveDay(today,todayData,{deferUi:true});
+}
+function _queueTodayInputSave(refreshMorning){
+  if(refreshMorning)_todayInputNeedsMorningRefresh=true;
+  clearTimeout(window.saveToday&&window.saveToday._t);
+  window.saveToday._t=setTimeout(_commitTodayInputSave,320);
+}
+window.addEventListener('pagehide',function(){
+  if(window.saveToday&&window.saveToday._t)_commitTodayInputSave();
+});
+document.addEventListener('focusout',function(){
+  if(window.saveToday&&window.saveToday._t)_commitTodayInputSave();
+});
 
 window.saveWorkTime = function(){
   if(!todayData) return;
@@ -7825,7 +7821,7 @@ window.saveWorkTime = function(){
 
 window.updTask = function(id, field, val){
   var t = todayData.tasks.find(function(x){return x.id === id;});
-  if(t){ t[field] = val; if(field==='project')_alignTaskResearchProject(t,val); saveDay(today, todayData); }
+  if(t){ t[field] = val; if(field==='project')_alignTaskResearchProject(t,val); _queueTodayInputSave(); }
 };
 window.toggleTaskPin = function(id){
   var t = todayData.tasks.find(function(x){return x.id === id;});
@@ -7837,7 +7833,7 @@ window.toggleTaskPin = function(id){
 };
 window.updProblemStepThought = function(id, idx, val){
   var t = todayData.tasks.find(function(x){return x.id === id;});
-  if(t){ _setProblemStepThought(t, idx, val); saveDay(today, todayData); }
+  if(t){ _setProblemStepThought(t, idx, val); _queueTodayInputSave(); }
 };
 
 window.toggleTask = function(id){
@@ -8328,7 +8324,6 @@ function renderTasks(){
     var taskId = card.getAttribute('data-task-id');
     if(taskId) attachGestures(card, taskId);
   });
-  if(typeof window.refreshMDPreviews === 'function') window.refreshMDPreviews();
 }
 
 window.toggleTaskCollapse = function(id){
@@ -8473,7 +8468,6 @@ function updatePetWidget(){
   choices.innerHTML = Object.keys(RESEARCH_PETS).map(function(k){
     return '<button class="pet-choice '+(k===s.pet?'active':'')+'" onclick="selectResearchPet(\''+k+'\')">'+RESEARCH_PETS[k].stages[1]+' '+RESEARCH_PETS[k].name+'</button>';
   }).join('');
-  if(typeof window.refreshMDPreviews === 'function') window.refreshMDPreviews();
 }
 window.togglePetChoices = function(){
   var el = document.getElementById('petChoices');
@@ -9584,8 +9578,28 @@ window.deleteHistoryDay = function(date) {
 };
 
 // ===== Weekly =====
+var _weeklyInputKey='';
+var _weeklyInputData=null;
+var _weeklyInputSaveTimer=null;
+function _flushWeeklyInputSave(){
+  clearTimeout(_weeklyInputSaveTimer);_weeklyInputSaveTimer=null;
+  if(!_weeklyInputKey||!_weeklyInputData)return;
+  localStorage.setItem(_weeklyInputKey,JSON.stringify(_weeklyInputData));flash();
+  _weeklyInputKey='';_weeklyInputData=null;
+  window._weeklyInputSaveCount=(window._weeklyInputSaveCount||0)+1;
+}
+function _weeklyDataForInput(){
+  var key=currentWkKey();
+  if(_weeklyInputKey&&_weeklyInputKey!==key)_flushWeeklyInputSave();
+  if(!_weeklyInputData){_weeklyInputKey=key;_weeklyInputData=loadWk();}
+  return _weeklyInputData;
+}
+function _queueWeeklyInputSave(){clearTimeout(_weeklyInputSaveTimer);_weeklyInputSaveTimer=setTimeout(_flushWeeklyInputSave,260);}
+window._resetWeeklyInputCache=function(){clearTimeout(_weeklyInputSaveTimer);_weeklyInputSaveTimer=null;_weeklyInputKey='';_weeklyInputData=null;};
+window.addEventListener('pagehide',_flushWeeklyInputSave);
+document.addEventListener('focusout',function(event){if(_weeklyInputSaveTimer&&event.target&&event.target.closest&&event.target.closest('#pane-weekly'))_flushWeeklyInputSave();});
 window.initWeekly = function(){
-  var w = loadWk();
+  var w = _weeklyInputKey===currentWkKey()&&_weeklyInputData?_weeklyInputData:loadWk();
   document.getElementById('wkUnder').value = w.under || '';
   var fields = {wkMainQuestion:'mainQuestion',wkEvidence:'evidence',wkExpectationChanges:'expectationChanges',wkRepeatedConfusions:'repeatedConfusions',wkTechnicalWork:'technicalWork',wkOutputs:'outputs',wkNextMainQuestion:'nextMainQuestion',wkStopRule:'stopRule'};
   Object.keys(fields).forEach(function(id){ var el=document.getElementById(id); if(el) el.value=w[fields[id]]||''; });
@@ -9632,6 +9646,7 @@ function renderWkNav(){
 }
 window.wkNav = function(dir){
   if(_wkOffset+dir>0) return; // 不能看未来
+  _flushWeeklyInputSave();
   _wkDateQuery='';
   _wkOffset += dir;
   initWeekly();
@@ -9670,12 +9685,13 @@ window.jumpToWeek = function(dateValue){
   var selected=parseDateLocal(normalized), selectedMon=_mondayForDate(selected), currentMon=_mondayForDate(new Date());
   var diff=Math.round((selectedMon.getTime()-currentMon.getTime())/(7*24*60*60*1000));
   if(diff>0){showToast('未来周暂不提供复盘编辑','info');diff=0;normalized=localDateStr(new Date());}
+  _flushWeeklyInputSave();
   _wkDateQuery=normalized;
   _wkOffset=diff;
   initWeekly();
   return true;
 };
-window.jumpToCurrentWeek = function(){_wkDateQuery='';_wkOffset=0;initWeekly();};
+window.jumpToCurrentWeek = function(){_flushWeeklyInputSave();_wkDateQuery='';_wkOffset=0;initWeekly();};
 
 window.renderWeeklySummary = function(){
   var monday = _wkMonday();
@@ -9714,15 +9730,15 @@ window.renderWeeklySummary = function(){
 };
 
 window.saveWeekly = function(){
-  var w = loadWk();
+  var w = _weeklyDataForInput();
   w.under = document.getElementById('wkUnder').value;
   var fields = {wkMainQuestion:'mainQuestion',wkEvidence:'evidence',wkExpectationChanges:'expectationChanges',wkRepeatedConfusions:'repeatedConfusions',wkTechnicalWork:'technicalWork',wkOutputs:'outputs',wkNextMainQuestion:'nextMainQuestion',wkStopRule:'stopRule'};
   Object.keys(fields).forEach(function(id){ var el=document.getElementById(id); if(el) w[fields[id]]=el.value; });
-  localStorage.setItem(currentWkKey(), JSON.stringify(w));
-  flash();
+  _queueWeeklyInputSave();
 };
 
 window.addWeekTask = function(){
+  _flushWeeklyInputSave();
   var w = loadWk();
   w.tasks = w.tasks || [];
   w.tasks.push({task:'', value:'high', feas:'high'});
@@ -9731,11 +9747,12 @@ window.addWeekTask = function(){
 };
 
 window.updWkTask = function(i, field, val){
-  var w = loadWk();
-  if(w.tasks[i]){ w.tasks[i][field] = val; localStorage.setItem(currentWkKey(), JSON.stringify(w)); flash(); }
+  var w = _weeklyDataForInput();
+  if(w.tasks[i]){w.tasks[i][field]=val;_queueWeeklyInputSave();}
 };
 
 window.delWkTask = function(i){
+  _flushWeeklyInputSave();
   var w = loadWk();
   w.tasks.splice(i, 1);
   localStorage.setItem(currentWkKey(), JSON.stringify(w));
@@ -9763,16 +9780,34 @@ function renderWkTasks(tasks){
 var _researchMode = 'projects';
 var _researchProjectId = '';
 var _selectedResearchOutputId = '';
+var _researchStateCache=null;
+var _researchStateSaveTimer=null;
+var _researchStateDirty=false;
 function _loadResearchState(){
+  if(_researchStateCache)return _researchStateCache;
   var raw = localStorage.getItem('wf_research_state');
   var value = null;
   try { value = raw ? JSON.parse(raw) : null; } catch(e) {}
-  return window.WorkflowResearch ? window.WorkflowResearch.normalizeState(value) : (value || {projects:[],questions:[],outputs:[]});
+  _researchStateCache=window.WorkflowResearch ? window.WorkflowResearch.normalizeState(value) : (value || {projects:[],questions:[],outputs:[]});
+  return _researchStateCache;
 }
-function _saveResearchState(state){
+function _flushResearchStateSave(){
+  clearTimeout(_researchStateSaveTimer);_researchStateSaveTimer=null;
+  if(!_researchStateDirty||!_researchStateCache)return;
+  localStorage.setItem('wf_research_state',JSON.stringify(_researchStateCache));
+  window._researchStateWriteCount=(window._researchStateWriteCount||0)+1;
+  _researchStateDirty=false;
+}
+function _saveResearchState(state,deferred){
   state = window.WorkflowResearch ? window.WorkflowResearch.normalizeState(state) : state;
-  localStorage.setItem('wf_research_state', JSON.stringify(state));
+  _researchStateCache=state;_researchStateDirty=true;
+  clearTimeout(_researchStateSaveTimer);
+  if(deferred)_researchStateSaveTimer=setTimeout(_flushResearchStateSave,220);
+  else _flushResearchStateSave();
 }
+window._resetResearchStateCache=function(){clearTimeout(_researchStateSaveTimer);_researchStateSaveTimer=null;_researchStateDirty=false;_researchStateCache=null;};
+window.addEventListener('pagehide',_flushResearchStateSave);
+document.addEventListener('focusout',function(event){if(_researchStateSaveTimer&&event.target&&event.target.closest&&event.target.closest('#pane-research'))_flushResearchStateSave();});
 function _researchProject(state){
   state = state || _loadResearchState();
   var project = state.projects.find(function(p){ return p.id === _researchProjectId; });
@@ -9870,7 +9905,7 @@ window.updateResearchProject = function(id,key,value){
   if(key==='name'&&!String(value||'').trim())return;
   p[key]=value; p.updatedAt=new Date().toISOString();
   if(key==='name' || key==='stage')_appendResearchEvent(p,'project-field','更新'+(RESEARCH_FIELD_LABELS[key]||key),RESEARCH_VALUE_LABELS[value]||value,key);
-  _saveResearchState(state);
+  _saveResearchState(state,key!=='name'&&key!=='stage');
   if(key==='name'){_renameResearchTaskProject(id,oldName,value);document.querySelectorAll('.research-project-btn[data-id="'+id+'"]').forEach(function(btn){btn.textContent=value;});}
 };
 window.deleteResearchProject = function(id){
@@ -9901,10 +9936,10 @@ function _renderResearchProjects(el){
   el.innerHTML='<div class="research-layout">'+nav+editor+'</div>';
 }
 window.addResearchClaim=function(pid){var s=_loadResearchState(),p=s.projects.find(function(x){return x.id===pid;});if(!p)return;p.claims.push({id:WorkflowResearch.uid('claim'),text:'',status:'candidate'});_saveResearchState(s);initResearch();};
-window.updateResearchClaim=function(pid,id,key,val){var s=_loadResearchState(),p=s.projects.find(function(x){return x.id===pid;}),c=p&&p.claims.find(function(x){return x.id===id;});if(c){c[key]=val;if(key==='status')_appendResearchEvent(p,'claim-status','判断状态变为 '+(RESEARCH_VALUE_LABELS[val]||val),c.text||'未命名判断',id);_saveResearchState(s);}};
+window.updateResearchClaim=function(pid,id,key,val){var s=_loadResearchState(),p=s.projects.find(function(x){return x.id===pid;}),c=p&&p.claims.find(function(x){return x.id===id;});if(c){c[key]=val;if(key==='status')_appendResearchEvent(p,'claim-status','判断状态变为 '+(RESEARCH_VALUE_LABELS[val]||val),c.text||'未命名判断',id);_saveResearchState(s,key==='text');}};
 window.deleteResearchClaim=function(pid,id){var s=_loadResearchState(),p=s.projects.find(function(x){return x.id===pid;}),c=p&&p.claims.find(function(x){return x.id===id;});if(p){if(c)_appendResearchEvent(p,'claim-delete','删除核心判断',c.text,id);p.claims=p.claims.filter(function(x){return x.id!==id;});(p.evidence||[]).forEach(function(e){if(e.claimId===id)delete e.claimId;});_saveResearchState(s);initResearch();}};
 window.addResearchEvidence=function(pid){var s=_loadResearchState(),p=s.projects.find(function(x){return x.id===pid;});if(!p)return;p.evidence.push({id:WorkflowResearch.uid('evidence'),text:'',source:'',direction:'neutral',confidence:'mid'});_saveResearchState(s);initResearch();};
-window.updateResearchEvidence=function(pid,id,key,val){var s=_loadResearchState(),p=s.projects.find(function(x){return x.id===pid;}),e=p&&p.evidence.find(function(x){return x.id===id;});if(e){e[key]=val;if(key==='direction'||key==='confidence'||key==='claimId'){var keyLabel={direction:'方向',confidence:'可信度',claimId:'关联判断'}[key];var valueLabel=key==='claimId'?(((p.claims||[]).find(function(c){return c.id===val;})||{}).text||'未关联判断'):(RESEARCH_VALUE_LABELS[val]||val);_appendResearchEvent(p,'evidence-meta','更新证据'+keyLabel,(e.text||e.source||'未命名证据')+' · '+valueLabel,id);}_saveResearchState(s);}};
+window.updateResearchEvidence=function(pid,id,key,val){var s=_loadResearchState(),p=s.projects.find(function(x){return x.id===pid;}),e=p&&p.evidence.find(function(x){return x.id===id;});if(e){e[key]=val;if(key==='direction'||key==='confidence'||key==='claimId'){var keyLabel={direction:'方向',confidence:'可信度',claimId:'关联判断'}[key];var valueLabel=key==='claimId'?(((p.claims||[]).find(function(c){return c.id===val;})||{}).text||'未关联判断'):(RESEARCH_VALUE_LABELS[val]||val);_appendResearchEvent(p,'evidence-meta','更新证据'+keyLabel,(e.text||e.source||'未命名证据')+' · '+valueLabel,id);}_saveResearchState(s,key==='text'||key==='source');}};
 window.deleteResearchEvidence=function(pid,id){var s=_loadResearchState(),p=s.projects.find(function(x){return x.id===pid;}),e=p&&p.evidence.find(function(x){return x.id===id;});if(p){if(e)_appendResearchEvent(p,'evidence-delete','删除研究证据',e.text||e.source,id);p.evidence=p.evidence.filter(function(x){return x.id!==id;});_saveResearchState(s);initResearch();}};
 
 function _renderResearchQuestions(el){
@@ -9914,7 +9949,7 @@ function _renderResearchQuestions(el){
   el.innerHTML='<div class="flex-between" style="margin-bottom:10px"><span style="font-size:12px;color:var(--text3)">只保留会改变判断或行动的问题</span><button class="btn btn-primary btn-sm" onclick="addResearchQuestion()">＋ 问题</button></div>'+(items||'<div class="empty"><div class="empty-title">问题池为空</div></div>');
 }
 window.addResearchQuestion=function(){var s=_loadResearchState(),p=_researchProject(s);s.questions.unshift({id:WorkflowResearch.uid('question'),projectId:p?p.id:'',question:'',gap:'',status:'open'});_saveResearchState(s);initResearch();};
-window.updateResearchQuestion=function(id,key,val){var s=_loadResearchState(),q=s.questions.find(function(x){return x.id===id;});if(q){var oldProject=q.projectId;q[key]=val;var p=s.projects.find(function(x){return x.id===(q.projectId||oldProject);});if(p&&(key==='status'||key==='projectId'))_appendResearchEvent(p,'question-status',key==='status'?'问题状态变为 '+(RESEARCH_VALUE_LABELS[val]||val):'问题归属到当前项目',q.question||'未命名问题',id);_saveResearchState(s);}};
+window.updateResearchQuestion=function(id,key,val){var s=_loadResearchState(),q=s.questions.find(function(x){return x.id===id;});if(q){var oldProject=q.projectId;q[key]=val;var p=s.projects.find(function(x){return x.id===(q.projectId||oldProject);});if(p&&(key==='status'||key==='projectId'))_appendResearchEvent(p,'question-status',key==='status'?'问题状态变为 '+(RESEARCH_VALUE_LABELS[val]||val):'问题归属到当前项目',q.question||'未命名问题',id);_saveResearchState(s,key==='question'||key==='gap');}};
 window.deleteResearchQuestion=function(id){var s=_loadResearchState(),q=s.questions.find(function(x){return x.id===id;}),p=q&&s.projects.find(function(x){return x.id===q.projectId;});if(p)_appendResearchEvent(p,'question-delete','删除研究问题',q.question,id);s.questions=s.questions.filter(function(x){return x.id!==id;});_saveResearchState(s);initResearch();};
 
 function _researchTimelineMarkdown(p,limit){
@@ -9949,7 +9984,7 @@ function _researchOutputMarkdown(type,p,state){
 window.generateResearchOutput=function(type){var s=_loadResearchState(),p=_researchProject(s);if(!p){showToast('请先建立研究项目','warn');return;}var labels={advisor:'组会沟通',paper:'论文骨架',figures:'图表清单',questions:'问题清单',repro:'复现记录'};_appendResearchEvent(p,'output','生成'+labels[type],p.name);var o={id:WorkflowResearch.uid('output'),projectId:p.id,type:type,title:labels[type]+' · '+p.name,status:'draft',content:_researchOutputMarkdown(type,p,s)+'\n\n## 项目近期演化\n'+_researchTimelineMarkdown(p,20),createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};s.outputs.unshift(o);_selectedResearchOutputId=o.id;_saveResearchState(s);initResearch();};
 function _renderResearchOutputs(el){var s=_loadResearchState(),selected=s.outputs.find(function(o){return o.id===_selectedResearchOutputId;})||s.outputs[0];if(selected)_selectedResearchOutputId=selected.id;var actions='<div class="research-output-actions">'+[['advisor','组会沟通'],['paper','论文骨架'],['figures','图表清单'],['questions','问题清单'],['repro','复现记录']].map(function(x){return '<button class="btn btn-secondary btn-sm" onclick="generateResearchOutput(\''+x[0]+'\')">'+x[1]+'</button>';}).join('')+'</div>';var nav=s.outputs.map(function(o){return '<button class="research-project-btn'+(selected&&selected.id===o.id?' active':'')+'" onclick="selectResearchOutput(\''+o.id+'\')">'+esc(o.title)+'</button>';}).join('');var editor=selected?'<div class="research-editor"><div class="research-title-row"><input value="'+esc(selected.title)+'" oninput="updateResearchOutput(\''+selected.id+'\',\'title\',this.value)"><select onchange="updateResearchOutput(\''+selected.id+'\',\'status\',this.value)">'+_closureOptions(selected.status,[['draft','草稿'],['ready','可使用'],['shared','已沟通'],['archived','归档']])+'</select><button class="btn btn-secondary btn-xs" onclick="openResearchOutputExport()">导出</button><button class="btn btn-danger btn-xs" onclick="deleteResearchOutput(\''+selected.id+'\')">×</button></div><div class="field"><label>成果内容</label><textarea style="min-height:320px" oninput="updateResearchOutput(\''+selected.id+'\',\'content\',this.value)">'+esc(selected.content||'')+'</textarea></div></div>':'<div class="empty"><div class="empty-title">选择上方模板生成成果草稿</div></div>';el.innerHTML=actions+'<div class="research-layout"><div class="research-nav">'+nav+'</div>'+editor+'</div>';if(typeof window.refreshMDPreviews==='function')window.refreshMDPreviews();}
 window.selectResearchOutput=function(id){_selectedResearchOutputId=id;initResearch();};
-window.updateResearchOutput=function(id,key,val){var s=_loadResearchState(),o=s.outputs.find(function(x){return x.id===id;});if(o){o[key]=val;o.updatedAt=new Date().toISOString();var p=s.projects.find(function(x){return x.id===o.projectId;});if(p&&key==='status')_appendResearchEvent(p,'output-status','成果状态变为 '+(RESEARCH_VALUE_LABELS[val]||val),o.title,id);_saveResearchState(s);}};
+window.updateResearchOutput=function(id,key,val){var s=_loadResearchState(),o=s.outputs.find(function(x){return x.id===id;});if(o){o[key]=val;o.updatedAt=new Date().toISOString();var p=s.projects.find(function(x){return x.id===o.projectId;});if(p&&key==='status')_appendResearchEvent(p,'output-status','成果状态变为 '+(RESEARCH_VALUE_LABELS[val]||val),o.title,id);_saveResearchState(s,key==='title'||key==='content');}};
 window.deleteResearchOutput=function(id){var s=_loadResearchState(),o=s.outputs.find(function(x){return x.id===id;}),p=o&&s.projects.find(function(x){return x.id===o.projectId;});if(p)_appendResearchEvent(p,'output-delete','删除成果草稿',o.title,id);s.outputs=s.outputs.filter(function(x){return x.id!==id;});_selectedResearchOutputId='';_saveResearchState(s);initResearch();};
 function _depositTaskObject(task,projectName,afterSave){var s=_loadResearchState(),p=s.projects.find(function(x){return x.id===task.projectId||x.name===projectName;});if(!p){p=WorkflowResearch.createProject(projectName);s.projects.push(p);}task.project=p.name;task.projectId=p.id;var evidenceData={text:task.evidence||task.actualResult||getTaskPrimaryField(task),source:task.artifact||today,direction:task.expectationMatch==='contrary'?'against':'support',confidence:task.confidence||'mid',taskId:task.id,date:today};var existingEvidence=p.evidence.find(function(e){return e.taskId===task.id&&e.date===today;});if(existingEvidence)Object.assign(existingEvidence,evidenceData);else p.evidence.push(Object.assign({id:WorkflowResearch.uid('evidence')},evidenceData));_appendResearchEvent(p,'task-deposit',existingEvidence?'更新任务沉淀':'沉淀任务结果',(getTaskPrimaryField(task)||'(空任务)')+(evidenceData.text?'\n结果 / 证据：'+evidenceData.text:'')+(evidenceData.source?'\n来源：'+evidenceData.source:''),task.id);if(task.unanswered&&!s.questions.some(function(q){return q.projectId===p.id&&q.question===task.unanswered;})){s.questions.push({id:WorkflowResearch.uid('question'),projectId:p.id,question:task.unanswered,gap:task.source||'',status:'open'});_appendResearchEvent(p,'question','由任务新增开放问题',task.unanswered,task.id);}task.workflowStage='deposited';_saveResearchState(s);afterSave();showToast(existingEvidence?'已更新研究地图中的证据':'已沉淀到研究地图','success');}
 window._depositTaskObject=_depositTaskObject;
@@ -9991,7 +10026,14 @@ window.renderNotes = function(){
     var preview = (n.content||'').replace(/\$[^$]+\$/g,'[公式]').slice(0,40) + ((n.content||'').length>40?'…':'');
     var isExpanded = window._noteExpandState && window._noteExpandState[n.id];
     var isEditing = window._noteEditState && window._noteEditState[n.id];
-    var rendered = _renderMDMaybe(n.content || '');
+    var rendered = isExpanded?_renderMDMaybe(n.content || ''):'';
+    var bodyHtml=isExpanded?'<div id="note_body_'+_exH(n.id)+'">'+
+        '<div id="note_render_'+_exH(n.id)+'" data-note-id="'+_exH(n.id)+'" class="math-preview note-reading-preview" style="display:'+(isEditing?'none':'block')+';font-size:13px;color:var(--text);line-height:1.7;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-xs);padding:10px 12px;word-break:break-word">'+rendered+'</div>'+
+        '<div class="field" id="note_edit_'+_exH(n.id)+'" style="display:'+(isEditing?'block':'none')+';margin-top:6px">'+
+          '<textarea id="note_'+_exH(n.id)+'" class="note-textarea" oninput="saveNote(\''+_exH(n.id)+'\')">'+_exH(n.content||'')+'</textarea>'+
+        '</div>'+
+        '<div style="text-align:right;margin-top:6px;display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap"><button class="btn btn-secondary btn-xs pin-btn '+(n.pinned?'active':'')+'" onclick="toggleNotePin(\''+_exH(n.id)+'\')" title="'+(n.pinned?'取消置顶':'置顶小记')+'">📌 '+(n.pinned?'已置顶':'置顶')+'</button><button class="btn btn-secondary btn-xs" onclick="openNotePopoutPreview(\''+_exH(n.id)+'\')" title="把预览移到独立浏览器窗口，可拖到另一块显示器">↗ 双屏预览</button><button class="btn btn-secondary btn-xs" onclick="toggleNoteEdit(\''+_exH(n.id)+'\')" title="编辑小记">'+(isEditing?'预览':'编辑')+'</button><button class="btn btn-danger btn-xs" onclick="deleteNote(\''+_exH(n.id)+'\')" title="删除">🗑️</button></div>'+
+      '</div>':'';
     return '<div class="note-card'+(n.pinned?' pinned-item':'')+'">'+
       '<div class="note-collapse-header" onclick="toggleNoteCollapse(\''+_exH(n.id)+'\')" style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--surface2);border-radius:var(--radius-sm);cursor:pointer;margin-bottom:'+(isExpanded?'8px':'0')+'">'+
         '<span style="font-size:12px;color:var(--text4)">'+(isExpanded?'▼':'▶')+'</span>'+
@@ -10000,13 +10042,7 @@ window.renderNotes = function(){
           '<span style="font-size:12px;color:var(--text3)">'+_exH(preview)+'</span>'+
         '</div>'+
       '</div>'+
-      '<div id="note_body_'+_exH(n.id)+'" style="display:'+(isExpanded?'block':'none')+'">'+
-        '<div id="note_render_'+_exH(n.id)+'" data-note-id="'+_exH(n.id)+'" class="math-preview note-reading-preview" style="display:'+(isEditing?'none':'block')+';font-size:13px;color:var(--text);line-height:1.7;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-xs);padding:10px 12px;word-break:break-word">'+rendered+'</div>'+
-        '<div class="field" id="note_edit_'+_exH(n.id)+'" style="display:'+(isEditing?'block':'none')+';margin-top:6px">'+
-          '<textarea id="note_'+_exH(n.id)+'" class="note-textarea" oninput="saveNote(\''+_exH(n.id)+'\')">'+_exH(n.content||'')+'</textarea>'+
-        '</div>'+
-        '<div style="text-align:right;margin-top:6px;display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap"><button class="btn btn-secondary btn-xs pin-btn '+(n.pinned?'active':'')+'" onclick="toggleNotePin(\''+_exH(n.id)+'\')" title="'+(n.pinned?'取消置顶':'置顶小记')+'">📌 '+(n.pinned?'已置顶':'置顶')+'</button><button class="btn btn-secondary btn-xs" onclick="openNotePopoutPreview(\''+_exH(n.id)+'\')" title="把预览移到独立浏览器窗口，可拖到另一块显示器">↗ 双屏预览</button><button class="btn btn-secondary btn-xs" onclick="toggleNoteEdit(\''+_exH(n.id)+'\')" title="编辑小记">'+(isEditing?'预览':'编辑')+'</button><button class="btn btn-danger btn-xs" onclick="deleteNote(\''+_exH(n.id)+'\')" title="删除">🗑️</button></div>'+
-      '</div>'+
+      bodyHtml+
     '</div>';
   }).join('');
   if (typeof window.renderMath === 'function') window.renderMath(list);
@@ -10174,7 +10210,9 @@ window.addNote = function(){
   }, 100);
 };
 
-window.saveNote = function(id){
+var _noteSaveTimers={};
+function _commitNoteSave(id){
+  if(_noteSaveTimers[id]){clearTimeout(_noteSaveTimers[id]);delete _noteSaveTimers[id];}
   var el = document.getElementById('note_'+id);
   if(!el) return;
   try {
@@ -10182,6 +10220,7 @@ window.saveNote = function(id){
     note.content = el.value;
     note.timestamp = note.timestamp || Date.now();
     localStorage.setItem('wf_note_'+id, JSON.stringify(note));
+    window._noteInputSaveCount=(window._noteInputSaveCount||0)+1;
     var rendered = document.getElementById('note_render_' + id);
     if(rendered) {
       rendered.innerHTML = _renderMDMaybe(note.content || '');
@@ -10190,7 +10229,13 @@ window.saveNote = function(id){
     if(typeof window.refreshNotePopout==='function')window.refreshNotePopout(id);
     flash();
   } catch(e){}
+}
+window.saveNote = function(id){
+  clearTimeout(_noteSaveTimers[id]);
+  _noteSaveTimers[id]=setTimeout(function(){_commitNoteSave(id);},140);
 };
+window.addEventListener('pagehide',function(){Object.keys(_noteSaveTimers).forEach(_commitNoteSave);});
+document.addEventListener('focusout',function(event){var match=event.target&&String(event.target.id||'').match(/^note_(.+)$/);if(match&&_noteSaveTimers[match[1]])_commitNoteSave(match[1]);});
 
 window.deleteNote = function(id){
   showConfirm('确定删除这条小记吗？', '🗑️', function(){
@@ -12272,6 +12317,7 @@ window.WorkflowMaintenance = {
     setMdFloatButtonState();
 
     function update() {
+      window._mdPreviewRenderCount=(window._mdPreviewRenderCount||0)+1;
       var val = el.value || el.textContent || '';
       if (!needsRender(val)) {
         preview.style.display = 'none';
@@ -12296,28 +12342,33 @@ window.WorkflowMaintenance = {
         syncPreviewScrollToCaret(previewBody,el,payload.marker);
       }
     }
-    el._mdUpdate = update;
+    var updateTimer=null;
+    function scheduleUpdate(){
+      clearTimeout(updateTimer);
+      updateTimer=setTimeout(function(){updateTimer=null;update();},80);
+    }
+    function updateNow(){clearTimeout(updateTimer);updateTimer=null;update();}
+    el._mdUpdate = updateNow;
 
-    el.addEventListener('input', update);
-    el.addEventListener('keyup', update);
-    el.addEventListener('change', update);
-    el.addEventListener('blur', update);
-    el.addEventListener('focus', update);
-    update();
+    el.addEventListener('input', scheduleUpdate);
+    el.addEventListener('keyup', scheduleUpdate);
+    el.addEventListener('change', updateNow);
+    el.addEventListener('blur', updateNow);
+    el.addEventListener('focus', updateNow);
+    updateNow();
   }
 
   // 初始化所有现有 textarea/input（含无type属性的input）
+  function attachPreviewIfNeeded(el){
+    if(!el)return;
+    if(el._mdAttached)return;
+    var value=el.value||el.textContent||'';
+    if(document.activeElement===el||needsRender(value))attachPreview(el);
+  }
   function initAllPreviews() {
     document.querySelectorAll(
       '.field textarea, .field input[type="text"], .field input:not([type]), .note-card .note-textarea'
-    ).forEach(attachPreview);
-    document.querySelectorAll(
-      '.field textarea, .field input[type="text"], .field input:not([type]), .note-card .note-textarea'
-    ).forEach(function(el){ if(typeof el._mdUpdate === 'function') el._mdUpdate(); });
-    document.querySelectorAll('.md-preview').forEach(function(p){
-      var prev = p.previousElementSibling;
-      if(prev && typeof prev._mdUpdate === 'function') prev._mdUpdate();
-    });
+    ).forEach(function(el){if(el._mdAttached&&typeof el._mdUpdate==='function')el._mdUpdate();else attachPreviewIfNeeded(el);});
     var notesList = document.getElementById('notesList');
     if(notesList && typeof renderMath === 'function') renderMath(notesList);
   }
@@ -12332,7 +12383,7 @@ window.WorkflowMaintenance = {
       var el = document.getElementById(id);
       if (!el) return;
       var obs = new MutationObserver(function() {
-        el.querySelectorAll(selector).forEach(attachPreview);
+        el.querySelectorAll(selector).forEach(attachPreviewIfNeeded);
       });
       obs.observe(el, { childList: true, subtree: true });
     }
@@ -12551,9 +12602,9 @@ window.handleImportFile = function(event) {
 
 <!--
 workflow_tool build
-version: 2026.08.14.2
-sourceSha256: 83fd42271710272109a9f8a7ff256b5e7cf2511d51794254d4512585ef08b719
-configSha256: 32b7515fc746b67cbfaa53d299754c9c92d41c7b3afef6e8939df73ad8395cdb
+version: 2026.08.14.3
+sourceSha256: fb7e6a517062d8b519239125647f68befeb7083a339cdb71f6db07cd654cba1d
+configSha256: ec7320dd9db10855515772b7302d4864a31e47c592cd3d139682d41160628335
 coreSha256: a37b0de74e36858958583978b532413971fc99908dcb2d41a494d5c17bc326f9
 appSha256: 2f24aa03f02a5b051051aad95e186b81abef342d0af6958c66b79307c3dc0db3
 exportSha256: 13ad148412f079c37fed48892779a4c15a69b986b274bf432dd0506e64c0fa2a
@@ -12562,5 +12613,5 @@ historySha256: d2d96792bc489871e1e12fdf2483793e1781fec5835bae872974bc6b66894a79
 tasksSha256: cf7b1e78be5c87a40720433883aa80f4c8e36fe389400e217af9bb744ad8a590
 researchSha256: 7f18bf83e2678ea03658117f346225a9af8304668c9f622903770f0292e2c5a8
 stylesSha256: 438038ffa6949e8cb705df0dbad8d9a17ed29abd17f0c072fc70f88118cf55be
-builtAt: 2026-08-14T08:55:51.745Z
+builtAt: 2026-08-14T11:21:40.495Z
 -->
