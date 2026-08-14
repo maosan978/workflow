@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <meta name="theme-color" content="#4f46e5">
-<meta name="workflow-version" content="2026.08.14.4">
+<meta name="workflow-version" content="2026.08.14.6">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="工作流">
@@ -198,6 +198,8 @@ input,textarea,select{-webkit-user-select:text;user-select:text}
   background:var(--surface);color:var(--text);resize:vertical;outline:none;
   transition:all var(--t)}
 .notes-panel .note-textarea:focus{border-color:var(--primary);box-shadow:var(--shadow-glow)}
+.note-actions{margin-top:7px;display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap}
+.note-preview-icon-btn{width:30px;height:30px;padding:0!important;display:inline-flex;align-items:center;justify-content:center;font-size:15px;line-height:1;flex:0 0 auto}
 .notes-panel-footer{padding:14px 20px;border-top:1.5px solid var(--border);background:var(--surface2)}
 .notes-backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,.4);
   z-index:249;opacity:0;pointer-events:none;transition:opacity .3s ease;backdrop-filter:blur(2px)}
@@ -1216,7 +1218,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   else root.WorkflowConfig = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
   return {
-    appVersion: '2026.08.14.4',
+    appVersion: '2026.08.14.6',
     schemaVersion: 7,
     typeLabels: {
       general: '通用',
@@ -2525,7 +2527,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
         <tr><td>手机/平板</td><td>点击屏幕右下角的 <b>📝</b> 浮动按钮（蓝色圆形）</td></tr>
       </table></div>
       <p><b>查看历史小记：</b>切换到"历史"标签，点开任意一天的详情，当天的所有小记会按时间顺序显示在最前面</p>
-      <p><b>清单与双屏：</b>小记阅读态和编辑预览都可以直接勾选 <code>- [ ]</code>，勾选后保持当前项目位置；展开小记后点“↗ 双屏预览”，可最大化、最小化、拖到第二块显示器或用 Win + 方向键分屏；需要始终位于其他窗口上方时使用“▣ 置顶预览”。</p>
+      <p><b>清单与预览窗口：</b>小记阅读态和编辑预览都可以直接勾选 <code>- [ ]</code>，勾选后保持当前项目位置；展开小记后直接点击 <b>↗</b> 打开支持最大化、最小化和 Windows 分屏的标准双屏窗口，点击 <b>▣</b> 打开始终位于其他窗口上方的置顶预览。编辑区预览栏不再重复显示这两个入口。</p>
     </div></div>
   </div>
 
@@ -3091,7 +3093,7 @@ var driveFileId = localStorage.getItem('drive_file_id') || null;
 var accessToken = null;
 var syncInProgress = false;
 var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 7;
-var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.08.14.4';
+var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.08.14.6';
 
 var tokenClient = null;
 var _syncReconcileInProgress = false;
@@ -3587,6 +3589,7 @@ function disconnectGitHub() {
 }
 
 function collectAllData() {
+  if(typeof _flushPendingNoteEdits==='function')_flushPendingNoteEdits();
   if(typeof _flushWeeklyInputSave==='function')_flushWeeklyInputSave();
   if(typeof _flushResearchStateSave==='function')_flushResearchStateSave();
   var data = {};
@@ -10056,6 +10059,7 @@ function getAllNotes(){
 }
 
 window.renderNotes = function(){
+  _flushPendingNoteEdits();
   var notes = getAllNotes();
   var list = document.getElementById('notesList');
   var empty = document.getElementById('notesEmpty');
@@ -10078,7 +10082,7 @@ window.renderNotes = function(){
         '<div class="field" id="note_edit_'+_exH(n.id)+'" style="display:'+(isEditing?'block':'none')+';margin-top:6px">'+
           '<textarea id="note_'+_exH(n.id)+'" class="note-textarea" oninput="saveNote(\''+_exH(n.id)+'\')">'+_exH(n.content||'')+'</textarea>'+
         '</div>'+
-        '<div style="text-align:right;margin-top:6px;display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap"><button class="btn btn-secondary btn-xs pin-btn '+(n.pinned?'active':'')+'" onclick="toggleNotePin(\''+_exH(n.id)+'\')" title="'+(n.pinned?'取消置顶':'置顶小记')+'">📌 '+(n.pinned?'已置顶':'置顶')+'</button><button class="btn btn-secondary btn-xs" onclick="openNotePopoutPreview(\''+_exH(n.id)+'\')" title="标准浏览器窗口，支持最大化、最小化和系统分屏">↗ 双屏预览</button><button class="btn btn-secondary btn-xs" onclick="openNotePinnedPreview(\''+_exH(n.id)+'\')" title="始终位于其他窗口上方">▣ 置顶预览</button><button class="btn btn-secondary btn-xs" onclick="toggleNoteEdit(\''+_exH(n.id)+'\')" title="编辑小记">'+(isEditing?'预览':'编辑')+'</button><button class="btn btn-danger btn-xs" onclick="deleteNote(\''+_exH(n.id)+'\')" title="删除">🗑️</button></div>'+
+        '<div class="note-actions"><button class="btn btn-secondary btn-xs pin-btn '+(n.pinned?'active':'')+'" onclick="toggleNotePin(\''+_exH(n.id)+'\')" title="'+(n.pinned?'取消内容置顶':'将这条小记固定在列表顶部')+'">📌 '+(n.pinned?'已置顶':'内容置顶')+'</button><button class="btn btn-secondary btn-xs note-preview-icon-btn" data-preview-kind="standard" onclick="openNotePopoutPreview(\''+_exH(n.id)+'\')" title="标准双屏：支持最大化、最小化和 Windows 分屏" aria-label="打开标准双屏预览">↗</button><button class="btn btn-secondary btn-xs note-preview-icon-btn" data-preview-kind="pinned" onclick="openNotePinnedPreview(\''+_exH(n.id)+'\')" title="置顶预览：始终位于其他窗口上方" aria-label="打开始终置顶预览">▣</button><button class="btn btn-secondary btn-xs" onclick="toggleNoteEdit(\''+_exH(n.id)+'\')" title="'+(isEditing?'返回阅读预览':'编辑小记')+'">'+(isEditing?'◉ 阅读':'✎ 编辑')+'</button><button class="btn btn-danger btn-xs" onclick="deleteNote(\''+_exH(n.id)+'\')" title="删除小记">🗑️ 删除</button></div>'+
       '</div>':'';
     return '<div class="note-card'+(n.pinned?' pinned-item':'')+'">'+
       '<div class="note-collapse-header" onclick="toggleNoteCollapse(\''+_exH(n.id)+'\')" style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--surface2);border-radius:var(--radius-sm);cursor:pointer;margin-bottom:'+(isExpanded?'8px':'0')+'">'+
@@ -10206,7 +10210,7 @@ window.toggleHistEvening = function(){
   var arrow = document.getElementById('hist_evening_arrow');
   if(body && arrow){
     body.style.display = window._histEveningExpanded ? 'block' : 'none';
-    arrow.textContent = window._histEveningExpanded ? '▶' : '▼';
+    arrow.textContent = window._histEveningExpanded ? '▼' : '▶';
     if(window._histEveningExpanded && typeof window.attachPreview === 'function'){
       setTimeout(function(){
         body.querySelectorAll('textarea').forEach(window.attachPreview);
@@ -10249,6 +10253,8 @@ window.addNote = function(){
   var id = Date.now();
   var note = {content:'', timestamp: id};
   localStorage.setItem('wf_note_'+id, JSON.stringify(note));
+  window._noteExpandState[id]=true;
+  window._noteEditState[id]=true;
   renderNotes();
   setTimeout(function(){
     var el = document.getElementById('note_'+id);
@@ -10257,6 +10263,14 @@ window.addNote = function(){
 };
 
 var _noteSaveTimers={};
+function _flushPendingNoteEdits(){
+  if(!_noteSaveTimers)return;
+  Object.keys(_noteSaveTimers).forEach(_commitNoteSave);
+}
+function _discardPendingNoteEdit(id){
+  if(_noteSaveTimers&&_noteSaveTimers[id])clearTimeout(_noteSaveTimers[id]);
+  if(_noteSaveTimers)delete _noteSaveTimers[id];
+}
 function _commitNoteSave(id){
   if(_noteSaveTimers[id]){clearTimeout(_noteSaveTimers[id]);delete _noteSaveTimers[id];}
   var el = document.getElementById('note_'+id);
@@ -10286,7 +10300,9 @@ document.addEventListener('focusout',function(event){var match=event.target&&Str
 
 window.deleteNote = function(id){
   showConfirm('确定删除这条小记吗？', '🗑️', function(){
+    _discardPendingNoteEdit(id);
     localStorage.removeItem('wf_note_'+id);
+    delete window._noteExpandState[id];delete window._noteEditState[id];
     renderNotes();
     showToast('已删除', 'success');
   });
@@ -12358,10 +12374,12 @@ window.WorkflowMaintenance = {
     var preview = document.createElement('div');
     preview.className = 'md-preview';
     preview.setAttribute('aria-live', 'polite');
+    var isNoteEditor=!!(el.classList&&el.classList.contains('note-textarea'));
+    var externalPreviewButtons=isNoteEditor?'':'<button class="md-preview-popout-btn" type="button" title="标准窗口：支持最大化、最小化和 Win + 方向键分屏" aria-label="双屏标准窗口预览">↗ 双屏</button><button class="md-preview-pin-btn" type="button" title="始终位于其他窗口上方" aria-label="始终置顶预览">▣ 置顶</button>';
     preview.innerHTML =
       '<div class="md-preview-head">' +
         '<span class="md-preview-label">预览</span>' +
-        '<span class="md-preview-actions"><button class="md-preview-popout-btn" type="button" title="标准窗口：支持最大化、最小化和 Win + 方向键分屏" aria-label="双屏标准窗口预览">↗ 双屏</button><button class="md-preview-pin-btn" type="button" title="始终位于其他窗口上方" aria-label="始终置顶预览">▣ 置顶</button><button class="md-preview-float-btn" type="button" title="在网页内小窗中预览" aria-label="网页内小窗预览">' +
+        '<span class="md-preview-actions">'+externalPreviewButtons+'<button class="md-preview-float-btn" type="button" title="在网页内小窗中预览" aria-label="网页内小窗预览">' +
           '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/><path d="M9 9h6v6H9z"/></svg>' +
         '</button></span>' +
       '</div>' +
@@ -12670,9 +12688,9 @@ window.handleImportFile = function(event) {
 
 <!--
 workflow_tool build
-version: 2026.08.14.4
-sourceSha256: 42791f97afe946465cf745c8a0493a247bb8729c4488793b5562eba58cdb6984
-configSha256: c8c6e36675ccf8645b383e3293d7e4a6f77ad1dffb88f3525b184362868e180e
+version: 2026.08.14.6
+sourceSha256: 335320aa6d117bffbbb3b5a8f96f7f8a3ab7b1e317c1320d450694048a79efa9
+configSha256: eda7a290c179312631e1e25867f2d2422bced0db4b1176be6081735f3e615882
 coreSha256: a37b0de74e36858958583978b532413971fc99908dcb2d41a494d5c17bc326f9
 appSha256: 2f24aa03f02a5b051051aad95e186b81abef342d0af6958c66b79307c3dc0db3
 exportSha256: 13ad148412f079c37fed48892779a4c15a69b986b274bf432dd0506e64c0fa2a
@@ -12681,5 +12699,5 @@ historySha256: d2d96792bc489871e1e12fdf2483793e1781fec5835bae872974bc6b66894a79
 tasksSha256: cf7b1e78be5c87a40720433883aa80f4c8e36fe389400e217af9bb744ad8a590
 researchSha256: 7f18bf83e2678ea03658117f346225a9af8304668c9f622903770f0292e2c5a8
 stylesSha256: 438038ffa6949e8cb705df0dbad8d9a17ed29abd17f0c072fc70f88118cf55be
-builtAt: 2026-08-14T15:16:49.786Z
+builtAt: 2026-08-14T15:47:19.545Z
 -->
