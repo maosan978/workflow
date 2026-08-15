@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <meta name="theme-color" content="#4f46e5">
-<meta name="workflow-version" content="2026.08.15.10">
+<meta name="workflow-version" content="2026.08.16.4">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="工作流">
@@ -1064,7 +1064,13 @@ body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between
 .md-preview-body[contenteditable=true]{outline:none;caret-color:var(--primary);cursor:text}
 .md-preview-body[contenteditable=true]:focus{background:color-mix(in srgb,var(--success-bg) 42%,var(--surface));box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--success) 32%,transparent)}
 .md-preview-body[contenteditable=true]:empty::before{content:'在这里直接编辑渲染后的内容';color:var(--text4);pointer-events:none}
-.md-caret-anchor{display:inline-block;width:0;height:1em;overflow:hidden;vertical-align:text-bottom;pointer-events:none}
+.md-preview-body .rich-edit-target{outline:1px dashed color-mix(in srgb,var(--success) 55%,transparent);outline-offset:3px;background:color-mix(in srgb,var(--success-bg) 54%,transparent);border-radius:3px}
+.md-source-editor.md-source-synced{border-color:var(--success)!important;box-shadow:inset 3px 0 0 var(--success),0 0 0 3px color-mix(in srgb,var(--success) 16%,transparent)!important}
+.md-source-editor{scroll-padding-block:18px;scroll-margin-block:calc(var(--header-height) + 54px) 34px}
+@keyframes mdPositionPulse{0%{opacity:.15;transform:scaleY(.72)}18%{opacity:1;transform:scaleY(1)}72%{opacity:.9}100%{opacity:0;transform:scaleY(1)}}
+.md-source-position-marker{position:fixed;z-index:1300;width:2px;min-height:16px;border-radius:999px;background:var(--success);box-shadow:0 0 0 2px color-mix(in srgb,var(--success) 18%,transparent),0 1px 5px color-mix(in srgb,var(--success) 28%,transparent);pointer-events:none;transform-origin:center;animation:mdPositionPulse 1.05s ease-out both}
+.md-source-position-marker::after{content:'';position:absolute;left:-1.5px;top:-2px;width:5px;height:5px;border-radius:50%;background:var(--success)}
+.md-caret-anchor{display:inline-block;width:0;height:1.05em;border-left:2px solid var(--success);margin-left:-1px;overflow:visible;vertical-align:text-bottom;pointer-events:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--success) 14%,transparent);animation:mdPositionPulse 1.05s ease-out both}
 .md-preview-actions{display:flex;align-items:center;gap:5px}
 .md-preview-popout-btn,.md-preview-pin-btn{min-width:22px;height:22px;border:1px solid var(--border);border-radius:999px;background:var(--surface);color:var(--text3);display:inline-flex;align-items:center;justify-content:center;gap:3px;cursor:pointer;padding:0 6px;flex:0 0 auto;font-size:10px;font-weight:700}
 .md-preview-popout-btn:hover,.md-preview-pin-btn:hover{border-color:var(--primary-light);color:var(--primary);background:var(--primary-bg)}
@@ -1237,7 +1243,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   else root.WorkflowConfig = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
   return {
-    appVersion: '2026.08.15.10',
+    appVersion: '2026.08.16.4',
     schemaVersion: 7,
     typeLabels: {
       general: '通用',
@@ -2508,8 +2514,8 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
         <tr><td>☀️ 设为晨间</td><td>任务卡片右上角 ☀️；历史编辑中也可用</td><td>将任意任务整体设为晨间目标，原晨间任务整体回到任务列表；晨间支持项目标签、打卡任务和完整字段预览，只在位置和标注上特殊</td></tr>
         <tr><td>➕ 明日任务</td><td>晚间"明天要做的事"字段旁</td><td>将计划直接添加到明天任务清单，可选择5种任务类型</td></tr>
         <tr><td>📐 公式预览</td><td>在输入框中输入 <code>$...$</code></td><td>支持 LaTeX 数学公式（KaTeX）和 Markdown，输入后自动在下方渲染预览</td></tr>
-        <tr><td>源码 / 渲染编辑</td><td>原输入框编辑源码；绿色“渲染预览”直接编辑排版结果</td><td>两种视图写入同一份 Markdown/LaTeX 数据；点击公式后直接在原位置输入，无需确认按钮，Enter 或离开公式后自动重渲染，Esc 撤销。手机上可拖动预览右下角按钮调节高度</td></tr>
-        <tr><td>▣ 预览窗口</td><td>点击“↗ 双屏”或“▣ 置顶”</td><td>两个外部预览同样可以直接编辑渲染内容，并锁定打开它的输入框；按住右下角调节柄拖动即可改变大小。“↗ 双屏”还支持 Edge 最大化、最小化和 Win + 方向键分屏；“▣ 置顶”保持在其他窗口上方</td></tr>
+        <tr><td>源码 / 渲染编辑</td><td>原输入框编辑源码；绿色“全文渲染预览”直接编辑排版结果</td><td>标题、段落、粗体/斜体/删除线、链接文字、引用、代码、列表、清单和表格单元格都可直接修改并保留格式；点击公式则在原位置编辑 LaTeX。预览光标会让源码框同步到对应字符位置</td></tr>
+        <tr><td>▣ 预览窗口</td><td>点击“↗ 双屏”或“▣ 置顶”</td><td>两个外部预览同样支持全文编辑，并锁定打开它的输入框；编辑预览时原网页源码框同步显示对应位置。按住右下角调节柄拖动即可改变大小；“↗ 双屏”支持 Edge 最大化、最小化和分屏，“▣ 置顶”保持在其他窗口上方</td></tr>
       </table></div>
     </div></div>
   </div>
@@ -3113,7 +3119,7 @@ var driveFileId = localStorage.getItem('drive_file_id') || null;
 var accessToken = null;
 var syncInProgress = false;
 var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 7;
-var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.08.15.10';
+var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.08.16.4';
 
 var tokenClient = null;
 var _syncReconcileInProgress = false;
@@ -5119,16 +5125,32 @@ function _basicMarkdownHtml(text){
   var src = _mdSafeSource(text);
   var lines = src.split(/\r?\n/);
   var html = '';
-  var listType = '';
+  var listType = '',plainOpen=false;
   function inline(s){
-    return s
-      .replace(/`([^`]+)`/g, '<code>$1</code>')
+    var held=[];
+    function hold(value){var key='\uE250'+held.length+'\uE251';held.push(value);return key;}
+    s=String(s||'')
+      .replace(/(\$\$[^$]+\$\$|\$[^$\n]+\$|\\\([^\n]+\\\)|\\\[[^\n]+\\\])/g,function(value){return hold(value);})
+      .replace(/`([^`]+)`/g,function(_,value){return hold('<code>'+value+'</code>');})
+      .replace(/!\[([^\]]*)\]\(([^)]+)\)/g,function(_,alt,url){return hold('<img alt="'+alt.replace(/"/g,'&quot;')+'" src="'+url.replace(/"/g,'&quot;')+'">');})
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g,function(_,label,url){return hold('<a href="'+url.replace(/"/g,'&quot;')+'">'+label+'</a>');})
       .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-      .replace(/__([^_]+)__/g, '<strong>$1</strong>');
+      .replace(/__([^_]+)__/g, '<strong>$1</strong>')
+      .replace(/~~([^~]+)~~/g, '<del>$1</del>')
+      .replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<em>$2</em>')
+      .replace(/(^|[^A-Za-z0-9_])_([^_\n]+)_(?![A-Za-z0-9_])/g, '$1<em>$2</em>');
+    return s.replace(/\uE250(\d+)\uE251/g,function(_,index){return held[Number(index)]||'';});
   }
-  function closeList(){ if(listType){ html += '</' + listType + '>'; listType = ''; } }
+  function closeParagraph(){if(plainOpen){html+='</p>';plainOpen=false;}}
+  function closeList(){closeParagraph();if(listType){ html += '</' + listType + '>'; listType = ''; } }
+  function tableCells(line){
+    line=String(line||'').trim().replace(/^\|/,'').replace(/\|$/,'');
+    return line.split(/(?<!\\)\|/).map(function(cell){return inline(cell.trim().replace(/\\\|/g,'|'));});
+  }
+  function isTableDivider(line){return /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(String(line||''));}
   var inFence = false, fenceLines = [];
-  lines.forEach(function(line){
+  for(var lineIndex=0;lineIndex<lines.length;lineIndex++){
+    var line=lines[lineIndex];
     var m;
     if(line.match(/^\s*```/)) {
       if(inFence) {
@@ -5141,11 +5163,16 @@ function _basicMarkdownHtml(text){
         inFence = true;
         fenceLines = [];
       }
-      return;
+      continue;
     }
-    if(inFence) { fenceLines.push(line); return; }
-    if(!line.trim()){ closeList(); return; }
-    if((m = line.match(/^(#{1,3})\s+(.+)$/))) {
+    if(inFence) { fenceLines.push(line); continue; }
+    if(!line.trim()){ closeList(); continue; }
+    if(line.indexOf('|')>=0&&lineIndex+1<lines.length&&isTableDivider(lines[lineIndex+1])){
+      closeList();var head=tableCells(line),rows=[];lineIndex+=2;
+      while(lineIndex<lines.length&&lines[lineIndex].trim()&&lines[lineIndex].indexOf('|')>=0){rows.push(tableCells(lines[lineIndex]));lineIndex++;}
+      lineIndex--;
+      html+='<table><thead><tr>'+head.map(function(cell){return '<th>'+cell+'</th>';}).join('')+'</tr></thead><tbody>'+rows.map(function(row){return '<tr>'+head.map(function(_,index){return '<td>'+(row[index]||'')+'</td>';}).join('')+'</tr>';}).join('')+'</tbody></table>';
+    } else if((m = line.match(/^(#{1,6})\s+(.+)$/))) {
       closeList();
       html += '<h' + m[1].length + '>' + inline(m[2]) + '</h' + m[1].length + '>';
     } else if((m = line.match(/^>\s?(.+)$/))) {
@@ -5164,10 +5191,11 @@ function _basicMarkdownHtml(text){
       if(listType !== 'ol') { closeList(); html += '<ol>'; listType = 'ol'; }
       html += '<li>' + inline(m[1]) + '</li>';
     } else {
-      closeList();
-      html += '<p>' + inline(line) + '</p>';
+      if(listType)closeList();
+      if(!plainOpen){html+='<p>';plainOpen=true;}else html+='<br>';
+      html += inline(line);
     }
-  });
+  }
   if(inFence) html += '<pre><code>' + fenceLines.join('\n') + '</code></pre>';
   closeList();
   return html || '<p></p>';
@@ -12130,7 +12158,7 @@ window.WorkflowMaintenance = {
   function _previewRenderPayload(value,sourceEl){
     var source=String(value||''),marker='';
     if(sourceEl&&document.activeElement===sourceEl&&typeof sourceEl.selectionStart==='number'){
-      marker='\uE000WF_CARET_'+Date.now()+'\uE001';
+      marker='\uE000WFCaret'+Date.now()+'\uE001';
       source=source.slice(0,sourceEl.selectionStart)+marker+source.slice(sourceEl.selectionStart);
     }
     var html=typeof window._renderMDMaybe==='function'?window._renderMDMaybe(source):renderMDMath(source);
@@ -12207,6 +12235,7 @@ window.WorkflowMaintenance = {
     if(tag==='EM'||tag==='I')return '*'+_richChildren(node)+'*';
     if(tag==='DEL'||tag==='S')return '~~'+_richChildren(node)+'~~';
     if(tag==='A')return '['+_richChildren(node)+']('+(node.getAttribute('href')||'')+')';
+    if(tag==='IMG')return '!['+(node.getAttribute('alt')||'')+']('+(node.getAttribute('src')||'')+')';
     if(tag==='PRE')return '\n```\n'+node.textContent.replace(/\n$/,'')+'\n```\n\n';
     if(tag==='CODE')return '`'+node.textContent.replace(/`/g,'\\`')+'`';
     if(tag==='BLOCKQUOTE')return '\n'+_richChildren(node).trim().split('\n').map(function(line){return '> '+line;}).join('\n')+'\n\n';
@@ -12214,11 +12243,99 @@ window.WorkflowMaintenance = {
     if(tag==='TABLE')return _richTableToMarkdown(node);
     if(tag==='HR')return '\n---\n\n';
     var content=_richChildren(node);
-    if(tag==='P'||tag==='DIV'||tag==='SECTION'||tag==='ARTICLE')return content.replace(/\n+$/,'')+'\n\n';
+    if(tag==='DIV')return content.replace(/\n+$/,'')+'\n';
+    if(tag==='P'||tag==='SECTION'||tag==='ARTICLE')return content.replace(/\n+$/,'')+'\n\n';
     return content;
   }
   function _richHtmlToMarkdown(container){
-    return _richChildren(container).replace(/[ \t]+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
+    var out='',previousTag='';
+    Array.prototype.forEach.call(container.childNodes||[],function(node){
+      var value=_richNodeToMarkdown(node),tag=node.nodeType===1?node.tagName:'';
+      if(value&&((tag==='UL'||tag==='OL')&&/^(P|DIV|H[1-6])$/.test(previousTag)||previousTag&&(previousTag==='UL'||previousTag==='OL')&&/^(P|DIV|H[1-6])$/.test(tag)))out=out.replace(/\n+$/,'')+'\n'+value.replace(/^\n+/,'');
+      else out+=value;
+      if(tag)previousTag=tag;
+    });
+    return out.replace(/[ \t]+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
+  }
+  function _richCloneMarkerOffset(container,node,offset,beforeNode){
+    if(!container||!node||node===container)return 0;
+    var path=[],cursor=node;
+    while(cursor&&cursor!==container){var parent=cursor.parentNode;if(!parent)return null;path.unshift(Array.prototype.indexOf.call(parent.childNodes,cursor));cursor=parent;}
+    if(cursor!==container)return null;
+    var clone=container.cloneNode(true),cloneNode=clone;
+    for(var i=0;i<path.length;i++){cloneNode=cloneNode.childNodes[path[i]];if(!cloneNode)return null;}
+    var marker='\uE137WF_SOURCE_POSITION\uE138';
+    if(beforeNode&&cloneNode.parentNode)cloneNode.parentNode.insertBefore(clone.ownerDocument.createTextNode(marker),cloneNode);
+    else if(cloneNode.nodeType===3){var text=String(cloneNode.nodeValue||''),at=Math.max(0,Math.min(Number(offset)||0,text.length));cloneNode.nodeValue=text.slice(0,at)+marker+text.slice(at);}
+    else if(cloneNode.nodeType===1){var childAt=Math.max(0,Math.min(Number(offset)||0,cloneNode.childNodes.length));cloneNode.insertBefore(clone.ownerDocument.createTextNode(marker),cloneNode.childNodes[childAt]||null);}
+    else return null;
+    var markdown=_richHtmlToMarkdown(clone),index=markdown.indexOf(marker);
+    return index<0?null:index;
+  }
+  function _richSelectionMarkdownOffset(container){
+    if(!container)return null;var doc=container.ownerDocument||document,selection=doc.getSelection&&doc.getSelection();
+    if(!selection||!selection.rangeCount||!selection.focusNode||!container.contains(selection.focusNode))return null;
+    if(selection.focusNode.parentElement&&selection.focusNode.parentElement.closest('.formula-source-editor'))return null;
+    return _richCloneMarkerOffset(container,selection.focusNode,selection.focusOffset,false);
+  }
+  function _measureRichSourceCaretMetrics(source,position){
+    if(!source||!source.ownerDocument)return null;
+    var doc=source.ownerDocument,win=doc.defaultView||window,style=win.getComputedStyle(source),rect=source.getBoundingClientRect();
+    if(!rect.width)return null;
+    var mirror=doc.createElement('div'),marker=doc.createElement('span'),properties=['fontFamily','fontSize','fontWeight','fontStyle','fontVariant','fontStretch','letterSpacing','lineHeight','textTransform','textIndent','textAlign','wordSpacing','tabSize','paddingTop','paddingRight','paddingBottom','paddingLeft','borderTopWidth','borderRightWidth','borderBottomWidth','borderLeftWidth','boxSizing','wordBreak','overflowWrap','direction'];
+    var borderWidth=(parseFloat(style.borderLeftWidth)||0)+(parseFloat(style.borderRightWidth)||0),mirrorWidth=source.clientWidth+borderWidth;
+    mirror.setAttribute('aria-hidden','true');mirror.style.position='fixed';mirror.style.left='-100000px';mirror.style.top='0';mirror.style.width=mirrorWidth+'px';mirror.style.height='auto';mirror.style.minHeight='0';mirror.style.maxHeight='none';mirror.style.margin='0';mirror.style.visibility='hidden';mirror.style.pointerEvents='none';mirror.style.whiteSpace='pre-wrap';mirror.style.overflow='hidden';
+    properties.forEach(function(name){mirror.style[name]=style[name];});
+    var value=String(source.value||''),at=Math.max(0,Math.min(Number(position)||0,value.length));
+    mirror.appendChild(doc.createTextNode(value.slice(0,at)));marker.textContent='\u200b';mirror.appendChild(marker);mirror.appendChild(doc.createTextNode(value.slice(at)||'\u200b'));
+    (doc.body||doc.documentElement).appendChild(mirror);
+    var markerRect=marker.getBoundingClientRect(),mirrorRect=mirror.getBoundingClientRect(),metrics={top:markerRect.top-mirrorRect.top,left:markerRect.left-mirrorRect.left,height:markerRect.height||parseFloat(style.lineHeight)||parseFloat(style.fontSize)*1.45||20};mirror.remove();return metrics;
+  }
+  function _measureRichSourceCaretTop(source,position){
+    var metrics=_measureRichSourceCaretMetrics(source,position);return metrics&&metrics.top;
+  }
+  function _showRichSourcePositionMarker(source,metrics){
+    if(!source||!metrics||!source.ownerDocument)return;
+    var doc=source.ownerDocument,rect=source.getBoundingClientRect(),style=(doc.defaultView||window).getComputedStyle(source),borderLeft=parseFloat(style.borderLeftWidth)||0,borderTop=parseFloat(style.borderTopWidth)||0,x=rect.left+metrics.left-source.scrollLeft,y=rect.top+metrics.top-source.scrollTop,lineHeight=Math.max(14,metrics.height||parseFloat(style.lineHeight)||20);
+    x=Math.max(rect.left+borderLeft+1,Math.min(rect.right-4,x));y=Math.max(rect.top+borderTop+1,Math.min(rect.bottom-borderTop-lineHeight-1,y));
+    var marker=source._wfSourcePositionMarker;
+    if(!marker||!marker.isConnected){marker=doc.createElement('span');marker.className='md-source-position-marker';marker.setAttribute('aria-hidden','true');(doc.body||doc.documentElement).appendChild(marker);source._wfSourcePositionMarker=marker;}
+    marker.style.left=Math.round(x)+'px';marker.style.top=Math.round(y)+'px';marker.style.height=Math.round(lineHeight)+'px';marker.style.animation='none';void marker.offsetWidth;marker.style.animation='';
+    clearTimeout(source._wfSourceMarkerTimer);source._wfSourceMarkerTimer=setTimeout(function(){if(marker&&marker.isConnected)marker.remove();},1120);
+  }
+  function _scrollRichSourceIntoSafeView(source){
+    if(!source||!source.ownerDocument)return;
+    var doc=source.ownerDocument,win=doc.defaultView||window,viewportHeight=win.innerHeight||doc.documentElement.clientHeight||0;
+    if(!viewportHeight)return;
+    var safeTop=14,safeBottom=viewportHeight-18;
+    Array.prototype.forEach.call(doc.querySelectorAll('.header,.tabs'),function(node){
+      var style=win.getComputedStyle(node),rect=node.getBoundingClientRect();
+      if(style.display!=='none'&&style.visibility!=='hidden'&&(style.position==='fixed'||style.position==='sticky')&&rect.bottom>0&&rect.top<viewportHeight)safeTop=Math.max(safeTop,Math.min(rect.bottom+12,viewportHeight*.46));
+    });
+    Array.prototype.forEach.call(doc.querySelectorAll('.bottom-bar'),function(node){
+      var style=win.getComputedStyle(node),rect=node.getBoundingClientRect();
+      if(style.display!=='none'&&style.visibility!=='hidden'&&(style.position==='fixed'||style.position==='sticky')&&rect.top<viewportHeight&&rect.bottom>0)safeBottom=Math.min(safeBottom,rect.top-12);
+    });
+    var rect=source.getBoundingClientRect(),available=Math.max(40,safeBottom-safeTop),targetTop=safeTop+Math.max(0,(available-Math.min(rect.height,available))*.38),delta=0;
+    if(rect.top<safeTop||rect.bottom>safeBottom)delta=rect.top-targetTop;
+    if(delta&&typeof win.scrollBy==='function')win.scrollBy({top:delta,left:0,behavior:'auto'});
+  }
+  function _syncRichSourcePosition(container,offset){
+    if(!container)return;var source=container._wfRichSource;if(!source||typeof source.setSelectionRange!=='function')return;
+    if(typeof offset!=='number')offset=_richSelectionMarkdownOffset(container);if(typeof offset!=='number')return;
+    var text=String(source.value||''),position=Math.max(0,Math.min(offset,text.length));
+    try{source.setSelectionRange(position,position);}catch(e){}
+    var maxScroll=Math.max(0,source.scrollHeight-source.clientHeight),style=(source.ownerDocument.defaultView||window).getComputedStyle(source),lineHeight=parseFloat(style.lineHeight)||parseFloat(style.fontSize)*1.45||20,metrics=_measureRichSourceCaretMetrics(source,position),caretTop=metrics&&metrics.top;
+    if(typeof caretTop==='number'){
+      var safeInset=Math.max(14,Math.min(30,lineHeight*.9)),target=Math.max(safeInset,Math.min(source.clientHeight-safeInset-lineHeight,source.clientHeight*.4));
+      source.scrollTop=Math.max(0,Math.min(maxScroll,caretTop-target));
+      source._wfLastSyncedCaretViewportTop=caretTop-source.scrollTop;source._wfLastSyncedSafeInset=safeInset;
+    }else{
+      var ratio=text.length?position/text.length:0;source.scrollTop=Math.max(0,Math.min(maxScroll,maxScroll*ratio-source.clientHeight*.28));
+    }
+    _scrollRichSourceIntoSafeView(source);
+    if(metrics)_showRichSourcePositionMarker(source,metrics);
+    source.classList.add('md-source-synced');clearTimeout(source._wfSourceSyncTimer);source._wfSourceSyncTimer=setTimeout(function(){source.classList.remove('md-source-synced');},900);
   }
   function _commitRichPreview(container){
     if(!container)return;
@@ -12231,6 +12348,7 @@ window.WorkflowMaintenance = {
       var note=_readNote(noteId);
       if((note.content||'')!==markdown){note.content=markdown;note.timestamp=note.timestamp||Date.now();localStorage.setItem('wf_note_'+noteId,JSON.stringify(note));flash();}
     }
+    _syncRichSourcePosition(container);
   }
   function _richFormulaNode(container,target){
     if(!container||!target||!target.closest)return null;
@@ -12265,6 +12383,7 @@ window.WorkflowMaintenance = {
   }
   function _openRichFormulaEditor(container,node){
     if(!container||!node)return;
+    var formulaOffset=_richCloneMarkerOffset(container,node,0,true);_syncRichSourcePosition(container,formulaOffset);
     _closeRichFormulaEditor(container);node.classList.add('rich-formula-active');
     var doc=container.ownerDocument||document,editor=doc.createElement('span'),display=node.classList.contains('katex-display')||node.classList.contains('display');
     editor.className='formula-source-editor'+(display?' display':'');editor.setAttribute('contenteditable','false');editor.setAttribute('role','group');editor.setAttribute('aria-label','直接编辑公式');
@@ -12286,18 +12405,26 @@ window.WorkflowMaintenance = {
     if(!container)return;
     container._wfRichSource=sourceEl||null;container._wfRichNoteId=noteId?String(noteId):'';
     container.setAttribute('contenteditable','true');container.setAttribute('role','textbox');container.setAttribute('aria-multiline','true');
-    container.setAttribute('aria-label','渲染预览，可直接编辑');container.spellcheck=true;
+    container.setAttribute('aria-label','全文渲染预览，可直接编辑标题、段落、列表、表格和文字格式');container.setAttribute('tabindex','0');container.spellcheck=true;
     container.querySelectorAll('.katex,.katex-display,.math-fallback').forEach(function(node){node.setAttribute('contenteditable','false');node.setAttribute('role','button');node.setAttribute('tabindex','0');node.setAttribute('title','点击编辑公式源码');node.setAttribute('aria-label','公式，点击编辑源码');});
     if(container._wfRichBound)return;
     container._wfRichBound=true;
     var timer=null,composing=false;
-    function queue(){if(composing)return;clearTimeout(timer);timer=setTimeout(function(){timer=null;_commitRichPreview(container);},120);}
+    function syncPosition(offset){_syncRichSourcePosition(container,offset);}
+    function markTarget(target){container.querySelectorAll('.rich-edit-target').forEach(function(node){node.classList.remove('rich-edit-target');});if(!target||!target.closest)return;var editable=target.closest('h1,h2,h3,h4,h5,h6,p,li,td,th,blockquote,pre,code,strong,em,del,a');if(editable&&container.contains(editable)&&!_richFormulaNode(container,editable))editable.classList.add('rich-edit-target');}
+    function queue(){if(composing)return;var source=container._wfRichSource;if(source&&typeof source._mdCancelScheduledUpdate==='function')source._mdCancelScheduledUpdate();syncPosition();clearTimeout(timer);timer=setTimeout(function(){timer=null;_commitRichPreview(container);},70);}
     container.addEventListener('compositionstart',function(){composing=true;});
     container.addEventListener('compositionend',function(){composing=false;queue();});
     container.addEventListener('input',queue);
-    container.addEventListener('pointerdown',function(ev){var node=_richFormulaNode(container,ev.target);if(!node)return;container._wfFormulaPointer=true;setTimeout(function(){container._wfFormulaPointer=false;},350);});
+    container.addEventListener('pointerdown',function(ev){var node=_richFormulaNode(container,ev.target);if(!node){markTarget(ev.target);return;}container._wfFormulaPointer=true;setTimeout(function(){container._wfFormulaPointer=false;},350);});
+    container.addEventListener('pointerup',function(){syncPosition();});
     container.addEventListener('click',function(ev){var node=_richFormulaNode(container,ev.target);if(!node)return;container._wfFormulaPointer=false;ev.preventDefault();ev.stopPropagation();_openRichFormulaEditor(container,node);});
-    container.addEventListener('keydown',function(ev){var node=_richFormulaNode(container,ev.target);if(node&&(ev.key==='Enter'||ev.key===' ')){ev.preventDefault();_openRichFormulaEditor(container,node);}});
+    container.addEventListener('keydown',function(ev){
+      var node=_richFormulaNode(container,ev.target);if(node&&(ev.key==='Enter'||ev.key===' ')){ev.preventDefault();_openRichFormulaEditor(container,node);return;}
+      if(ev.target&&ev.target.closest&&ev.target.closest('.formula-source-editor'))return;
+      if((ev.ctrlKey||ev.metaKey)&&!ev.altKey){var key=String(ev.key||'').toLowerCase(),cmd=key==='b'?'bold':key==='i'?'italic':(key==='x'&&ev.shiftKey?'strikeThrough':'');if(cmd){ev.preventDefault();try{(container.ownerDocument||document).execCommand(cmd,false,null);}catch(e){}queue();}}
+    });
+    container.addEventListener('keyup',function(){syncPosition();});
     container.addEventListener('blur',function(){
       setTimeout(function(){
         var active=(container.ownerDocument||document).activeElement;if(container._wfFormulaPointer||container.querySelector('.formula-source-editor')||(active&&container.contains(active)))return;
@@ -12309,6 +12436,8 @@ window.WorkflowMaintenance = {
     },true);
   }
   window._richHtmlToMarkdown=_richHtmlToMarkdown;
+  window._measureRichSourceCaretMetrics=_measureRichSourceCaretMetrics;
+  window._measureRichSourceCaretTop=_measureRichSourceCaretTop;
 
   function _readNote(id){try{return JSON.parse(localStorage.getItem('wf_note_'+id)||'{}');}catch(e){return {};}}
   function _renderStaticNoteContainer(container,id,content,scrollTop){
@@ -12412,9 +12541,9 @@ window.WorkflowMaintenance = {
       'main{height:calc(100vh - 76px);margin:14px;padding:16px 18px;overflow:auto;overscroll-behavior:contain;line-height:1.75;color:var(--text);background:var(--surface);border:2px solid var(--success-border);border-left:4px solid var(--success);border-radius:var(--radius);box-shadow:var(--shadow);word-break:break-word;overflow-wrap:anywhere;scrollbar-gutter:stable;outline:none;caret-color:var(--primary)}main:focus{background:color-mix(in srgb,var(--success-bg) 42%,var(--surface));box-shadow:var(--shadow),inset 0 0 0 2px color-mix(in srgb,var(--success) 30%,transparent)}'+
       '#previewResizeGrip{position:fixed;right:4px;bottom:4px;z-index:8;width:38px;height:38px;display:flex;align-items:center;justify-content:center;padding:0;border:1px solid var(--success-border);border-radius:10px;background:color-mix(in srgb,var(--surface) 90%,transparent);color:var(--success);box-shadow:var(--shadow-md);cursor:nwse-resize;touch-action:none;opacity:.88}#previewResizeGrip:hover,#previewResizeGrip:focus-visible,#previewResizeGrip.is-resizing{opacity:1;background:var(--success-bg);outline:2px solid color-mix(in srgb,var(--success) 24%,transparent)}#previewResizeGrip.is-resizing{transform:scale(1.06)}#previewResizeGrip svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}'+
       'main>*{max-width:100%}p{margin:0 0 7px}p:last-child{margin-bottom:0}h1,h2,h3,h4,h5,h6{margin:12px 0 7px;color:var(--text);line-height:1.35}h1:first-child,h2:first-child,h3:first-child{margin-top:0}ul,ol{margin:5px 0 8px;padding-left:24px;list-style-position:outside}li{margin:2px 0;padding-left:2px}blockquote{margin:8px 0;padding:7px 11px;border-left:3px solid var(--primary);border-radius:var(--radius-xs);background:var(--surface2);color:var(--text2)}hr{border:0;border-top:1px solid var(--border);margin:10px 0}a{color:var(--primary)}'+
-      'input[type=checkbox]{width:16px;height:16px;margin-right:6px;vertical-align:-2px;accent-color:var(--primary);cursor:pointer}code{padding:1px 4px;border-radius:4px;background:var(--surface2);color:var(--text);font-family:"Fira Code","Consolas",monospace;font-size:.9em}pre{max-width:100%;margin:8px 0;padding:11px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid var(--border);border-radius:var(--radius-xs);background:var(--surface2)}pre code{padding:0;border:0;background:transparent}table{display:block;width:100%;max-width:100%;margin:8px 0;overflow-x:auto;border-collapse:collapse}td,th{padding:5px 7px;border:1px solid var(--border);text-align:left}th{background:var(--surface2)}.md-caret-anchor{display:inline-block;width:0;height:1em;overflow:hidden;vertical-align:text-bottom;pointer-events:none}.katex,.katex-display,.math-fallback{cursor:pointer}.rich-formula-active{display:none!important}.formula-source-editor{display:inline;max-width:100%;margin:0 2px;vertical-align:baseline}.formula-source-editor.display{display:flex;width:100%;margin:7px 0}.formula-source-input{display:inline-block;min-width:5ch;max-width:100%;min-height:1.8em;padding:2px 6px;border:1px solid var(--success-border);border-bottom:2px solid var(--success);border-radius:var(--radius-xs);outline:none;background:var(--success-bg);color:var(--text);box-shadow:none;font-family:"Fira Code","Consolas",monospace;font-size:inherit;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;vertical-align:middle}.formula-source-editor.display .formula-source-input{display:block;width:100%;max-width:100%;text-align:left}.formula-source-input:focus{background:color-mix(in srgb,var(--success-bg) 76%,var(--surface));box-shadow:0 0 0 2px color-mix(in srgb,var(--success) 22%,transparent)}.katex .katex-mathml{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}.math-fallback{padding:0 4px;color:var(--text);background:var(--surface2);border:1px solid var(--border);border-radius:4px;font-family:Georgia,"Times New Roman",serif;font-style:italic}.math-fallback.display{display:block;margin:7px 0;padding:8px;text-align:center}.preview-empty{color:var(--text3)}'+
+      'input[type=checkbox]{width:16px;height:16px;margin-right:6px;vertical-align:-2px;accent-color:var(--primary);cursor:pointer}code{padding:1px 4px;border-radius:4px;background:var(--surface2);color:var(--text);font-family:"Fira Code","Consolas",monospace;font-size:.9em}pre{max-width:100%;margin:8px 0;padding:11px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid var(--border);border-radius:var(--radius-xs);background:var(--surface2)}pre code{padding:0;border:0;background:transparent}table{display:block;width:100%;max-width:100%;margin:8px 0;overflow-x:auto;border-collapse:collapse}td,th{padding:5px 7px;border:1px solid var(--border);text-align:left}th{background:var(--surface2)}.rich-edit-target{outline:1px dashed color-mix(in srgb,var(--success) 55%,transparent);outline-offset:3px;background:color-mix(in srgb,var(--success-bg) 54%,transparent);border-radius:3px}@keyframes mdPositionPulse{0%{opacity:.15;transform:scaleY(.72)}18%{opacity:1;transform:scaleY(1)}72%{opacity:.9}100%{opacity:0;transform:scaleY(1)}}.md-caret-anchor{display:inline-block;width:0;height:1.05em;border-left:2px solid var(--success);margin-left:-1px;overflow:visible;vertical-align:text-bottom;pointer-events:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--success) 14%,transparent);animation:mdPositionPulse 1.05s ease-out both}.katex,.katex-display,.math-fallback{cursor:pointer}.rich-formula-active{display:none!important}.formula-source-editor{display:inline;max-width:100%;margin:0 2px;vertical-align:baseline}.formula-source-editor.display{display:flex;width:100%;margin:7px 0}.formula-source-input{display:inline-block;min-width:5ch;max-width:100%;min-height:1.8em;padding:2px 6px;border:1px solid var(--success-border);border-bottom:2px solid var(--success);border-radius:var(--radius-xs);outline:none;background:var(--success-bg);color:var(--text);box-shadow:none;font-family:"Fira Code","Consolas",monospace;font-size:inherit;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;vertical-align:middle}.formula-source-editor.display .formula-source-input{display:block;width:100%;max-width:100%;text-align:left}.formula-source-input:focus{background:color-mix(in srgb,var(--success-bg) 76%,var(--surface));box-shadow:0 0 0 2px color-mix(in srgb,var(--success) 22%,transparent)}.katex .katex-mathml{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}.math-fallback{padding:0 4px;color:var(--text);background:var(--surface2);border:1px solid var(--border);border-radius:4px;font-family:Georgia,"Times New Roman",serif;font-style:italic}.math-fallback.display{display:block;margin:7px 0;padding:8px;text-align:center}.preview-empty{color:var(--text3)}'+
       '@media(max-width:520px){header{height:44px;padding:0 12px}main{height:calc(100vh - 60px);margin:8px;padding:12px 34px 12px 12px;border-radius:var(--radius-sm)}}'+
-      '</style></head><body><header id="previewTitle">渲染预览 · 可直接编辑 · '+esc(title||'实时预览')+'</header><main id="previewBody"></main><button id="previewResizeGrip" type="button" title="按住并拖动调节预览窗口大小" aria-label="拖动调节预览窗口大小"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 19h10V9M14 19l5-5"/></svg></button></body></html>');
+      '</style></head><body><header id="previewTitle">全文渲染预览 · '+esc(title||'实时预览')+'</header><main id="previewBody"></main><button id="previewResizeGrip" type="button" title="按住并拖动调节预览窗口大小" aria-label="拖动调节预览窗口大小"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 19h10V9M14 19l5-5"/></svg></button></body></html>');
     _mdPopoutWindow.document.close();
     _installPopoutResizeGrip(_mdPopoutWindow);
     _applyPopoutTheme();
@@ -12447,7 +12576,7 @@ window.WorkflowMaintenance = {
     var body=_mdPopoutWindow.document.getElementById('previewBody');
     var title=_mdPopoutWindow.document.getElementById('previewTitle');
     _applyPopoutTheme();
-    if(title)title.textContent='渲染预览 · 可直接编辑 · '+_inputPreviewLabel(el);
+    if(title)title.textContent='全文渲染预览 · '+_inputPreviewLabel(el);
     if(body){body.innerHTML=html||'';if(html)renderMath(body);enableTaskListCheckboxes(body,el);enableRichPreviewEditing(body,el);syncPreviewScrollToCaret(body,el,caretMarker);}
   }
 
@@ -12596,7 +12725,7 @@ window.WorkflowMaintenance = {
     var externalPreviewButtons=isNoteEditor?'':'<button class="md-preview-popout-btn" type="button" title="标准窗口：支持最大化、最小化和 Win + 方向键分屏" aria-label="双屏标准窗口预览">↗ 双屏</button><button class="md-preview-pin-btn" type="button" title="置顶预览：已合并原网页内小窗" aria-label="始终置顶预览">▣ 置顶</button>';
     preview.innerHTML =
       '<div class="md-preview-head">' +
-        '<span class="md-preview-label">渲染预览 · 可直接编辑</span>' +
+        '<span class="md-preview-label">全文渲染预览 · 可直接编辑</span>' +
         '<span class="md-preview-actions">'+externalPreviewButtons+'</span>' +
       '</div>' +
       '<div class="md-preview-body math-preview"></div>' +
@@ -12652,6 +12781,7 @@ window.WorkflowMaintenance = {
     }
     function updateNow(){if(window._isWorkflowComposing&&window._isWorkflowComposing(el))return;clearTimeout(updateTimer);updateTimer=null;update();}
     el._mdUpdate = updateNow;
+    el._mdCancelScheduledUpdate=function(){clearTimeout(updateTimer);updateTimer=null;};
 
     el.addEventListener('input', scheduleUpdate);
     el.addEventListener('keyup', scheduleUpdate);
@@ -12903,9 +13033,9 @@ window.handleImportFile = function(event) {
 
 <!--
 workflow_tool build
-version: 2026.08.15.10
-sourceSha256: ec78d2c437531d405d8dad8d4ad0a8997c50654416f1523e5fc98c5508ea5d22
-configSha256: feff9aa3a452dc5d401e41a660653aabbd16a4a0e4a4b7be94c88a6b1a9a930e
+version: 2026.08.16.4
+sourceSha256: 4fd1922ba09959c61c60b01be6108e455f1082d910650a85428fe8a86ac26124
+configSha256: 4e9f9c87e979c6d2317e2ba83d7f5b2c367810cdd44f46a5c6966ef03ebd51cc
 coreSha256: a37b0de74e36858958583978b532413971fc99908dcb2d41a494d5c17bc326f9
 appSha256: 2f24aa03f02a5b051051aad95e186b81abef342d0af6958c66b79307c3dc0db3
 exportSha256: 13ad148412f079c37fed48892779a4c15a69b986b274bf432dd0506e64c0fa2a
@@ -12914,5 +13044,5 @@ historySha256: d2d96792bc489871e1e12fdf2483793e1781fec5835bae872974bc6b66894a79
 tasksSha256: cf7b1e78be5c87a40720433883aa80f4c8e36fe389400e217af9bb744ad8a590
 researchSha256: 7f18bf83e2678ea03658117f346225a9af8304668c9f622903770f0292e2c5a8
 stylesSha256: 438038ffa6949e8cb705df0dbad8d9a17ed29abd17f0c072fc70f88118cf55be
-builtAt: 2026-08-15T16:01:05.168Z
+builtAt: 2026-08-15T17:15:07.027Z
 -->
