@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <meta name="theme-color" content="#4f46e5">
-<meta name="workflow-version" content="2026.08.14.6">
+<meta name="workflow-version" content="2026.08.15.10">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="工作流">
@@ -27,6 +27,8 @@
   --shadow-md:0 4px 12px rgba(0,0,0,.07); --shadow-lg:0 12px 32px rgba(0,0,0,.1);
   --shadow-glow:0 0 0 3px rgba(79,70,229,.15);
   --radius:12px; --radius-sm:8px; --radius-xs:6px; --radius-lg:16px;
+  --content-width:760px;
+  --header-height:93px;
   --t:.2s ease; --t-slow:.35s cubic-bezier(.4,0,.2,1);
   /* Heatmap colors */
   --heat-0:#ebedf0; --heat-1:#c6e48b; --heat-2:#7bc96f; --heat-3:#239a3b; --heat-4:#196127;
@@ -51,12 +53,16 @@
 html{touch-action:manipulation;overflow-x:hidden}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
   background:
-    linear-gradient(180deg,rgba(79,70,229,.055),transparent 260px),
+    linear-gradient(180deg,color-mix(in srgb,var(--primary) 6%,transparent),transparent 260px),
     var(--bg);
   color:var(--text);min-height:100vh;transition:background var(--t),color var(--t);
   line-height:1.6;font-size:14px;-webkit-tap-highlight-color:transparent;
-  -webkit-user-select:none;user-select:none;overflow-x:hidden}
+  -webkit-user-select:none;user-select:none;overflow-x:clip}
 input,textarea,select{-webkit-user-select:text;user-select:text}
+::selection{background:var(--primary-light);color:var(--text)}
+button,input,textarea,select{font-family:inherit}
+button:focus-visible,[role="button"]:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{
+  outline:2px solid color-mix(in srgb,var(--primary) 72%,transparent);outline-offset:2px}
 
 /* ===== Animations ===== */
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
@@ -210,7 +216,7 @@ input,textarea,select{-webkit-user-select:text;user-select:text}
   padding:12px 20px;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(79,70,229,.3);
   transition:padding var(--t),background var(--t)}
 .dark .header{background:linear-gradient(135deg,#312e81,#4c1d95,#3730a3)}
-.header-inner{display:flex;justify-content:space-between;align-items:center;max-width:720px;margin:0 auto}
+.header-inner{display:flex;justify-content:space-between;align-items:center;max-width:var(--content-width);margin:0 auto}
 .header-left h1{font-size:18px;font-weight:700;letter-spacing:.01em;display:flex;align-items:center;gap:10px}
 .streak-badge{display:inline-flex;align-items:center;gap:5px;
   background:rgba(255,255,255,.18);backdrop-filter:blur(6px);
@@ -229,7 +235,7 @@ input,textarea,select{-webkit-user-select:text;user-select:text}
 .theme-btn:hover{background:rgba(255,255,255,.25);transform:scale(1.08)}
 
 /* ===== Progress Bar ===== */
-.progress-wrap{padding:10px 16px 0;max-width:720px;margin:0 auto}
+.progress-wrap{padding:10px 16px 0;max-width:var(--content-width);margin:0 auto}
 .progress-bar{background:var(--surface);border-radius:var(--radius);padding:10px 14px;
   display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);
   border:1.5px solid var(--border);box-shadow:var(--shadow-sm);flex-wrap:wrap;
@@ -248,9 +254,9 @@ input,textarea,select{-webkit-user-select:text;user-select:text}
 
 /* ===== Tabs ===== */
 .tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);
-  position:sticky;top:59px;z-index:90;max-width:720px;margin:0 auto;
+  position:sticky;top:var(--header-height);z-index:90;max-width:var(--content-width);margin:0 auto;
   transition:top .2s cubic-bezier(.4,0,.2,1);will-change:transform;
-  transform:translate3d(0,0,0);backdrop-filter:blur(8px)}
+  transform:translate3d(0,0,0);box-shadow:var(--shadow-xs)}
 .tab{flex:1;padding:12px 8px;text-align:center;font-size:13px;cursor:pointer;
   border-bottom:2.5px solid transparent;color:var(--text3);transition:all var(--t);font-weight:500;
   user-select:none;position:relative;letter-spacing:.01em;-webkit-tap-highlight-color:transparent}
@@ -261,7 +267,7 @@ input,textarea,select{-webkit-user-select:text;user-select:text}
   margin-left:4px;text-align:center;padding:0 5px}
 
 /* ===== Content ===== */
-.content{padding:14px 16px 110px;max-width:720px;margin:0 auto;animation:fadeIn var(--t) ease}
+.content{padding:14px 16px 110px;max-width:var(--content-width);margin:0 auto;animation:fadeIn var(--t) ease}
 
 /* ===== Onboarding ===== */
 .onboard{background:linear-gradient(135deg,var(--primary-bg),var(--accent-bg));
@@ -738,7 +744,7 @@ body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between
 /* ===== Keyboard Hints Footer ===== */
 .kbd-hints{position:fixed;bottom:0;left:0;right:0;z-index:80;background:var(--surface);
   border-top:1px solid var(--border);padding:6px 16px;display:flex;align-items:center;
-  gap:12px;font-size:11px;color:var(--text3);flex-wrap:nowrap;backdrop-filter:blur(12px);
+  gap:12px;font-size:11px;color:var(--text3);flex-wrap:nowrap;
   box-shadow:0 -2px 12px rgba(0,0,0,.06)}
 .kbd-hint{display:inline-flex;align-items:center;gap:4px;font-weight:500}
 .kbd-key{display:inline-block;background:var(--bg);border:1px solid var(--border);
@@ -856,6 +862,8 @@ body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between
 /* ===== Responsive - Tablet down ===== */
 @media(max-width:600px){
   .header{padding:10px 14px}
+  .header-inner{display:grid;grid-template-columns:minmax(0,1fr);gap:7px;align-items:start}
+  .header-left{display:flex;align-items:baseline;gap:8px;min-width:0}
   .header-left h1{font-size:16px}
   .hdate{font-size:11px}
   .streak-badge{padding:3px 10px;font-size:11px}
@@ -863,7 +871,7 @@ body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between
   .header-left > div[style*='font-size:10px']{display:none}
   #googleAuthBtn,#googleSignout{display:none!important}
   #ghConfigBtn{display:none!important}
-  .header-right{gap:6px;flex-wrap:nowrap;overflow-x:auto}
+  .header-right{gap:6px;flex-wrap:nowrap;width:100%;min-width:0;overflow:visible;justify-content:flex-start}
   .hdr-icon-btn{width:28px;height:28px;font-size:13px}
   .hdr-divider{height:16px}
   .content{padding:10px 10px 130px}
@@ -969,7 +977,6 @@ body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between
   .task-card{padding:10px 10px}
   .field input,.field textarea,.field select{padding:9px 10px;font-size:16px}
   .tab{font-size:10px;padding:10px 1px}
-  .tabs{top:49px}
   .progress-bar{font-size:11px;padding:7px 10px}
   .progress-seg{padding:4px 0}
   .modal{padding:16px;width:calc(100% - 16px)}
@@ -1044,18 +1051,28 @@ body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between
   .export-btns{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 /* ===== Markdown / Math Preview ===== */
-.md-preview{display:none;cursor:text;border:1.5px solid var(--border);border-radius:var(--radius-xs);background:var(--bg);min-height:38px;font-size:14px;line-height:1.7;color:var(--text);word-break:break-word;overflow-wrap:anywhere;box-sizing:border-box;overflow:hidden}
-.md-preview:hover{border-color:var(--primary-light)}
-.md-preview-head{height:28px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 8px 0 10px;background:var(--surface2);border-bottom:1px solid var(--border);box-sizing:border-box}
-.md-preview-label{font-size:10px;color:var(--text4);font-weight:700;line-height:1}
+.md-source-editor{border-left:3px solid var(--primary)!important;background:linear-gradient(90deg,var(--primary-bg),var(--surface) 22px)!important}
+.md-source-editor:focus{border-color:var(--primary)!important;box-shadow:var(--shadow-glow)!important}
+.md-preview{display:none;position:relative;cursor:text;border:1.5px solid var(--success-border);border-left:3px solid var(--success);border-radius:var(--radius-xs);background:var(--surface);min-height:38px;font-size:14px;line-height:1.7;color:var(--text);word-break:break-word;overflow-wrap:anywhere;box-sizing:border-box;overflow:hidden}
+.md-preview:hover{border-color:var(--success)}
+.md-preview-head{height:30px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 8px 0 10px;background:var(--success-bg);border-bottom:1px solid var(--success-border);box-sizing:border-box}
+.md-preview-label{font-size:10px;color:var(--success);font-weight:800;line-height:1}
 .md-preview-float-btn{width:22px;height:22px;border:1px solid var(--border);border-radius:50%;background:var(--surface);color:var(--text3);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;flex:0 0 auto;transition:all var(--t)}
 .md-preview-float-btn:hover,.md-preview-float-btn.active{border-color:var(--primary-light);color:var(--primary);background:var(--primary-bg)}
 .md-preview-float-btn svg{width:13px;height:13px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;display:block}
 .md-preview-body{padding:8px 12px;box-sizing:border-box;overflow-wrap:anywhere;max-height:180px;overflow-y:auto;scrollbar-gutter:stable}
+.md-preview-body[contenteditable=true]{outline:none;caret-color:var(--primary);cursor:text}
+.md-preview-body[contenteditable=true]:focus{background:color-mix(in srgb,var(--success-bg) 42%,var(--surface));box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--success) 32%,transparent)}
+.md-preview-body[contenteditable=true]:empty::before{content:'在这里直接编辑渲染后的内容';color:var(--text4);pointer-events:none}
 .md-caret-anchor{display:inline-block;width:0;height:1em;overflow:hidden;vertical-align:text-bottom;pointer-events:none}
 .md-preview-actions{display:flex;align-items:center;gap:5px}
 .md-preview-popout-btn,.md-preview-pin-btn{min-width:22px;height:22px;border:1px solid var(--border);border-radius:999px;background:var(--surface);color:var(--text3);display:inline-flex;align-items:center;justify-content:center;gap:3px;cursor:pointer;padding:0 6px;flex:0 0 auto;font-size:10px;font-weight:700}
 .md-preview-popout-btn:hover,.md-preview-pin-btn:hover{border-color:var(--primary-light);color:var(--primary);background:var(--primary-bg)}
+.md-preview-resize{display:none;position:absolute;right:2px;bottom:2px;z-index:3;width:30px;height:30px;align-items:center;justify-content:center;padding:0;border:0;border-radius:7px;background:color-mix(in srgb,var(--surface) 88%,transparent);color:var(--text4);cursor:ns-resize;touch-action:none}
+.md-preview-resize:hover,.md-preview-resize:focus-visible{color:var(--primary);background:var(--primary-bg);outline:none}.md-preview-resize svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.md-preview .katex,.md-preview .katex-display,.md-preview .math-fallback,.note-reading-preview .katex,.note-reading-preview .katex-display,.note-reading-preview .math-fallback,.math-preview .katex,.math-preview .katex-display,.math-preview .math-fallback{cursor:pointer}
+.rich-formula-active{display:none!important}
+.formula-source-editor{display:inline;max-width:100%;margin:0 2px;vertical-align:baseline}.formula-source-editor.display{display:flex;width:100%;margin:7px 0}.formula-source-input{display:inline-block;min-width:5ch;max-width:100%;min-height:1.8em;padding:2px 6px!important;border:1px solid var(--success-border)!important;border-bottom:2px solid var(--success)!important;border-radius:var(--radius-xs)!important;outline:none!important;background:var(--success-bg)!important;color:var(--text)!important;box-shadow:none!important;font-family:'Fira Code','Consolas',monospace;font-size:inherit!important;line-height:1.5!important;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;vertical-align:middle}.formula-source-editor.display .formula-source-input{display:block;width:100%;max-width:100%;text-align:left}.formula-source-input:focus{background:color-mix(in srgb,var(--success-bg) 76%,var(--surface))!important;box-shadow:0 0 0 2px color-mix(in srgb,var(--success) 22%,transparent)!important}
 .md-preview input.task-list-item-checkbox,.note-reading-preview input.task-list-item-checkbox,.wf-export-md input.task-list-item-checkbox{width:15px;height:15px;margin-right:6px;vertical-align:-2px;accent-color:var(--primary);cursor:pointer}
 .work-time-card{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0 14px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-xs)}
 .work-time-card label{display:block;font-size:11px;color:var(--text3);margin-bottom:4px}.work-time-card input{width:100%;min-width:0}
@@ -1120,6 +1137,8 @@ body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between
 .math-fallback{font-family:Georgia,'Times New Roman',serif;font-style:italic;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:0 4px;color:var(--text)}
 .math-fallback.display{display:block;text-align:center;margin:6px 0;padding:8px 10px;font-size:15px}
 @media(max-width:600px){
+  .md-preview-body{padding-bottom:34px}
+  .md-preview-resize{display:flex}
   .work-time-card{grid-template-columns:1fr 1fr;padding:10px}
   .md-preview-head{height:32px}
   .md-preview-float-btn{width:28px;height:28px}
@@ -1175,7 +1194,7 @@ body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between
 input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-bg)}
 
 /* ===== Unified Visual Rhythm ===== */
-.content{max-width:760px}
+.content{max-width:var(--content-width)}
 .card,.task-card,.detail-box,.stat-section,.backup-section,.pet-card{
   border-color:var(--border);box-shadow:var(--shadow-xs)
 }
@@ -1218,7 +1237,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   else root.WorkflowConfig = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
   return {
-    appVersion: '2026.08.14.6',
+    appVersion: '2026.08.15.10',
     schemaVersion: 7,
     typeLabels: {
       general: '通用',
@@ -2489,7 +2508,8 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
         <tr><td>☀️ 设为晨间</td><td>任务卡片右上角 ☀️；历史编辑中也可用</td><td>将任意任务整体设为晨间目标，原晨间任务整体回到任务列表；晨间支持项目标签、打卡任务和完整字段预览，只在位置和标注上特殊</td></tr>
         <tr><td>➕ 明日任务</td><td>晚间"明天要做的事"字段旁</td><td>将计划直接添加到明天任务清单，可选择5种任务类型</td></tr>
         <tr><td>📐 公式预览</td><td>在输入框中输入 <code>$...$</code></td><td>支持 LaTeX 数学公式（KaTeX）和 Markdown，输入后自动在下方渲染预览</td></tr>
-        <tr><td>▣ 预览窗口</td><td>点击“↗ 双屏”“▣ 置顶”或网页小窗按钮</td><td>下方预览按当前光标所在的具体字符跟踪；“↗ 双屏”打开标准 Edge 窗口，可用标题栏最大化/最小化，也可用 Win + 方向键分屏；“▣ 置顶”保持在其他窗口上方，但不支持系统最大化和贴靠。各窗口都会锁定打开它的输入框，点击其他输入框不会覆盖</td></tr>
+        <tr><td>源码 / 渲染编辑</td><td>原输入框编辑源码；绿色“渲染预览”直接编辑排版结果</td><td>两种视图写入同一份 Markdown/LaTeX 数据；点击公式后直接在原位置输入，无需确认按钮，Enter 或离开公式后自动重渲染，Esc 撤销。手机上可拖动预览右下角按钮调节高度</td></tr>
+        <tr><td>▣ 预览窗口</td><td>点击“↗ 双屏”或“▣ 置顶”</td><td>两个外部预览同样可以直接编辑渲染内容，并锁定打开它的输入框；按住右下角调节柄拖动即可改变大小。“↗ 双屏”还支持 Edge 最大化、最小化和 Win + 方向键分屏；“▣ 置顶”保持在其他窗口上方</td></tr>
       </table></div>
     </div></div>
   </div>
@@ -3093,7 +3113,7 @@ var driveFileId = localStorage.getItem('drive_file_id') || null;
 var accessToken = null;
 var syncInProgress = false;
 var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 7;
-var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.08.14.6';
+var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.08.15.10';
 
 var tokenClient = null;
 var _syncReconcileInProgress = false;
@@ -7333,6 +7353,13 @@ window.toggleMeta = function(){
 })();
 
 // ===== Header Scroll Compact =====
+function _syncStickyHeaderOffset(){
+  var header=document.getElementById('mainHeader');
+  if(header)document.documentElement.style.setProperty('--header-height',Math.ceil(header.getBoundingClientRect().height)+'px');
+}
+_syncStickyHeaderOffset();
+if(typeof ResizeObserver!=='undefined')new ResizeObserver(_syncStickyHeaderOffset).observe(document.getElementById('mainHeader'));
+window.addEventListener('resize',_syncStickyHeaderOffset,{passive:true});
 var lastScrollY = 0;
 var ticking = false;
 window.addEventListener('scroll', function(){
@@ -7778,7 +7805,7 @@ function _isWorkflowComposing(el){
 window._isWorkflowComposing=_isWorkflowComposing;
 document.addEventListener('compositionstart',function(event){
   var el=event.target;
-  if(!el||!/^(INPUT|TEXTAREA)$/.test(el.tagName))return;
+  if(!el||(!/^(INPUT|TEXTAREA)$/.test(el.tagName)&&!el.isContentEditable))return;
   el._wfComposing=true;
   el._wfAwaitingCompositionCommit=false;
 },true);
@@ -11850,7 +11877,9 @@ window.WorkflowMaintenance = {
 
 /* ===== Markdown + Math Preview Module ===== */
 (function(){
-  var _mdFloatMode = localStorage.getItem('wf_md_float_mode') === '1';
+  // 网页内悬浮预览已合并到置顶预览；清除旧瞬态状态，避免旧配置继续隐藏行内预览。
+  localStorage.removeItem('wf_md_float_mode');
+  var _mdFloatMode = false;
   var _mdFloatSource = null;
   var _mdPopoutSource = null;
   var _mdPopoutNoteId = '';
@@ -11860,7 +11889,7 @@ window.WorkflowMaintenance = {
     '--bg','--surface','--surface2','--surface3','--border','--border-light',
     '--text','--text2','--text3','--text4','--primary','--primary-hover',
     '--primary-bg','--primary-light','--primary-soft','--accent','--accent-bg',
-    '--success','--success-bg','--warn','--warn-bg','--danger','--danger-bg',
+    '--success','--success-bg','--success-border','--warn','--warn-bg','--danger','--danger-bg',
     '--shadow-xs','--shadow-sm','--shadow','--shadow-md','--shadow-lg','--shadow-glow',
     '--radius','--radius-sm','--radius-xs','--radius-lg','--t'
   ];
@@ -12123,12 +12152,171 @@ window.WorkflowMaintenance = {
     });
   }
 
+  function _richFormulaSource(node,display){
+    var annotation=node.querySelector&&node.querySelector('annotation[encoding="application/x-tex"]');
+    var tex=annotation?annotation.textContent:(node.getAttribute&&node.getAttribute('data-tex'))||'';
+    return tex?(display?'\n$$'+tex+'$$\n':'$'+tex+'$'):'';
+  }
+  function _richChildren(node){
+    return Array.prototype.map.call(node.childNodes||[],_richNodeToMarkdown).join('');
+  }
+  function _richListToMarkdown(list,depth){
+    depth=depth||0;
+    var ordered=list.tagName==='OL',index=parseInt(list.getAttribute('start')||'1',10)||1,lines=[];
+    Array.prototype.forEach.call(list.children||[],function(li){
+      if(li.tagName!=='LI')return;
+      var checkbox=li.querySelector(':scope > input[type="checkbox"]');
+      var inline='';var nested=[];
+      Array.prototype.forEach.call(li.childNodes||[],function(child){
+        if(child.nodeType===1&&(child.tagName==='UL'||child.tagName==='OL'))nested.push(child);
+        else if(child!==checkbox)inline+=_richNodeToMarkdown(child);
+      });
+      inline=inline.replace(/\s*\n+\s*/g,' ').trim();
+      var prefix=ordered?(index++)+'. ':'- ';
+      if(checkbox)prefix+='['+(checkbox.checked?'x':' ')+'] ';
+      lines.push('  '.repeat(depth)+prefix+inline);
+      nested.forEach(function(child){lines.push(_richListToMarkdown(child,depth+1));});
+    });
+    return lines.join('\n')+'\n';
+  }
+  function _richTableToMarkdown(table){
+    var rows=Array.prototype.map.call(table.querySelectorAll('tr'),function(row){
+      return Array.prototype.map.call(row.querySelectorAll(':scope > th,:scope > td'),function(cell){return _richChildren(cell).replace(/\|/g,'\\|').replace(/\s*\n+\s*/g,' ').trim();});
+    }).filter(function(row){return row.length;});
+    if(!rows.length)return '';
+    var width=Math.max.apply(Math,rows.map(function(row){return row.length;}));
+    rows.forEach(function(row){while(row.length<width)row.push('');});
+    var out=['| '+rows[0].join(' | ')+' |','| '+rows[0].map(function(){return '---';}).join(' | ')+' |'];
+    rows.slice(1).forEach(function(row){out.push('| '+row.join(' | ')+' |');});
+    return '\n'+out.join('\n')+'\n\n';
+  }
+  function _richNodeToMarkdown(node){
+    if(!node)return '';
+    if(node.nodeType===3)return String(node.nodeValue||'').replace(/\u200B/g,'').replace(/\u00a0/g,' ');
+    if(node.nodeType!==1)return '';
+    var tag=node.tagName;
+    if(node.classList.contains('md-caret-anchor'))return '';
+    if(node.classList.contains('formula-source-editor'))return '';
+    if(node.classList.contains('katex-display'))return _richFormulaSource(node,true);
+    if(node.classList.contains('katex'))return _richFormulaSource(node,false);
+    if(node.classList.contains('math-fallback'))return _richFormulaSource(node,node.classList.contains('display'));
+    if(tag==='BR')return '\n';
+    if(tag==='INPUT'&&String(node.type).toLowerCase()==='checkbox')return '';
+    if(/^H[1-6]$/.test(tag))return '\n'+('#'.repeat(parseInt(tag.slice(1),10)))+' '+_richChildren(node).trim()+'\n\n';
+    if(tag==='STRONG'||tag==='B')return '**'+_richChildren(node)+'**';
+    if(tag==='EM'||tag==='I')return '*'+_richChildren(node)+'*';
+    if(tag==='DEL'||tag==='S')return '~~'+_richChildren(node)+'~~';
+    if(tag==='A')return '['+_richChildren(node)+']('+(node.getAttribute('href')||'')+')';
+    if(tag==='PRE')return '\n```\n'+node.textContent.replace(/\n$/,'')+'\n```\n\n';
+    if(tag==='CODE')return '`'+node.textContent.replace(/`/g,'\\`')+'`';
+    if(tag==='BLOCKQUOTE')return '\n'+_richChildren(node).trim().split('\n').map(function(line){return '> '+line;}).join('\n')+'\n\n';
+    if(tag==='UL'||tag==='OL')return '\n'+_richListToMarkdown(node,0)+'\n';
+    if(tag==='TABLE')return _richTableToMarkdown(node);
+    if(tag==='HR')return '\n---\n\n';
+    var content=_richChildren(node);
+    if(tag==='P'||tag==='DIV'||tag==='SECTION'||tag==='ARTICLE')return content.replace(/\n+$/,'')+'\n\n';
+    return content;
+  }
+  function _richHtmlToMarkdown(container){
+    return _richChildren(container).replace(/[ \t]+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
+  }
+  function _commitRichPreview(container){
+    if(!container)return;
+    var markdown=_richHtmlToMarkdown(container),sourceEl=container._wfRichSource,noteId=container._wfRichNoteId;
+    if(sourceEl&&sourceEl.value!==markdown){
+      sourceEl.value=markdown;sourceEl._wfRichSyncing=true;
+      sourceEl.dispatchEvent(new Event('input',{bubbles:true}));
+      sourceEl._wfRichSyncing=false;
+    }else if(noteId){
+      var note=_readNote(noteId);
+      if((note.content||'')!==markdown){note.content=markdown;note.timestamp=note.timestamp||Date.now();localStorage.setItem('wf_note_'+noteId,JSON.stringify(note));flash();}
+    }
+  }
+  function _richFormulaNode(container,target){
+    if(!container||!target||!target.closest)return null;
+    var node=target.closest('.katex-display')||target.closest('.katex')||target.closest('.math-fallback');
+    return node&&container.contains(node)?node:null;
+  }
+  function _richFormulaTex(node){
+    if(!node)return '';
+    var annotation=node.querySelector&&node.querySelector('annotation[encoding="application/x-tex"]');
+    return annotation?annotation.textContent:(node.getAttribute('data-tex')||'');
+  }
+  function _closeRichFormulaEditor(container){
+    if(!container)return;
+    var editor=container.querySelector('.formula-source-editor');if(editor)editor.remove();
+    container.querySelectorAll('.rich-formula-active').forEach(function(node){node.classList.remove('rich-formula-active');});
+  }
+  function _finishRichFormulaEdit(container,node,tex){
+    tex=String(tex||'').trim();
+    if(tex){
+      node.setAttribute('data-tex',tex);
+      var annotation=node.querySelector&&node.querySelector('annotation[encoding="application/x-tex"]');if(annotation)annotation.textContent=tex;
+    }else node.remove();
+    _closeRichFormulaEditor(container);_commitRichPreview(container);
+    var source=container._wfRichSource,id=container._wfRichNoteId;
+    if(source){source.dispatchEvent(new Event('change',{bubbles:true}));if(typeof source._mdUpdate==='function')source._mdUpdate();}
+    else if(id)_refreshNotePreviewSurfaces(id);
+  }
+  function _stageRichFormulaEdit(container,node,tex){
+    tex=String(tex||'');node.setAttribute('data-tex',tex);
+    var annotation=node.querySelector&&node.querySelector('annotation[encoding="application/x-tex"]');if(annotation)annotation.textContent=tex;
+    _commitRichPreview(container);
+  }
+  function _openRichFormulaEditor(container,node){
+    if(!container||!node)return;
+    _closeRichFormulaEditor(container);node.classList.add('rich-formula-active');
+    var doc=container.ownerDocument||document,editor=doc.createElement('span'),display=node.classList.contains('katex-display')||node.classList.contains('display');
+    editor.className='formula-source-editor'+(display?' display':'');editor.setAttribute('contenteditable','false');editor.setAttribute('role','group');editor.setAttribute('aria-label','直接编辑公式');
+    var original=_richFormulaTex(node),input=doc.createElement('span');input.className='formula-source-input';input.textContent=original;input.setAttribute('contenteditable','true');input.setAttribute('role','textbox');input.setAttribute('aria-label','直接编辑 LaTeX 公式');input.setAttribute('title','直接输入公式；Enter 完成，Esc 撤销');input.spellcheck=false;
+    editor.appendChild(input);node.insertAdjacentElement('afterend',editor);
+    var stageTimer=null,finished=false,formulaComposing=false;
+    function value(){return String(input.textContent||'').replace(/\u00a0/g,' ');}
+    function stage(){if(formulaComposing)return;clearTimeout(stageTimer);stageTimer=setTimeout(function(){stageTimer=null;_stageRichFormulaEdit(container,node,value());},90);}
+    function apply(){if(finished)return;finished=true;clearTimeout(stageTimer);_finishRichFormulaEdit(container,node,value());}
+    function cancel(){if(finished)return;finished=true;clearTimeout(stageTimer);_finishRichFormulaEdit(container,node,original);}
+    input.addEventListener('input',stage);
+    input.addEventListener('compositionstart',function(){formulaComposing=true;});
+    input.addEventListener('compositionend',function(){formulaComposing=false;stage();});
+    input.addEventListener('blur',apply);
+    input.addEventListener('keydown',function(ev){if(formulaComposing)return;if(ev.key==='Enter'){ev.preventDefault();apply();}else if(ev.key==='Escape'){ev.preventDefault();cancel();}});
+    setTimeout(function(){input.focus();var range=doc.createRange(),selection=doc.getSelection();range.selectNodeContents(input);selection.removeAllRanges();selection.addRange(range);},0);
+  }
+  function enableRichPreviewEditing(container,sourceEl,noteId){
+    if(!container)return;
+    container._wfRichSource=sourceEl||null;container._wfRichNoteId=noteId?String(noteId):'';
+    container.setAttribute('contenteditable','true');container.setAttribute('role','textbox');container.setAttribute('aria-multiline','true');
+    container.setAttribute('aria-label','渲染预览，可直接编辑');container.spellcheck=true;
+    container.querySelectorAll('.katex,.katex-display,.math-fallback').forEach(function(node){node.setAttribute('contenteditable','false');node.setAttribute('role','button');node.setAttribute('tabindex','0');node.setAttribute('title','点击编辑公式源码');node.setAttribute('aria-label','公式，点击编辑源码');});
+    if(container._wfRichBound)return;
+    container._wfRichBound=true;
+    var timer=null,composing=false;
+    function queue(){if(composing)return;clearTimeout(timer);timer=setTimeout(function(){timer=null;_commitRichPreview(container);},120);}
+    container.addEventListener('compositionstart',function(){composing=true;});
+    container.addEventListener('compositionend',function(){composing=false;queue();});
+    container.addEventListener('input',queue);
+    container.addEventListener('pointerdown',function(ev){var node=_richFormulaNode(container,ev.target);if(!node)return;container._wfFormulaPointer=true;setTimeout(function(){container._wfFormulaPointer=false;},350);});
+    container.addEventListener('click',function(ev){var node=_richFormulaNode(container,ev.target);if(!node)return;container._wfFormulaPointer=false;ev.preventDefault();ev.stopPropagation();_openRichFormulaEditor(container,node);});
+    container.addEventListener('keydown',function(ev){var node=_richFormulaNode(container,ev.target);if(node&&(ev.key==='Enter'||ev.key===' ')){ev.preventDefault();_openRichFormulaEditor(container,node);}});
+    container.addEventListener('blur',function(){
+      setTimeout(function(){
+        var active=(container.ownerDocument||document).activeElement;if(container._wfFormulaPointer||container.querySelector('.formula-source-editor')||(active&&container.contains(active)))return;
+        clearTimeout(timer);timer=null;_commitRichPreview(container);
+        var source=container._wfRichSource,id=container._wfRichNoteId;
+        if(source){source.dispatchEvent(new Event('change',{bubbles:true}));if(typeof source._mdUpdate==='function')source._mdUpdate();}
+        else if(id){window.renderNotes();}
+      },0);
+    },true);
+  }
+  window._richHtmlToMarkdown=_richHtmlToMarkdown;
+
   function _readNote(id){try{return JSON.parse(localStorage.getItem('wf_note_'+id)||'{}');}catch(e){return {};}}
   function _renderStaticNoteContainer(container,id,content,scrollTop){
     if(!container)return;
     container.innerHTML=typeof window._renderMDMaybe==='function'?window._renderMDMaybe(content||''):renderMDMath(content||'');
     renderMath(container);
     enableStaticNoteChecklist(container,id);
+    enableRichPreviewEditing(container,null,id);
     if(typeof scrollTop==='number')container.scrollTop=scrollTop;
   }
   function _refreshNotePreviewSurfaces(id,preserve){
@@ -12184,19 +12372,51 @@ window.WorkflowMaintenance = {
   }
   window._applyPopoutTheme=_applyPopoutTheme;
 
+  function _installPopoutResizeGrip(targetWindow){
+    if(!targetWindow||targetWindow.closed)return;
+    var grip=targetWindow.document.getElementById('previewResizeGrip');if(!grip||grip._wfResizeBound)return;
+    grip._wfResizeBound=true;var sizing=null,pendingResize=null;
+    grip.addEventListener('pointerdown',function(ev){
+      pendingResize=null;sizing={x:ev.screenX,y:ev.screenY,width:targetWindow.outerWidth||targetWindow.innerWidth,height:targetWindow.outerHeight||targetWindow.innerHeight,pointerId:ev.pointerId,dx:0,dy:0};
+      grip.classList.add('is-resizing');
+      try{grip.setPointerCapture(ev.pointerId);}catch(e){}ev.preventDefault();ev.stopPropagation();
+    });
+    targetWindow.document.addEventListener('pointermove',function(ev){
+      if(!sizing||ev.pointerId!==sizing.pointerId)return;
+      var rawX=ev.screenX-sizing.x,rawY=ev.screenY-sizing.y;
+      sizing.dx=Math.max(360-sizing.width,rawX);sizing.dy=Math.max(260-sizing.height,rawY);
+      grip.setAttribute('aria-valuetext',Math.round(sizing.width+sizing.dx)+' × '+Math.round(sizing.height+sizing.dy));
+      ev.preventDefault();
+    });
+    function finish(ev){
+      if(!sizing||ev.pointerId!==sizing.pointerId)return;
+      if(Math.abs(sizing.dx)+Math.abs(sizing.dy)>=4)pendingResize={dx:Math.round(sizing.dx),dy:Math.round(sizing.dy)};
+      grip.classList.remove('is-resizing');grip.removeAttribute('aria-valuetext');
+      sizing=null;try{grip.releasePointerCapture(ev.pointerId);}catch(e){}
+    }
+    targetWindow.document.addEventListener('pointerup',finish);targetWindow.document.addEventListener('pointercancel',finish);
+    grip.addEventListener('click',function(ev){
+      if(!pendingResize)return;var resize=pendingResize;pendingResize=null;
+      ev.preventDefault();ev.stopPropagation();
+      try{targetWindow.resizeBy(resize.dx,resize.dy);}catch(e){}
+    });
+  }
+
   function _openPopoutShell(title,targetWindow){
     _mdPopoutWindow=targetWindow||window.open('','workflow_md_preview','popup=yes,width=620,height=720,resizable=yes,scrollbars=yes');
     if(!_mdPopoutWindow){showToast('请允许浏览器弹出独立预览窗口','warn');return null;}
     _mdPopoutWindow.document.open();
     _mdPopoutWindow.document.write('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta id="previewThemeColor" name="theme-color" content=""><title>'+esc(title||'实时预览')+'</title><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"><style>'+
       '*,*::before,*::after{box-sizing:border-box}html,body{height:100%;margin:0}html{background:var(--bg);color-scheme:light}body{overflow:hidden;color:var(--text);background:linear-gradient(180deg,color-mix(in srgb,var(--primary) 7%,transparent),transparent 240px),var(--bg);transition:background var(--t),color var(--t)}'+
-      'header{height:48px;display:flex;align-items:center;position:sticky;top:0;z-index:2;padding:0 16px;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;font-size:13px;font-weight:750;letter-spacing:.01em;border-bottom:1px solid color-mix(in srgb,#fff 18%,transparent);box-shadow:var(--shadow-md)}'+
-      'main{height:calc(100vh - 76px);margin:14px;padding:16px 18px;overflow:auto;overscroll-behavior:contain;line-height:1.75;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);word-break:break-word;overflow-wrap:anywhere;scrollbar-gutter:stable}'+
+      'header{height:48px;display:flex;align-items:center;position:sticky;top:0;z-index:2;padding:0 16px;background:linear-gradient(135deg,var(--success),var(--primary));color:#fff;font-size:13px;font-weight:750;letter-spacing:.01em;border-bottom:1px solid color-mix(in srgb,#fff 18%,transparent);box-shadow:var(--shadow-md);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'+
+      'main{height:calc(100vh - 76px);margin:14px;padding:16px 18px;overflow:auto;overscroll-behavior:contain;line-height:1.75;color:var(--text);background:var(--surface);border:2px solid var(--success-border);border-left:4px solid var(--success);border-radius:var(--radius);box-shadow:var(--shadow);word-break:break-word;overflow-wrap:anywhere;scrollbar-gutter:stable;outline:none;caret-color:var(--primary)}main:focus{background:color-mix(in srgb,var(--success-bg) 42%,var(--surface));box-shadow:var(--shadow),inset 0 0 0 2px color-mix(in srgb,var(--success) 30%,transparent)}'+
+      '#previewResizeGrip{position:fixed;right:4px;bottom:4px;z-index:8;width:38px;height:38px;display:flex;align-items:center;justify-content:center;padding:0;border:1px solid var(--success-border);border-radius:10px;background:color-mix(in srgb,var(--surface) 90%,transparent);color:var(--success);box-shadow:var(--shadow-md);cursor:nwse-resize;touch-action:none;opacity:.88}#previewResizeGrip:hover,#previewResizeGrip:focus-visible,#previewResizeGrip.is-resizing{opacity:1;background:var(--success-bg);outline:2px solid color-mix(in srgb,var(--success) 24%,transparent)}#previewResizeGrip.is-resizing{transform:scale(1.06)}#previewResizeGrip svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}'+
       'main>*{max-width:100%}p{margin:0 0 7px}p:last-child{margin-bottom:0}h1,h2,h3,h4,h5,h6{margin:12px 0 7px;color:var(--text);line-height:1.35}h1:first-child,h2:first-child,h3:first-child{margin-top:0}ul,ol{margin:5px 0 8px;padding-left:24px;list-style-position:outside}li{margin:2px 0;padding-left:2px}blockquote{margin:8px 0;padding:7px 11px;border-left:3px solid var(--primary);border-radius:var(--radius-xs);background:var(--surface2);color:var(--text2)}hr{border:0;border-top:1px solid var(--border);margin:10px 0}a{color:var(--primary)}'+
-      'input[type=checkbox]{width:16px;height:16px;margin-right:6px;vertical-align:-2px;accent-color:var(--primary);cursor:pointer}code{padding:1px 4px;border-radius:4px;background:var(--surface2);color:var(--text);font-family:"Fira Code","Consolas",monospace;font-size:.9em}pre{max-width:100%;margin:8px 0;padding:11px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid var(--border);border-radius:var(--radius-xs);background:var(--surface2)}pre code{padding:0;border:0;background:transparent}table{display:block;width:100%;max-width:100%;margin:8px 0;overflow-x:auto;border-collapse:collapse}td,th{padding:5px 7px;border:1px solid var(--border);text-align:left}th{background:var(--surface2)}.md-caret-anchor{display:inline-block;width:0;height:1em;overflow:hidden;vertical-align:text-bottom;pointer-events:none}.katex .katex-mathml{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}.math-fallback{padding:0 4px;color:var(--text);background:var(--surface2);border:1px solid var(--border);border-radius:4px;font-family:Georgia,"Times New Roman",serif;font-style:italic}.math-fallback.display{display:block;margin:7px 0;padding:8px;text-align:center}.preview-empty{color:var(--text3)}'+
-      '@media(max-width:520px){header{height:44px;padding:0 12px}main{height:calc(100vh - 60px);margin:8px;padding:12px;border-radius:var(--radius-sm)}}'+
-      '</style></head><body><header id="previewTitle">'+esc(title||'实时预览')+'</header><main id="previewBody"></main></body></html>');
+      'input[type=checkbox]{width:16px;height:16px;margin-right:6px;vertical-align:-2px;accent-color:var(--primary);cursor:pointer}code{padding:1px 4px;border-radius:4px;background:var(--surface2);color:var(--text);font-family:"Fira Code","Consolas",monospace;font-size:.9em}pre{max-width:100%;margin:8px 0;padding:11px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid var(--border);border-radius:var(--radius-xs);background:var(--surface2)}pre code{padding:0;border:0;background:transparent}table{display:block;width:100%;max-width:100%;margin:8px 0;overflow-x:auto;border-collapse:collapse}td,th{padding:5px 7px;border:1px solid var(--border);text-align:left}th{background:var(--surface2)}.md-caret-anchor{display:inline-block;width:0;height:1em;overflow:hidden;vertical-align:text-bottom;pointer-events:none}.katex,.katex-display,.math-fallback{cursor:pointer}.rich-formula-active{display:none!important}.formula-source-editor{display:inline;max-width:100%;margin:0 2px;vertical-align:baseline}.formula-source-editor.display{display:flex;width:100%;margin:7px 0}.formula-source-input{display:inline-block;min-width:5ch;max-width:100%;min-height:1.8em;padding:2px 6px;border:1px solid var(--success-border);border-bottom:2px solid var(--success);border-radius:var(--radius-xs);outline:none;background:var(--success-bg);color:var(--text);box-shadow:none;font-family:"Fira Code","Consolas",monospace;font-size:inherit;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;vertical-align:middle}.formula-source-editor.display .formula-source-input{display:block;width:100%;max-width:100%;text-align:left}.formula-source-input:focus{background:color-mix(in srgb,var(--success-bg) 76%,var(--surface));box-shadow:0 0 0 2px color-mix(in srgb,var(--success) 22%,transparent)}.katex .katex-mathml{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}.math-fallback{padding:0 4px;color:var(--text);background:var(--surface2);border:1px solid var(--border);border-radius:4px;font-family:Georgia,"Times New Roman",serif;font-style:italic}.math-fallback.display{display:block;margin:7px 0;padding:8px;text-align:center}.preview-empty{color:var(--text3)}'+
+      '@media(max-width:520px){header{height:44px;padding:0 12px}main{height:calc(100vh - 60px);margin:8px;padding:12px 34px 12px 12px;border-radius:var(--radius-sm)}}'+
+      '</style></head><body><header id="previewTitle">渲染预览 · 可直接编辑 · '+esc(title||'实时预览')+'</header><main id="previewBody"></main><button id="previewResizeGrip" type="button" title="按住并拖动调节预览窗口大小" aria-label="拖动调节预览窗口大小"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 19h10V9M14 19l5-5"/></svg></button></body></html>');
     _mdPopoutWindow.document.close();
+    _installPopoutResizeGrip(_mdPopoutWindow);
     _applyPopoutTheme();
     return _mdPopoutWindow;
   }
@@ -12227,8 +12447,8 @@ window.WorkflowMaintenance = {
     var body=_mdPopoutWindow.document.getElementById('previewBody');
     var title=_mdPopoutWindow.document.getElementById('previewTitle');
     _applyPopoutTheme();
-    if(title)title.textContent=_inputPreviewLabel(el);
-    if(body){body.innerHTML=html||'<div class="preview-empty">暂无可预览内容</div>';if(html)renderMath(body);enableTaskListCheckboxes(body,el);syncPreviewScrollToCaret(body,el,caretMarker);}
+    if(title)title.textContent='渲染预览 · 可直接编辑 · '+_inputPreviewLabel(el);
+    if(body){body.innerHTML=html||'';if(html)renderMath(body);enableTaskListCheckboxes(body,el);enableRichPreviewEditing(body,el);syncPreviewScrollToCaret(body,el,caretMarker);}
   }
 
   function openMdPopoutPreview(el){
@@ -12274,15 +12494,8 @@ window.WorkflowMaintenance = {
   }
 
   window.toggleMdFloatPreview = function(force){
-    _mdFloatMode = typeof force === 'boolean' ? force : !_mdFloatMode;
-    localStorage.setItem('wf_md_float_mode', _mdFloatMode ? '1' : '0');
-    setMdFloatButtonState();
-    if(!_mdFloatMode) {
-      var box = document.getElementById('mdFloatPreview');
-      if(box) box.style.display = 'none';
-    }
-    initAllPreviews();
-    refreshMdFloatFromActive();
+    _mdFloatMode=false;localStorage.removeItem('wf_md_float_mode');
+    var box=document.getElementById('mdFloatPreview');if(box)box.style.display='none';
   };
   window._clampMdFloatToViewport = clampMdFloatToViewport;
 
@@ -12331,6 +12544,8 @@ window.WorkflowMaintenance = {
         var raw = m[2] || m[3] || m[4] || m[5] || '';
         var span = document.createElement('span');
         span.className = 'math-fallback' + (display ? ' display' : '');
+        span.setAttribute('data-tex',raw);
+        span.setAttribute('contenteditable','false');
         span.innerHTML = _plainMathFallback(typeof window._mdSafeSource === 'function' ? window._mdSafeSource(raw) : String(raw || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
         frag.appendChild(span);
         last = re.lastIndex;
@@ -12365,71 +12580,73 @@ window.WorkflowMaintenance = {
   // 为一个 textarea/input 绑定预览行为
   function attachPreview(el) {
     if (!el) return;
+    if(el.closest&&el.closest('.formula-source-editor'))return;
     if (el._mdAttached) return;
     el._mdAttached = true;
     // 支持 .field、.note-card 等各种父容器
     var field = (el.closest ? el.closest('.field, .note-card, .wk-row') : null) || el.parentNode;
     if (!field) return;
+    el.classList.add('md-source-editor');
+    el.title=(el.title?el.title+' · ':'')+'源码编辑：输入 Markdown / LaTeX 原代码';
 
     var preview = document.createElement('div');
     preview.className = 'md-preview';
     preview.setAttribute('aria-live', 'polite');
     var isNoteEditor=!!(el.classList&&el.classList.contains('note-textarea'));
-    var externalPreviewButtons=isNoteEditor?'':'<button class="md-preview-popout-btn" type="button" title="标准窗口：支持最大化、最小化和 Win + 方向键分屏" aria-label="双屏标准窗口预览">↗ 双屏</button><button class="md-preview-pin-btn" type="button" title="始终位于其他窗口上方" aria-label="始终置顶预览">▣ 置顶</button>';
+    var externalPreviewButtons=isNoteEditor?'':'<button class="md-preview-popout-btn" type="button" title="标准窗口：支持最大化、最小化和 Win + 方向键分屏" aria-label="双屏标准窗口预览">↗ 双屏</button><button class="md-preview-pin-btn" type="button" title="置顶预览：已合并原网页内小窗" aria-label="始终置顶预览">▣ 置顶</button>';
     preview.innerHTML =
       '<div class="md-preview-head">' +
-        '<span class="md-preview-label">预览</span>' +
-        '<span class="md-preview-actions">'+externalPreviewButtons+'<button class="md-preview-float-btn" type="button" title="在网页内小窗中预览" aria-label="网页内小窗预览">' +
-          '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/><path d="M9 9h6v6H9z"/></svg>' +
-        '</button></span>' +
+        '<span class="md-preview-label">渲染预览 · 可直接编辑</span>' +
+        '<span class="md-preview-actions">'+externalPreviewButtons+'</span>' +
       '</div>' +
-      '<div class="md-preview-body math-preview"></div>';
+      '<div class="md-preview-body math-preview"></div>' +
+      '<button class="md-preview-resize" type="button" title="上下拖动调整预览高度" aria-label="调整实时预览高度"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9l5-5 5 5M7 15l5 5 5-5"/></svg></button>';
     field.appendChild(preview);
     var previewBody = preview.querySelector('.md-preview-body');
-    var floatBtn = preview.querySelector('.md-preview-float-btn');
     var popoutBtn = preview.querySelector('.md-preview-popout-btn');
     var pinBtn = preview.querySelector('.md-preview-pin-btn');
+    var resizeBtn = preview.querySelector('.md-preview-resize');
     if(popoutBtn)popoutBtn.addEventListener('click',function(ev){ev.preventDefault();ev.stopPropagation();openMdPopoutPreview(el);});
     if(pinBtn)pinBtn.addEventListener('click',function(ev){ev.preventDefault();ev.stopPropagation();window.openMdPinnedPreview(el);});
-    if(floatBtn) {
-      floatBtn.addEventListener('click', function(ev){
-        ev.preventDefault();
-        ev.stopPropagation();
-        _mdFloatSource = el;
-        window.toggleMdFloatPreview(true);
+    if(resizeBtn){
+      var savedMobileHeight=parseInt(localStorage.getItem('wf_md_mobile_preview_height')||'0',10);
+      if(savedMobileHeight&&window.matchMedia&&window.matchMedia('(max-width:600px)').matches){previewBody.style.height=Math.max(90,Math.min(savedMobileHeight,Math.round(window.innerHeight*.65)))+'px';previewBody.style.maxHeight='none';}
+      var resizing=null;
+      resizeBtn.addEventListener('pointerdown',function(ev){
+        resizing={y:ev.clientY,height:previewBody.getBoundingClientRect().height};resizeBtn.setPointerCapture(ev.pointerId);ev.preventDefault();ev.stopPropagation();
+      });
+      resizeBtn.addEventListener('pointermove',function(ev){
+        if(!resizing)return;var height=Math.max(90,Math.min(resizing.height+ev.clientY-resizing.y,Math.round(window.innerHeight*.65)));previewBody.style.height=Math.round(height)+'px';previewBody.style.maxHeight='none';ev.preventDefault();
+      });
+      resizeBtn.addEventListener('pointerup',function(ev){
+        if(resizing){resizing=null;localStorage.setItem('wf_md_mobile_preview_height',String(Math.round(previewBody.getBoundingClientRect().height)));}
+        try{resizeBtn.releasePointerCapture(ev.pointerId);}catch(e){}
       });
     }
-    setMdFloatButtonState();
 
     function update() {
       window._mdPreviewRenderCount=(window._mdPreviewRenderCount||0)+1;
       var val = el.value || el.textContent || '';
       if (!needsRender(val)) {
-        preview.style.display = 'none';
-        // 小窗只跟随用户通过对应按钮明确选择的输入框；普通焦点变化不能换源。
-        var plainHtml=String(val||'').trim()?renderMDMath(String(val)):'<div style="color:var(--text4);padding:8px 0">当前输入框暂无可预览内容</div>';
+        var plainActive=document.activeElement===el||document.activeElement===previewBody;
+        preview.style.display=plainActive?'block':'none';
+        var plainHtml=String(val||'').trim()?renderMDMath(String(val)):'';
+        if(plainActive){previewBody.innerHTML=plainHtml;renderMath(previewBody);enableRichPreviewEditing(previewBody,el);}
         updateMdPopoutPreview(el,plainHtml,'');
-        if(_mdFloatMode&&_mdFloatSource===el){
-          updateMdFloatPreview(el,plainHtml,'');
-        }
         return;
       }
       var payload=_previewRenderPayload(val,el),rendered=payload.html;
       updateMdPopoutPreview(el, rendered, payload.marker);
-      if(_mdFloatMode) {
-        preview.style.display = 'none';
-        if(shouldUpdateMdFloat(el)) updateMdFloatPreview(el, rendered, payload.marker);
-      } else {
-        preview.style.display = 'block';
-        previewBody.innerHTML = rendered;
-        renderMath(previewBody);
-        enableTaskListCheckboxes(previewBody, el);
-        syncPreviewScrollToCaret(previewBody,el,payload.marker);
-      }
+      preview.style.display = 'block';
+      previewBody.innerHTML = rendered;
+      renderMath(previewBody);
+      enableTaskListCheckboxes(previewBody, el);
+      enableRichPreviewEditing(previewBody,el);
+      syncPreviewScrollToCaret(previewBody,el,payload.marker);
     }
     var updateTimer=null;
     function scheduleUpdate(){
-      if(window._isWorkflowComposing&&window._isWorkflowComposing(el))return;
+      if(el._wfRichSyncing||(window._isWorkflowComposing&&window._isWorkflowComposing(el)))return;
       clearTimeout(updateTimer);
       updateTimer=setTimeout(function(){updateTimer=null;update();},80);
     }
@@ -12438,8 +12655,8 @@ window.WorkflowMaintenance = {
 
     el.addEventListener('input', scheduleUpdate);
     el.addEventListener('keyup', scheduleUpdate);
-    el.addEventListener('change', updateNow);
-    el.addEventListener('blur', updateNow);
+    el.addEventListener('change', function(){if(previewBody._wfFormulaPointer)return;updateNow();});
+    el.addEventListener('blur', function(){setTimeout(function(){var active=document.activeElement;if(previewBody._wfFormulaPointer||preview.querySelector('.formula-source-editor')||(active&&preview.contains(active)))return;updateNow();},0);});
     el.addEventListener('focus', updateNow);
     updateNow();
   }
@@ -12447,13 +12664,14 @@ window.WorkflowMaintenance = {
   // 初始化所有现有 textarea/input（含无type属性的input）
   function attachPreviewIfNeeded(el){
     if(!el)return;
+    if(el.closest&&el.closest('.formula-source-editor'))return;
     if(el._mdAttached)return;
     var value=el.value||el.textContent||'';
     if(document.activeElement===el||needsRender(value))attachPreview(el);
   }
   function initAllPreviews() {
     document.querySelectorAll(
-      '.field textarea, .field input[type="text"], .field input:not([type]), .note-card .note-textarea'
+      '.field textarea, .field input[type="text"], .field input:not([type]), .note-card .note-textarea, .wk-row input[type="text"], .wk-row input:not([type])'
     ).forEach(function(el){if(el._mdAttached&&typeof el._mdUpdate==='function')el._mdUpdate();else attachPreviewIfNeeded(el);});
     var notesList = document.getElementById('notesList');
     if(notesList && typeof renderMath === 'function') renderMath(notesList);
@@ -12512,11 +12730,11 @@ window.WorkflowMaintenance = {
 
   window._setFont = function(i) { applyFont(i); };
 
+  var _markdownPreviewBooted=false;
   function bootMarkdownPreview() {
-    setMdFloatButtonState();
-    if(_mdFloatMode) ensureMdFloatPreview();
+    if(_markdownPreviewBooted)return;
+    _markdownPreviewBooted=true;
     initAllPreviews();
-    refreshMdFloatFromActive();
     watchTaskList();
     applyFont(parseInt(curFont) || 0);
     injectFontSwitcher();
@@ -12539,16 +12757,13 @@ window.WorkflowMaintenance = {
   } else {
     bootMarkdownPreview();
   }
-  window.addEventListener('load', bootMarkdownPreview);
   document.addEventListener('focusin', function(e){
     var el = e.target;
-    if(el && el.matches && el.matches('.field textarea, .field input[type="text"], .field input:not([type]), .note-card .note-textarea')) {
+    if(el && el.matches && !el.closest('.formula-source-editor') && el.matches('.field textarea, .field input[type="text"], .field input:not([type]), .note-card .note-textarea, .wk-row input[type="text"], .wk-row input:not([type])')) {
       attachPreview(el);
       if(typeof el._mdUpdate === 'function') el._mdUpdate();
     }
   });
-  setTimeout(bootMarkdownPreview, 250);
-  setTimeout(bootMarkdownPreview, 1000);
 })();
 /* ===== End Markdown + Math Preview Module ===== */
 
@@ -12688,9 +12903,9 @@ window.handleImportFile = function(event) {
 
 <!--
 workflow_tool build
-version: 2026.08.14.6
-sourceSha256: 335320aa6d117bffbbb3b5a8f96f7f8a3ab7b1e317c1320d450694048a79efa9
-configSha256: eda7a290c179312631e1e25867f2d2422bced0db4b1176be6081735f3e615882
+version: 2026.08.15.10
+sourceSha256: ec78d2c437531d405d8dad8d4ad0a8997c50654416f1523e5fc98c5508ea5d22
+configSha256: feff9aa3a452dc5d401e41a660653aabbd16a4a0e4a4b7be94c88a6b1a9a930e
 coreSha256: a37b0de74e36858958583978b532413971fc99908dcb2d41a494d5c17bc326f9
 appSha256: 2f24aa03f02a5b051051aad95e186b81abef342d0af6958c66b79307c3dc0db3
 exportSha256: 13ad148412f079c37fed48892779a4c15a69b986b274bf432dd0506e64c0fa2a
@@ -12699,5 +12914,5 @@ historySha256: d2d96792bc489871e1e12fdf2483793e1781fec5835bae872974bc6b66894a79
 tasksSha256: cf7b1e78be5c87a40720433883aa80f4c8e36fe389400e217af9bb744ad8a590
 researchSha256: 7f18bf83e2678ea03658117f346225a9af8304668c9f622903770f0292e2c5a8
 stylesSha256: 438038ffa6949e8cb705df0dbad8d9a17ed29abd17f0c072fc70f88118cf55be
-builtAt: 2026-08-14T15:47:19.545Z
+builtAt: 2026-08-15T16:01:05.168Z
 -->
