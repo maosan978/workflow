@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <meta name="theme-color" content="#4f46e5">
-<meta name="workflow-version" content="2026.08.16.4">
+<meta name="workflow-version" content="2026.08.16.5">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="工作流">
@@ -1068,7 +1068,7 @@ body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between
 .md-source-editor.md-source-synced{border-color:var(--success)!important;box-shadow:inset 3px 0 0 var(--success),0 0 0 3px color-mix(in srgb,var(--success) 16%,transparent)!important}
 .md-source-editor{scroll-padding-block:18px;scroll-margin-block:calc(var(--header-height) + 54px) 34px}
 @keyframes mdPositionPulse{0%{opacity:.15;transform:scaleY(.72)}18%{opacity:1;transform:scaleY(1)}72%{opacity:.9}100%{opacity:0;transform:scaleY(1)}}
-.md-source-position-marker{position:fixed;z-index:1300;width:2px;min-height:16px;border-radius:999px;background:var(--success);box-shadow:0 0 0 2px color-mix(in srgb,var(--success) 18%,transparent),0 1px 5px color-mix(in srgb,var(--success) 28%,transparent);pointer-events:none;transform-origin:center;animation:mdPositionPulse 1.05s ease-out both}
+.md-source-position-marker{position:fixed;z-index:1300;width:2px;min-height:16px;border-radius:999px;background:var(--success);box-shadow:0 0 0 2px color-mix(in srgb,var(--success) 18%,transparent),0 1px 5px color-mix(in srgb,var(--success) 28%,transparent);pointer-events:none;transform-origin:center top;animation:mdPositionPulse 1.05s ease-out both}
 .md-source-position-marker::after{content:'';position:absolute;left:-1.5px;top:-2px;width:5px;height:5px;border-radius:50%;background:var(--success)}
 .md-caret-anchor{display:inline-block;width:0;height:1.05em;border-left:2px solid var(--success);margin-left:-1px;overflow:visible;vertical-align:text-bottom;pointer-events:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--success) 14%,transparent);animation:mdPositionPulse 1.05s ease-out both}
 .md-preview-actions{display:flex;align-items:center;gap:5px}
@@ -1243,7 +1243,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   else root.WorkflowConfig = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
   return {
-    appVersion: '2026.08.16.4',
+    appVersion: '2026.08.16.5',
     schemaVersion: 7,
     typeLabels: {
       general: '通用',
@@ -2061,8 +2061,8 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   </div>
   <div class="work-time-card today-work-time" id="workTimeCard">
     <div class="work-time-head"><span class="work-time-icon" aria-hidden="true">◷</span><div><div class="work-time-title">工作时间</div><div class="work-time-sub">回看昨天的投入，为今天留出可信的时间边界</div></div></div>
-    <div class="work-time-item"><label for="yesterdayActualHours">昨日实际</label><div class="work-time-input"><input type="number" id="yesterdayActualHours" min="0" max="24" step="0.5" placeholder="6.5" oninput="saveWorkTime()"><span class="work-time-unit">小时</span></div></div>
-    <div class="work-time-item"><label for="todayExpectedHours">今日预期</label><div class="work-time-input"><input type="number" id="todayExpectedHours" min="0" max="24" step="0.5" placeholder="8" oninput="saveWorkTime()"><span class="work-time-unit">小时</span></div></div>
+    <div class="work-time-item"><label for="yesterdayActualHours">昨日实际</label><div class="work-time-input"><input type="number" id="yesterdayActualHours" min="0" max="24" step="0.5" placeholder="6.5" oninput="saveWorkTime(this)"><span class="work-time-unit">小时</span></div></div>
+    <div class="work-time-item"><label for="todayExpectedHours">今日预期</label><div class="work-time-input"><input type="number" id="todayExpectedHours" min="0" max="24" step="0.5" placeholder="8" oninput="saveWorkTime(this)"><span class="work-time-unit">小时</span></div></div>
   </div>
 
   <div id="dailyQuote" class="daily-quote"><span class="daily-quote-text" id="dailyQuoteText"></span></div>
@@ -2150,8 +2150,8 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
     </div>
     <div class="card-subtitle">选定它，其他事都是辅助。哪怕今天只做成了这一件，也已经足够。</div>
     <div class="morning-actions" id="morningActions"></div>
-    <div class="field"><label>这件事是<span class="help-icon" title="具体描述你今天要完成的那件事，尽量具体而非抽象">?</span></label><textarea id="mTask" placeholder="例：完成 YbNi4P2 的能带计算并画出费米面，与文献 Fig.3 对比" oninput="saveToday()" autocomplete="off" rows="1" style="min-height:38px"></textarea></div>
-    <div class="field"><label>完成的标志是<span class="help-icon" title="可验证的完成标准——别人也能判断你做完没做完。没有标准的事很容易拖延。">?</span></label><textarea id="mMarker" placeholder="例：成功生成 band.agr 和费米面 .ps 文件，且关键特征与 Krellner 2012 一致" oninput="saveToday()" autocomplete="off" rows="1" style="min-height:38px"></textarea></div>
+    <div class="field"><label>这件事是<span class="help-icon" title="具体描述你今天要完成的那件事，尽量具体而非抽象">?</span></label><textarea id="mTask" placeholder="例：完成 YbNi4P2 的能带计算并画出费米面，与文献 Fig.3 对比" oninput="saveToday(this)" autocomplete="off" rows="1" style="min-height:38px"></textarea></div>
+    <div class="field"><label>完成的标志是<span class="help-icon" title="可验证的完成标准——别人也能判断你做完没做完。没有标准的事很容易拖延。">?</span></label><textarea id="mMarker" placeholder="例：成功生成 band.agr 和费米面 .ps 文件，且关键特征与 Krellner 2012 一致" oninput="saveToday(this)" autocomplete="off" rows="1" style="min-height:38px"></textarea></div>
     <div id="morningTaskObjPreview"></div>
     <div class="done-row"><input type="checkbox" id="mDone" onchange="toggleMorning()"><label for="mDone" style="cursor:pointer">已完成（勾选后卡片变灰，今天最重要的事做完了）</label></div>
   </div>
@@ -2175,25 +2175,25 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
       <div class="card-title" style="margin:0">🌙 今日日志 &amp; 反思</div>
     </div>
     <div class="card-subtitle">记录今天，是给明天的自己最好的礼物。</div>
-    <div class="field"><label>今天发现 / 困惑于</label><textarea id="eLog" placeholder="今天发现：DOS 在 Ef 附近有一个异常峰，可能来自 Yb 4f 态与 Ni 3d 的杂化&#10;或困惑于：费米面 Γ 点附近截面与预期不符，目前猜测是 k 点密度不够导致插值误差" oninput="saveToday()" autocomplete="off"></textarea></div>
+    <div class="field"><label>今天发现 / 困惑于</label><textarea id="eLog" placeholder="今天发现：DOS 在 Ef 附近有一个异常峰，可能来自 Yb 4f 态与 Ni 3d 的杂化&#10;或困惑于：费米面 Γ 点附近截面与预期不符，目前猜测是 k 点密度不够导致插值误差" oninput="saveToday(this)" autocomplete="off"></textarea></div>
     <div class="field">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
         <label style="margin-bottom:0">明天最重要的一件事</label>
         <button class="btn btn-secondary btn-xs" onclick="addTomorrowToTaskList()" title="将此内容作为任务添加到明日任务清单"><span class="ico">➕</span>明日任务</button>
       </div>
-      <textarea id="eTomorrow" placeholder="例：明天只做磁化率计算，用 GGA+U 方案对比 U=6eV 和 U=8eV" oninput="saveToday()" autocomplete="off" rows="1" style="min-height:38px"></textarea>
+      <textarea id="eTomorrow" placeholder="例：明天只做磁化率计算，用 GGA+U 方案对比 U=6eV 和 U=8eV" oninput="saveToday(this)" autocomplete="off" rows="1" style="min-height:38px"></textarea>
     </div>
-    <div class="field"><label>今天有什么做得不错 <span style="font-size:10px;color:var(--text4);font-weight:400">（可选）</span></label><input id="eHighlight" placeholder="例：坚持推导完了一个之前一直跳过的公式" oninput="saveToday()" autocomplete="off"></div>
+    <div class="field"><label>今天有什么做得不错 <span style="font-size:10px;color:var(--text4);font-weight:400">（可选）</span></label><input id="eHighlight" placeholder="例：坚持推导完了一个之前一直跳过的公式" oninput="saveToday(this)" autocomplete="off"></div>
 
     <div class="toggle-section">
       <div class="toggle-trigger" id="tqTrigger" onclick="toggleThreeQuestions()">
         <span class="toggle-arrow" id="tqArrow">▶</span> 三句追问 · 把今天的经历变成成长 <span class="help-icon" title="认知心理学技术：通过连续追问，把表面反应挖到深层假设。每天坚持，一个月后思考深度明显不同。">?</span>
       </div>
       <div class="toggle-body" id="tqBody">
-        <div class="field"><label>今天发生的一件值得反思的事</label><textarea id="rEvent" placeholder="例：组会上导师质疑了我的 k-path 选择" oninput="saveToday()" autocomplete="off" rows="1" style="min-height:38px"></textarea></div>
-        <div class="field"><label style="color:var(--primary)">追问1：我做出反应的证据是什么？</label><textarea id="rQ1" placeholder="例：我说服导师这是 Dai 2025 文献中的标准路径" oninput="saveToday()" autocomplete="off" rows="1" style="min-height:38px"></textarea></div>
-        <div class="field"><label style="color:var(--accent)">追问2：还有别的解释吗？</label><textarea id="rQ2" placeholder="例：也许导师知道这个体系有特殊的对称性要求" oninput="saveToday()" autocomplete="off" rows="1" style="min-height:38px"></textarea></div>
-        <div class="field"><label style="color:var(--warn)">追问3：如果我的假设是错的，后果是什么？</label><textarea id="rQ3" placeholder="例：算出来的能带可能错过关键的 Dirac 点，费米面拓扑会完全错误" oninput="saveToday()" autocomplete="off" rows="1" style="min-height:38px"></textarea></div>
+        <div class="field"><label>今天发生的一件值得反思的事</label><textarea id="rEvent" placeholder="例：组会上导师质疑了我的 k-path 选择" oninput="saveToday(this)" autocomplete="off" rows="1" style="min-height:38px"></textarea></div>
+        <div class="field"><label style="color:var(--primary)">追问1：我做出反应的证据是什么？</label><textarea id="rQ1" placeholder="例：我说服导师这是 Dai 2025 文献中的标准路径" oninput="saveToday(this)" autocomplete="off" rows="1" style="min-height:38px"></textarea></div>
+        <div class="field"><label style="color:var(--accent)">追问2：还有别的解释吗？</label><textarea id="rQ2" placeholder="例：也许导师知道这个体系有特殊的对称性要求" oninput="saveToday(this)" autocomplete="off" rows="1" style="min-height:38px"></textarea></div>
+        <div class="field"><label style="color:var(--warn)">追问3：如果我的假设是错的，后果是什么？</label><textarea id="rQ3" placeholder="例：算出来的能带可能错过关键的 Dirac 点，费米面拓扑会完全错误" oninput="saveToday(this)" autocomplete="off" rows="1" style="min-height:38px"></textarea></div>
       </div>
     </div>
 
@@ -3119,7 +3119,7 @@ var driveFileId = localStorage.getItem('drive_file_id') || null;
 var accessToken = null;
 var syncInProgress = false;
 var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 7;
-var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.08.16.4';
+var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.08.16.5';
 
 var tokenClient = null;
 var _syncReconcileInProgress = false;
@@ -7543,7 +7543,7 @@ function _renderMorningClosureEditor(t){
     '<div class="field"><label>关键证据</label><textarea rows="1" oninput="'+update('evidence','this.value')+'">'+esc(t.evidence||'')+'</textarea></div><div class="field"><label>如何解释</label><textarea rows="1" oninput="'+update('interpretation','this.value')+'">'+esc(t.interpretation||'')+'</textarea></div><div class="field"><label>它改变了什么认识</label><textarea rows="1" oninput="'+update('impact','this.value')+'">'+esc(t.impact||'')+'</textarea></div>'+
     '<div class="row2"><div class="field"><label>下一步</label><textarea rows="1" oninput="'+update('nextAction','this.value')+'">'+esc(t.nextAction||'')+'</textarea></div><div class="field"><label>产物位置</label><textarea rows="1" oninput="'+update('artifact','this.value')+'">'+esc(t.artifact||'')+'</textarea></div></div><div class="task-closure-actions"><button class="btn btn-secondary btn-xs" onclick="depositMorningTaskResult()">沉淀到研究地图</button></div></div>';
 }
-function _refreshMorningTaskPreview(){var mp=document.getElementById('morningTaskObjPreview');if(!mp)return;var t=todayData&&todayData.m&&todayData.m.taskObj;mp.innerHTML=t?_renderTaskReadonlyDetails(t)+_renderMorningClosureEditor(t):'';if(typeof window.refreshMDPreviews==='function')window.refreshMDPreviews();}
+function _refreshMorningTaskPreview(){var mp=document.getElementById('morningTaskObjPreview');if(!mp)return;var t=todayData&&todayData.m&&todayData.m.taskObj;mp.innerHTML=t?_renderTaskReadonlyDetails(t)+_renderMorningClosureEditor(t):'';if(typeof window.bindMDPreviews==='function')window.bindMDPreviews(mp);}
 window.toggleMorningClosure=function(){window._morningClosureOpen=!window._morningClosureOpen;renderMorningActions();_refreshMorningTaskPreview();};
 window.updMorningClosure=function(field,val){if(window._isWorkflowComposing&&window._isWorkflowComposing())return;var t=_ensureMorningTaskObj(todayData);if(!t)return;t[field]=val;_queueTodayInputSave(true);};
 window.openMorningProjectMenu = function(event){
@@ -7853,23 +7853,38 @@ document.addEventListener('input',function(event){
   if(el&&!el._wfComposing&&el._wfAwaitingCompositionCommit)el._wfAwaitingCompositionCommit=false;
 },true);
 
-window.saveToday = function(){
+window.saveToday = function(changedEl){
   if(window._isWorkflowComposing&&window._isWorkflowComposing()) return;
   if(!todayData) return;
-  var el;
-  el = document.getElementById('mTask'); if(el) todayData.m.task = el.value;
-  el = document.getElementById('mMarker'); if(el) todayData.m.marker = el.value;
-  _syncMorningTaskObjFromFields(todayData.m);
-  el = document.getElementById('eLog'); if(el) todayData.e.log = el.value;
-  el = document.getElementById('eTomorrow'); if(el) todayData.e.tomorrow = el.value;
-  el = document.getElementById('eHighlight'); if(el) todayData.e.highlight = el.value;
-  el = document.getElementById('rEvent'); if(el) todayData.r.event = el.value;
-  el = document.getElementById('rQ1'); if(el) todayData.r.q1 = el.value;
-  el = document.getElementById('rQ2'); if(el) todayData.r.q2 = el.value;
-  el = document.getElementById('rQ3'); if(el) todayData.r.q3 = el.value;
+  var el,id=changedEl&&changedEl.id;
+  if(id){
+    if(id==='mTask')todayData.m.task=changedEl.value;
+    else if(id==='mMarker')todayData.m.marker=changedEl.value;
+    else if(id==='eLog')todayData.e.log=changedEl.value;
+    else if(id==='eTomorrow')todayData.e.tomorrow=changedEl.value;
+    else if(id==='eHighlight')todayData.e.highlight=changedEl.value;
+    else if(id==='rEvent')todayData.r.event=changedEl.value;
+    else if(id==='rQ1')todayData.r.q1=changedEl.value;
+    else if(id==='rQ2')todayData.r.q2=changedEl.value;
+    else if(id==='rQ3')todayData.r.q3=changedEl.value;
+    if(id==='mTask'||id==='mMarker')_syncMorningTaskObjFromFields(todayData.m);
+    window._todaySingleFieldCollectCount=(window._todaySingleFieldCollectCount||0)+1;
+  }else{
+    el = document.getElementById('mTask'); if(el) todayData.m.task = el.value;
+    el = document.getElementById('mMarker'); if(el) todayData.m.marker = el.value;
+    _syncMorningTaskObjFromFields(todayData.m);
+    el = document.getElementById('eLog'); if(el) todayData.e.log = el.value;
+    el = document.getElementById('eTomorrow'); if(el) todayData.e.tomorrow = el.value;
+    el = document.getElementById('eHighlight'); if(el) todayData.e.highlight = el.value;
+    el = document.getElementById('rEvent'); if(el) todayData.r.event = el.value;
+    el = document.getElementById('rQ1'); if(el) todayData.r.q1 = el.value;
+    el = document.getElementById('rQ2'); if(el) todayData.r.q2 = el.value;
+    el = document.getElementById('rQ3'); if(el) todayData.r.q3 = el.value;
+    window._todayFullFieldCollectCount=(window._todayFullFieldCollectCount||0)+1;
+  }
   // 动态任务字段的 oninput 已通过 updTask/updProblemStepThought 同步到 todayData；
   // 此处不再为每个普通输入字符重新扫描当天全部任务 DOM。
-  var activeId=document.activeElement&&document.activeElement.id;
+  var activeId=id||(document.activeElement&&document.activeElement.id);
   _queueTodayInputSave(activeId==='mTask'||activeId==='mMarker'||activeId==='mDone');
 };
 
@@ -7896,17 +7911,30 @@ document.addEventListener('focusout',function(){
   if(window.saveToday&&window.saveToday._t)_commitTodayInputSave();
 });
 
-window.saveWorkTime = function(){
-  if(!todayData) return;
-  var expected = document.getElementById('todayExpectedHours');
-  if(expected) todayData.workTime.expectedHours = expected.value;
-  saveDay(today, todayData);
-  var prev = parseDateLocal(today); prev.setDate(prev.getDate()-1);
-  var prevDate = localDateStr(prev), prevDay = loadDay(prevDate);
-  var actual = document.getElementById('yesterdayActualHours');
-  if(actual) prevDay.workTime.actualHours = actual.value;
-  saveDay(prevDate, prevDay);
+var _pendingWorkTimeDays={};
+function _commitWorkTimeSave(){
+  clearTimeout(window.saveWorkTime&&window.saveWorkTime._t);if(window.saveWorkTime)window.saveWorkTime._t=null;
+  var pending=_pendingWorkTimeDays;_pendingWorkTimeDays={};
+  if(Object.keys(pending).length)window._workTimeSaveBatchCount=(window._workTimeSaveBatchCount||0)+1;
+  Object.keys(pending).forEach(function(date){saveDay(date,pending[date],{deferUi:true});});
+}
+function _queueWorkTimeSave(){clearTimeout(window.saveWorkTime&&window.saveWorkTime._t);window.saveWorkTime._t=setTimeout(_commitWorkTimeSave,320);}
+window.saveWorkTime = function(changedEl){
+  if(!todayData||(window._isWorkflowComposing&&window._isWorkflowComposing(changedEl)))return;
+  var prev=parseDateLocal(today);prev.setDate(prev.getDate()-1);var prevDate=localDateStr(prev),id=changedEl&&changedEl.id;
+  if(!id||id==='todayExpectedHours'){
+    var expected=id?changedEl:document.getElementById('todayExpectedHours');if(expected)todayData.workTime.expectedHours=expected.value;
+    _pendingWorkTimeDays[today]=todayData;
+  }
+  if(!id||id==='yesterdayActualHours'){
+    var prevDay=_pendingWorkTimeDays[prevDate]||loadDay(prevDate),actual=id?changedEl:document.getElementById('yesterdayActualHours');if(actual)prevDay.workTime.actualHours=actual.value;
+    _pendingWorkTimeDays[prevDate]=prevDay;
+  }
+  window._workTimeSingleFieldCollectCount=(window._workTimeSingleFieldCollectCount||0)+(id?1:0);
+  if(id)_queueWorkTimeSave();else _commitWorkTimeSave();
 };
+window.addEventListener('pagehide',function(){if(window.saveWorkTime&&window.saveWorkTime._t)_commitWorkTimeSave();});
+document.addEventListener('focusout',function(){if(window.saveWorkTime&&window.saveWorkTime._t)_commitWorkTimeSave();});
 
 window.updTask = function(id, field, val){
   if(window._isWorkflowComposing&&window._isWorkflowComposing())return;
@@ -9875,7 +9903,7 @@ function renderWkTasks(tasks){
       '<button class="btn btn-danger btn-xs" onclick="delWkTask('+i+')" title="删除">×</button>'+
     '</div>';
   }).join('');
-  if (typeof window.refreshMDPreviews === 'function') window.refreshMDPreviews();
+  if (typeof window.bindMDPreviews === 'function') window.bindMDPreviews(list);
 }
 
 // ===== Research Map =====
@@ -9967,7 +9995,7 @@ window.initResearch = function(){
   if(_researchMode==='questions') return _renderResearchQuestions(el);
   if(_researchMode==='outputs') return _renderResearchOutputs(el);
   _renderResearchProjects(el);
-  if(typeof window.refreshMDPreviews==='function') window.refreshMDPreviews();
+  if(typeof window.bindMDPreviews==='function') window.bindMDPreviews(el);
 };
 window.addResearchProject = function(){
   showInputModal('项目名称', '新项目', '⌘', function(name){
@@ -10086,7 +10114,7 @@ function _researchOutputMarkdown(type,p,state){
   return '# 可复现记录：'+p.name+'\n\n## 项目边界\n'+(p.limits||'')+'\n\n## 证据与来源\n'+ledger+'\n\n## 任务结果与产物\n'+(taskLines||'- 暂无');
 }
 window.generateResearchOutput=function(type){var s=_loadResearchState(),p=_researchProject(s);if(!p){showToast('请先建立研究项目','warn');return;}var labels={advisor:'组会沟通',paper:'论文骨架',figures:'图表清单',questions:'问题清单',repro:'复现记录'};_appendResearchEvent(p,'output','生成'+labels[type],p.name);var o={id:WorkflowResearch.uid('output'),projectId:p.id,type:type,title:labels[type]+' · '+p.name,status:'draft',content:_researchOutputMarkdown(type,p,s)+'\n\n## 项目近期演化\n'+_researchTimelineMarkdown(p,20),createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};s.outputs.unshift(o);_selectedResearchOutputId=o.id;_saveResearchState(s);initResearch();};
-function _renderResearchOutputs(el){var s=_loadResearchState(),selected=s.outputs.find(function(o){return o.id===_selectedResearchOutputId;})||s.outputs[0];if(selected)_selectedResearchOutputId=selected.id;var actions='<div class="research-output-actions">'+[['advisor','组会沟通'],['paper','论文骨架'],['figures','图表清单'],['questions','问题清单'],['repro','复现记录']].map(function(x){return '<button class="btn btn-secondary btn-sm" onclick="generateResearchOutput(\''+x[0]+'\')">'+x[1]+'</button>';}).join('')+'</div>';var nav=s.outputs.map(function(o){return '<button class="research-project-btn'+(selected&&selected.id===o.id?' active':'')+'" onclick="selectResearchOutput(\''+o.id+'\')">'+esc(o.title)+'</button>';}).join('');var editor=selected?'<div class="research-editor"><div class="research-title-row"><input value="'+esc(selected.title)+'" oninput="updateResearchOutput(\''+selected.id+'\',\'title\',this.value)"><select onchange="updateResearchOutput(\''+selected.id+'\',\'status\',this.value)">'+_closureOptions(selected.status,[['draft','草稿'],['ready','可使用'],['shared','已沟通'],['archived','归档']])+'</select><button class="btn btn-secondary btn-xs" onclick="openResearchOutputExport()">导出</button><button class="btn btn-danger btn-xs" onclick="deleteResearchOutput(\''+selected.id+'\')">×</button></div><div class="field"><label>成果内容</label><textarea style="min-height:320px" oninput="updateResearchOutput(\''+selected.id+'\',\'content\',this.value)">'+esc(selected.content||'')+'</textarea></div></div>':'<div class="empty"><div class="empty-title">选择上方模板生成成果草稿</div></div>';el.innerHTML=actions+'<div class="research-layout"><div class="research-nav">'+nav+'</div>'+editor+'</div>';if(typeof window.refreshMDPreviews==='function')window.refreshMDPreviews();}
+function _renderResearchOutputs(el){var s=_loadResearchState(),selected=s.outputs.find(function(o){return o.id===_selectedResearchOutputId;})||s.outputs[0];if(selected)_selectedResearchOutputId=selected.id;var actions='<div class="research-output-actions">'+[['advisor','组会沟通'],['paper','论文骨架'],['figures','图表清单'],['questions','问题清单'],['repro','复现记录']].map(function(x){return '<button class="btn btn-secondary btn-sm" onclick="generateResearchOutput(\''+x[0]+'\')">'+x[1]+'</button>';}).join('')+'</div>';var nav=s.outputs.map(function(o){return '<button class="research-project-btn'+(selected&&selected.id===o.id?' active':'')+'" onclick="selectResearchOutput(\''+o.id+'\')">'+esc(o.title)+'</button>';}).join('');var editor=selected?'<div class="research-editor"><div class="research-title-row"><input value="'+esc(selected.title)+'" oninput="updateResearchOutput(\''+selected.id+'\',\'title\',this.value)"><select onchange="updateResearchOutput(\''+selected.id+'\',\'status\',this.value)">'+_closureOptions(selected.status,[['draft','草稿'],['ready','可使用'],['shared','已沟通'],['archived','归档']])+'</select><button class="btn btn-secondary btn-xs" onclick="openResearchOutputExport()">导出</button><button class="btn btn-danger btn-xs" onclick="deleteResearchOutput(\''+selected.id+'\')">×</button></div><div class="field"><label>成果内容</label><textarea style="min-height:320px" oninput="updateResearchOutput(\''+selected.id+'\',\'content\',this.value)">'+esc(selected.content||'')+'</textarea></div></div>':'<div class="empty"><div class="empty-title">选择上方模板生成成果草稿</div></div>';el.innerHTML=actions+'<div class="research-layout"><div class="research-nav">'+nav+'</div>'+editor+'</div>';if(typeof window.bindMDPreviews==='function')window.bindMDPreviews(el);}
 window.selectResearchOutput=function(id){_selectedResearchOutputId=id;initResearch();};
 window.updateResearchOutput=function(id,key,val){if(window._isWorkflowComposing&&window._isWorkflowComposing())return;var s=_loadResearchState(),o=s.outputs.find(function(x){return x.id===id;});if(o){o[key]=val;o.updatedAt=new Date().toISOString();var p=s.projects.find(function(x){return x.id===o.projectId;});if(p&&key==='status')_appendResearchEvent(p,'output-status','成果状态变为 '+(RESEARCH_VALUE_LABELS[val]||val),o.title,id);_saveResearchState(s,key==='title'||key==='content');}};
 window.deleteResearchOutput=function(id){var s=_loadResearchState(),o=s.outputs.find(function(x){return x.id===id;}),p=o&&s.projects.find(function(x){return x.id===o.projectId;});if(p)_appendResearchEvent(p,'output-delete','删除成果草稿',o.title,id);s.outputs=s.outputs.filter(function(x){return x.id!==id;});_selectedResearchOutputId='';_saveResearchState(s);initResearch();};
@@ -12248,6 +12276,7 @@ window.WorkflowMaintenance = {
     return content;
   }
   function _richHtmlToMarkdown(container){
+    window._richMarkdownSerializeCount=(window._richMarkdownSerializeCount||0)+1;
     var out='',previousTag='';
     Array.prototype.forEach.call(container.childNodes||[],function(node){
       var value=_richNodeToMarkdown(node),tag=node.nodeType===1?node.tagName:'';
@@ -12257,8 +12286,8 @@ window.WorkflowMaintenance = {
     });
     return out.replace(/[ \t]+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
   }
-  function _richCloneMarkerOffset(container,node,offset,beforeNode){
-    if(!container||!node||node===container)return 0;
+  function _richCloneMarkerResult(container,node,offset,beforeNode){
+    if(!container||!node)return null;
     var path=[],cursor=node;
     while(cursor&&cursor!==container){var parent=cursor.parentNode;if(!parent)return null;path.unshift(Array.prototype.indexOf.call(parent.childNodes,cursor));cursor=parent;}
     if(cursor!==container)return null;
@@ -12269,14 +12298,21 @@ window.WorkflowMaintenance = {
     else if(cloneNode.nodeType===3){var text=String(cloneNode.nodeValue||''),at=Math.max(0,Math.min(Number(offset)||0,text.length));cloneNode.nodeValue=text.slice(0,at)+marker+text.slice(at);}
     else if(cloneNode.nodeType===1){var childAt=Math.max(0,Math.min(Number(offset)||0,cloneNode.childNodes.length));cloneNode.insertBefore(clone.ownerDocument.createTextNode(marker),cloneNode.childNodes[childAt]||null);}
     else return null;
-    var markdown=_richHtmlToMarkdown(clone),index=markdown.indexOf(marker);
-    return index<0?null:index;
+    var markedMarkdown=_richHtmlToMarkdown(clone),index=markedMarkdown.indexOf(marker);
+    if(index<0)return null;
+    return {markdown:markedMarkdown.replace(marker,'').trim(),index:index};
   }
-  function _richSelectionMarkdownOffset(container){
+  function _richCloneMarkerOffset(container,node,offset,beforeNode){
+    var result=_richCloneMarkerResult(container,node,offset,beforeNode);return result&&result.index;
+  }
+  function _richSelectionMarkdownResult(container){
     if(!container)return null;var doc=container.ownerDocument||document,selection=doc.getSelection&&doc.getSelection();
     if(!selection||!selection.rangeCount||!selection.focusNode||!container.contains(selection.focusNode))return null;
     if(selection.focusNode.parentElement&&selection.focusNode.parentElement.closest('.formula-source-editor'))return null;
-    return _richCloneMarkerOffset(container,selection.focusNode,selection.focusOffset,false);
+    return _richCloneMarkerResult(container,selection.focusNode,selection.focusOffset,false);
+  }
+  function _richSelectionMarkdownOffset(container){
+    var result=_richSelectionMarkdownResult(container);return result&&result.index;
   }
   function _measureRichSourceCaretMetrics(source,position){
     if(!source||!source.ownerDocument)return null;
@@ -12284,12 +12320,12 @@ window.WorkflowMaintenance = {
     if(!rect.width)return null;
     var mirror=doc.createElement('div'),marker=doc.createElement('span'),properties=['fontFamily','fontSize','fontWeight','fontStyle','fontVariant','fontStretch','letterSpacing','lineHeight','textTransform','textIndent','textAlign','wordSpacing','tabSize','paddingTop','paddingRight','paddingBottom','paddingLeft','borderTopWidth','borderRightWidth','borderBottomWidth','borderLeftWidth','boxSizing','wordBreak','overflowWrap','direction'];
     var borderWidth=(parseFloat(style.borderLeftWidth)||0)+(parseFloat(style.borderRightWidth)||0),mirrorWidth=source.clientWidth+borderWidth;
-    mirror.setAttribute('aria-hidden','true');mirror.style.position='fixed';mirror.style.left='-100000px';mirror.style.top='0';mirror.style.width=mirrorWidth+'px';mirror.style.height='auto';mirror.style.minHeight='0';mirror.style.maxHeight='none';mirror.style.margin='0';mirror.style.visibility='hidden';mirror.style.pointerEvents='none';mirror.style.whiteSpace='pre-wrap';mirror.style.overflow='hidden';
     properties.forEach(function(name){mirror.style[name]=style[name];});
+    mirror.style.position='fixed';mirror.style.left='-10000px';mirror.style.top='0';mirror.style.visibility='hidden';mirror.style.pointerEvents='none';mirror.style.overflow='hidden';mirror.style.whiteSpace='pre-wrap';mirror.style.width=mirrorWidth+'px';mirror.style.borderStyle='solid';mirror.style.borderColor='transparent';
     var value=String(source.value||''),at=Math.max(0,Math.min(Number(position)||0,value.length));
-    mirror.appendChild(doc.createTextNode(value.slice(0,at)));marker.textContent='\u200b';mirror.appendChild(marker);mirror.appendChild(doc.createTextNode(value.slice(at)||'\u200b'));
+    mirror.appendChild(doc.createTextNode(value.slice(0,at)));marker.textContent=value.slice(at)||'.';mirror.appendChild(marker);
     (doc.body||doc.documentElement).appendChild(mirror);
-    var markerRect=marker.getBoundingClientRect(),mirrorRect=mirror.getBoundingClientRect(),metrics={top:markerRect.top-mirrorRect.top,left:markerRect.left-mirrorRect.left,height:markerRect.height||parseFloat(style.lineHeight)||parseFloat(style.fontSize)*1.45||20};mirror.remove();return metrics;
+    var markerRect=marker.getClientRects()[0]||marker.getBoundingClientRect(),mirrorRect=mirror.getBoundingClientRect(),lineHeight=parseFloat(style.lineHeight)||parseFloat(style.fontSize)*1.45||20,leading=Math.max(0,(lineHeight-markerRect.height)/2),metrics={top:markerRect.top-mirrorRect.top-leading,left:markerRect.left-mirrorRect.left,height:lineHeight};mirror.remove();window._richCaretMeasureCount=(window._richCaretMeasureCount||0)+1;return metrics;
   }
   function _measureRichSourceCaretTop(source,position){
     var metrics=_measureRichSourceCaretMetrics(source,position);return metrics&&metrics.top;
@@ -12339,7 +12375,7 @@ window.WorkflowMaintenance = {
   }
   function _commitRichPreview(container){
     if(!container)return;
-    var markdown=_richHtmlToMarkdown(container),sourceEl=container._wfRichSource,noteId=container._wfRichNoteId;
+    var selectionResult=_richSelectionMarkdownResult(container),markdown=selectionResult?selectionResult.markdown:_richHtmlToMarkdown(container),sourceEl=container._wfRichSource,noteId=container._wfRichNoteId;
     if(sourceEl&&sourceEl.value!==markdown){
       sourceEl.value=markdown;sourceEl._wfRichSyncing=true;
       sourceEl.dispatchEvent(new Event('input',{bubbles:true}));
@@ -12348,7 +12384,7 @@ window.WorkflowMaintenance = {
       var note=_readNote(noteId);
       if((note.content||'')!==markdown){note.content=markdown;note.timestamp=note.timestamp||Date.now();localStorage.setItem('wf_note_'+noteId,JSON.stringify(note));flash();}
     }
-    _syncRichSourcePosition(container);
+    _syncRichSourcePosition(container,selectionResult&&selectionResult.index);
   }
   function _richFormulaNode(container,target){
     if(!container||!target||!target.closest)return null;
@@ -12412,7 +12448,7 @@ window.WorkflowMaintenance = {
     var timer=null,composing=false;
     function syncPosition(offset){_syncRichSourcePosition(container,offset);}
     function markTarget(target){container.querySelectorAll('.rich-edit-target').forEach(function(node){node.classList.remove('rich-edit-target');});if(!target||!target.closest)return;var editable=target.closest('h1,h2,h3,h4,h5,h6,p,li,td,th,blockquote,pre,code,strong,em,del,a');if(editable&&container.contains(editable)&&!_richFormulaNode(container,editable))editable.classList.add('rich-edit-target');}
-    function queue(){if(composing)return;var source=container._wfRichSource;if(source&&typeof source._mdCancelScheduledUpdate==='function')source._mdCancelScheduledUpdate();syncPosition();clearTimeout(timer);timer=setTimeout(function(){timer=null;_commitRichPreview(container);},70);}
+    function queue(){if(composing)return;var source=container._wfRichSource;if(source&&typeof source._mdCancelScheduledUpdate==='function')source._mdCancelScheduledUpdate();clearTimeout(timer);timer=setTimeout(function(){timer=null;_commitRichPreview(container);},90);}
     container.addEventListener('compositionstart',function(){composing=true;});
     container.addEventListener('compositionend',function(){composing=false;queue();});
     container.addEventListener('input',queue);
@@ -12424,7 +12460,7 @@ window.WorkflowMaintenance = {
       if(ev.target&&ev.target.closest&&ev.target.closest('.formula-source-editor'))return;
       if((ev.ctrlKey||ev.metaKey)&&!ev.altKey){var key=String(ev.key||'').toLowerCase(),cmd=key==='b'?'bold':key==='i'?'italic':(key==='x'&&ev.shiftKey?'strikeThrough':'');if(cmd){ev.preventDefault();try{(container.ownerDocument||document).execCommand(cmd,false,null);}catch(e){}queue();}}
     });
-    container.addEventListener('keyup',function(){syncPosition();});
+    container.addEventListener('keyup',function(ev){if(/^(Arrow|Home|End|Page)/.test(String(ev.key||'')))syncPosition();});
     container.addEventListener('blur',function(){
       setTimeout(function(){
         var active=(container.ownerDocument||document).activeElement;if(container._wfFormulaPointer||container.querySelector('.formula-source-editor')||(active&&container.contains(active)))return;
@@ -12443,7 +12479,7 @@ window.WorkflowMaintenance = {
   function _renderStaticNoteContainer(container,id,content,scrollTop){
     if(!container)return;
     container.innerHTML=typeof window._renderMDMaybe==='function'?window._renderMDMaybe(content||''):renderMDMath(content||'');
-    renderMath(container);
+    if(hasMathSyntax(content))renderMath(container);
     enableStaticNoteChecklist(container,id);
     enableRichPreviewEditing(container,null,id);
     if(typeof scrollTop==='number')container.scrollTop=scrollTop;
@@ -12571,13 +12607,13 @@ window.WorkflowMaintenance = {
     return _openStandardPopoutShell(title,onReady);
   }
 
-  function updateMdPopoutPreview(el,html,caretMarker){
+  function updateMdPopoutPreview(el,html,caretMarker,hasMath){
     if(!_mdPopoutWindow||_mdPopoutWindow.closed||_mdPopoutSource!==el)return;
     var body=_mdPopoutWindow.document.getElementById('previewBody');
     var title=_mdPopoutWindow.document.getElementById('previewTitle');
     _applyPopoutTheme();
     if(title)title.textContent='全文渲染预览 · '+_inputPreviewLabel(el);
-    if(body){body.innerHTML=html||'';if(html)renderMath(body);enableTaskListCheckboxes(body,el);enableRichPreviewEditing(body,el);syncPreviewScrollToCaret(body,el,caretMarker);}
+    if(body){body.innerHTML=html||'';if(html&&hasMath)renderMath(body);enableTaskListCheckboxes(body,el);enableRichPreviewEditing(body,el);syncPreviewScrollToCaret(body,el,caretMarker);}
   }
 
   function openMdPopoutPreview(el){
@@ -12685,6 +12721,7 @@ window.WorkflowMaintenance = {
   }
 
   function renderMath(el) {
+    window._mdMathRenderCount=(window._mdMathRenderCount||0)+1;
     if (typeof renderMathInElement !== 'undefined') {
       renderMathInElement(el, {
         delimiters: [
@@ -12705,6 +12742,7 @@ window.WorkflowMaintenance = {
     if (!text) return false;
     return /\$|\\\(|\\\[|\*\*|__|`|(^|\n)#{1,6}\s|(^|\n)\s*[-*]\s|(^|\n)\s*\d+\.\s|(^|\n)>\s?|(^|\n)\s*```|(^|\n)\s*(-{3,}|\*{3,}|_{3,})\s*$|(^|\n)\|.+\||\[.+\]\(/.test(text);
   }
+  function hasMathSyntax(text){return /\$|\\\(|\\\[/.test(String(text||''));}
 
   // 为一个 textarea/input 绑定预览行为
   function attachPreview(el) {
@@ -12755,36 +12793,41 @@ window.WorkflowMaintenance = {
 
     function update() {
       window._mdPreviewRenderCount=(window._mdPreviewRenderCount||0)+1;
-      var val = el.value || el.textContent || '';
+      var val = el.value || el.textContent || '',hasMath=hasMathSyntax(val);
       if (!needsRender(val)) {
         var plainActive=document.activeElement===el||document.activeElement===previewBody;
         preview.style.display=plainActive?'block':'none';
         var plainHtml=String(val||'').trim()?renderMDMath(String(val)):'';
-        if(plainActive){previewBody.innerHTML=plainHtml;renderMath(previewBody);enableRichPreviewEditing(previewBody,el);}
-        updateMdPopoutPreview(el,plainHtml,'');
+        if(plainActive){previewBody.innerHTML=plainHtml;if(hasMath)renderMath(previewBody);enableRichPreviewEditing(previewBody,el);}
+        updateMdPopoutPreview(el,plainHtml,'',hasMath);
         return;
       }
       var payload=_previewRenderPayload(val,el),rendered=payload.html;
-      updateMdPopoutPreview(el, rendered, payload.marker);
+      updateMdPopoutPreview(el, rendered, payload.marker,hasMath);
       preview.style.display = 'block';
       previewBody.innerHTML = rendered;
-      renderMath(previewBody);
+      if(hasMath)renderMath(previewBody);
       enableTaskListCheckboxes(previewBody, el);
       enableRichPreviewEditing(previewBody,el);
       syncPreviewScrollToCaret(previewBody,el,payload.marker);
     }
-    var updateTimer=null;
-    function scheduleUpdate(){
+    var updateTimer=null,lastRenderedValue=null;
+    function previewDelay(){var length=String(el.value||el.textContent||'').length;return length>5000?190:length>1800?150:110;}
+    function scheduleUpdate(force){
+      force=force===true;
       if(el._wfRichSyncing||(window._isWorkflowComposing&&window._isWorkflowComposing(el)))return;
+      var value=String(el.value||el.textContent||'');if(!force&&updateTimer&&el._wfQueuedPreviewValue===value)return;
+      el._wfQueuedPreviewValue=value;
       clearTimeout(updateTimer);
-      updateTimer=setTimeout(function(){updateTimer=null;update();},80);
+      updateTimer=setTimeout(function(){updateTimer=null;el._wfQueuedPreviewValue='';if(force||value!==lastRenderedValue){update();lastRenderedValue=String(el.value||el.textContent||'');}},previewDelay());
     }
-    function updateNow(){if(window._isWorkflowComposing&&window._isWorkflowComposing(el))return;clearTimeout(updateTimer);updateTimer=null;update();}
+    function updateNow(){if(window._isWorkflowComposing&&window._isWorkflowComposing(el))return;clearTimeout(updateTimer);updateTimer=null;el._wfQueuedPreviewValue='';update();lastRenderedValue=String(el.value||el.textContent||'');}
     el._mdUpdate = updateNow;
     el._mdCancelScheduledUpdate=function(){clearTimeout(updateTimer);updateTimer=null;};
 
     el.addEventListener('input', scheduleUpdate);
-    el.addEventListener('keyup', scheduleUpdate);
+    el.addEventListener('keyup', function(ev){if(/^(Arrow|Home|End|Page)/.test(String(ev.key||'')))scheduleUpdate(true);});
+    el.addEventListener('pointerup',function(){scheduleUpdate(true);});
     el.addEventListener('change', function(){if(previewBody._wfFormulaPointer)return;updateNow();});
     el.addEventListener('blur', function(){setTimeout(function(){var active=document.activeElement;if(previewBody._wfFormulaPointer||preview.querySelector('.formula-source-editor')||(active&&preview.contains(active)))return;updateNow();},0);});
     el.addEventListener('focus', updateNow);
@@ -12805,6 +12848,10 @@ window.WorkflowMaintenance = {
     ).forEach(function(el){if(el._mdAttached&&typeof el._mdUpdate==='function')el._mdUpdate();else attachPreviewIfNeeded(el);});
     var notesList = document.getElementById('notesList');
     if(notesList && typeof renderMath === 'function') renderMath(notesList);
+  }
+  function bindNewPreviews(root){
+    if(!root||!root.querySelectorAll)return;
+    root.querySelectorAll('.field textarea, .field input[type="text"], .field input:not([type]), .note-card .note-textarea, .wk-row input[type="text"], .wk-row input:not([type])').forEach(attachPreviewIfNeeded);
   }
 
   // 在 initToday() 和 renderTasks() 调用后也需重新初始化动态生成的字段
@@ -12877,6 +12924,7 @@ window.WorkflowMaintenance = {
   }
   // 公开接口供外部调用
   window.refreshMDPreviews = initAllPreviews;
+  window.bindMDPreviews = bindNewPreviews;
   window.renderMDMath = renderMDMath;
   window.renderMath = renderMath;
   window.attachPreview = attachPreview;
@@ -12890,8 +12938,7 @@ window.WorkflowMaintenance = {
   document.addEventListener('focusin', function(e){
     var el = e.target;
     if(el && el.matches && !el.closest('.formula-source-editor') && el.matches('.field textarea, .field input[type="text"], .field input:not([type]), .note-card .note-textarea, .wk-row input[type="text"], .wk-row input:not([type])')) {
-      attachPreview(el);
-      if(typeof el._mdUpdate === 'function') el._mdUpdate();
+      if(!el._mdAttached)attachPreview(el);
     }
   });
 })();
@@ -13033,9 +13080,9 @@ window.handleImportFile = function(event) {
 
 <!--
 workflow_tool build
-version: 2026.08.16.4
-sourceSha256: 4fd1922ba09959c61c60b01be6108e455f1082d910650a85428fe8a86ac26124
-configSha256: 4e9f9c87e979c6d2317e2ba83d7f5b2c367810cdd44f46a5c6966ef03ebd51cc
+version: 2026.08.16.5
+sourceSha256: 1299590067bed79174c4419abcb0d78fda127fa3bb4b089549792463a63dfe7c
+configSha256: ab2ab065a5fb9361eb84f43c59a552431a82a06d4dfa787b59056e8ad0e3b03e
 coreSha256: a37b0de74e36858958583978b532413971fc99908dcb2d41a494d5c17bc326f9
 appSha256: 2f24aa03f02a5b051051aad95e186b81abef342d0af6958c66b79307c3dc0db3
 exportSha256: 13ad148412f079c37fed48892779a4c15a69b986b274bf432dd0506e64c0fa2a
@@ -13044,5 +13091,5 @@ historySha256: d2d96792bc489871e1e12fdf2483793e1781fec5835bae872974bc6b66894a79
 tasksSha256: cf7b1e78be5c87a40720433883aa80f4c8e36fe389400e217af9bb744ad8a590
 researchSha256: 7f18bf83e2678ea03658117f346225a9af8304668c9f622903770f0292e2c5a8
 stylesSha256: 438038ffa6949e8cb705df0dbad8d9a17ed29abd17f0c072fc70f88118cf55be
-builtAt: 2026-08-15T17:15:07.027Z
+builtAt: 2026-08-15T17:40:26.292Z
 -->
