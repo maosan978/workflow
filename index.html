@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- workflow-build:5641baf541c1a1d1a1a3f4af36afb085b3cb010b5ff27822e96d33c9e227172b -->
+<!-- workflow-build:28dc4fae5ec0b60d0c72982bdf1755d9266b0e05705148d92d120c9d1df5b88d -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <meta name="theme-color" content="#4f46e5">
-<meta name="workflow-version" content="2026.08.21.5">
+<meta name="workflow-version" content="2026.08.21.6">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="工作流">
@@ -1268,8 +1268,8 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   else root.WorkflowConfig = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
   return {
-    appVersion: '2026.08.21.5',
-    schemaVersion: 8,
+    appVersion: '2026.08.21.6',
+    schemaVersion: 9,
     typeLabels: {
       general: '通用',
       calc: '计算前',
@@ -1299,7 +1299,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   if (typeof module === 'object' && module.exports) module.exports = factory();
   else root.WorkflowCore = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
-  var SCHEMA_VERSION = 8;
+  var SCHEMA_VERSION = 9;
 
   function emptyDay() {
     return {m:{task:'',marker:'',done:false},tasks:[],e:{log:'',tomorrow:'',highlight:''},r:{event:'',q1:'',q2:'',q3:''},workTime:{expectedHours:'',actualHours:''}};
@@ -1366,9 +1366,14 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
       if (exactChain) return exactChain;
     }
     var compatible = candidates.filter(function(candidate) { return !task.type || !candidate.type || candidate.type === task.type; });
-    if (compatible.length === 1) return compatible[0];
     if (!compatible.length) return null;
-    var detailFields = ['expect','because','verify','predict','method','conclusion','question','source','problem','choice','project','projectId'];
+    var stableDetailFields = ['expect','because','verify','predict','method','conclusion','question','source','problem','choice'];
+    var detailFields = stableDetailFields.concat(['project','projectId']);
+    function evidence(candidate) {
+      var sameLabel = !!(taskLabel(candidate) && taskLabel(candidate) === taskLabel(task));
+      var stableMatches = stableDetailFields.filter(function(field) { return task[field] && candidate[field] && String(task[field]) === String(candidate[field]); }).length;
+      return {sameLabel:sameLabel, stableMatches:stableMatches};
+    }
     function score(candidate) {
       var value = candidate.type === task.type ? 8 : 0;
       if (!!candidate.isCheckInTask === !!task.isCheckInTask) value += 6;
@@ -1376,8 +1381,55 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
       detailFields.forEach(function(field) { if (task[field] && candidate[field] && String(task[field]) === String(candidate[field])) value += field === 'project' || field === 'projectId' ? 4 : 2; });
       return value;
     }
-    var ranked = compatible.map(function(candidate) { return {candidate:candidate, score:score(candidate)}; }).sort(function(a,b) { return b.score-a.score; });
-    return ranked[0].score >= 10 && (!ranked[1] || ranked[0].score-ranked[1].score >= 3) ? ranked[0].candidate : null;
+    var ranked = compatible.map(function(candidate) { var proof=evidence(candidate);return {candidate:candidate, score:score(candidate), proof:proof}; }).sort(function(a,b) { return b.score-a.score; });
+    // 类型、打卡状态和项目只是弱特征；至少要有同名或一个稳定业务字段完全相同。
+    // 这仍允许旧任务改名/补充描述后凭 expect/because/verify 等证据接回原链，
+    // 但不会把同项目下两个完全不同的打卡任务强行并链。
+    return (ranked[0].proof.sameLabel || ranked[0].proof.stableMatches > 0) && ranked[0].score >= 10 && (!ranked[1] || ranked[0].score-ranked[1].score >= 3) ? ranked[0].candidate : null;
+  }
+
+  function repairSameDayChainCollisions(dayRecords, newChainId) {
+    dayRecords = (dayRecords || []).slice().sort(function(a,b) { return String(a.date||'').localeCompare(String(b.date||'')); });
+    newChainId = newChainId || function(prefix) { return (prefix || 'chain') + '_repair'; };
+    var latestByLabel = {}, latestLabelByChain = {}, relinked = 0, deduped = 0;
+    function normalizedLabel(task) { return String(taskLabel(task)||'').replace(/\s+/g,' ').trim().toLowerCase(); }
+    function entries(day) {
+      var list = (day && day.tasks || []).map(function(task,index) { return {task:task,index:index,where:'tasks'}; });
+      if (day && day.m && day.m.taskObj) list.push({task:day.m.taskObj,index:-1,where:'morning'});
+      return list;
+    }
+    function mergeHistory(keep, extra) {
+      var seen = {}, merged = [];
+      (keep.checkInHistory || []).concat(extra.checkInHistory || []).forEach(function(event) {
+        if (!event) return;var key=String(event.date||'')+'|'+String(event.action||'');if(seen[key])return;seen[key]=true;merged.push(JSON.parse(JSON.stringify(event)));
+      });
+      merged.sort(function(a,b) { var byDate=String(a.date||'').localeCompare(String(b.date||''));return byDate||String(a.action||'').localeCompare(String(b.action||'')); });
+      if (merged.length) keep.checkInHistory = merged;
+      keep.checkInDays = Math.max(Number(keep.checkInDays)||1, Number(extra.checkInDays)||1);
+    }
+    dayRecords.forEach(function(record) {
+      var day=record.data||emptyDay(), date=String(record.date||''), dayEntries=entries(day), byChain={};
+      dayEntries.forEach(function(entry) { var chain=entry.task&&entry.task._chainId,label=normalizedLabel(entry.task);if(chain&&label)(byChain[chain]||(byChain[chain]=[])).push(entry); });
+      Object.keys(byChain).forEach(function(chain) {
+        var group=byChain[chain], labels={};group.forEach(function(entry){labels[normalizedLabel(entry.task)]=true;});
+        if(Object.keys(labels).length<2)return;
+        var canonicalLabel=latestLabelByChain[chain]||normalizedLabel(group[0].task),canonical=group.find(function(entry){return normalizedLabel(entry.task)===canonicalLabel;})||group[0];
+        group.forEach(function(entry) {
+          if(entry===canonical)return;var task=entry.task,label=normalizedLabel(task),prior=latestByLabel[label];
+          var replacement=prior&&prior.task&&prior.task._chainId&&prior.task._chainId!==chain?prior.task._chainId:newChainId(task.isCheckInTask?'checkin':'chain');
+          if(task._chainId!==replacement){task._chainId=replacement;relinked++;}
+          if(prior&&prior.task){task._continuedFrom=prior.date;if(prior.task.id)task._continuedFromTaskId=prior.task.id;mergeHistory(task,prior.task);}
+          else{delete task._continuedFrom;delete task._continuedFromTaskId;}
+        });
+      });
+      // 接链后，同一天同一链同一标题可能收敛成两个副本。保留连续天数更完整者，合并历史事件。
+      var taskGroups={};(day.tasks||[]).forEach(function(task,index){var key=(task._chainId||'')+'|'+normalizedLabel(task);if(task._chainId&&normalizedLabel(task))(taskGroups[key]||(taskGroups[key]=[])).push({task:task,index:index});});
+      var remove={};Object.keys(taskGroups).forEach(function(key){var group=taskGroups[key];if(group.length<2)return;group.sort(function(a,b){return (Number(b.task.checkInDays)||1)-(Number(a.task.checkInDays)||1)||(b.task.checkInHistory||[]).length-(a.task.checkInHistory||[]).length;});var keep=group[0].task;group.slice(1).forEach(function(entry){mergeHistory(keep,entry.task);remove[entry.index]=true;deduped++;});});
+      if(Object.keys(remove).length)day.tasks=(day.tasks||[]).filter(function(task,index){return !remove[index];});
+      entries(day).forEach(function(entry){var task=entry.task,label=normalizedLabel(task);if(label)latestByLabel[label]={task:task,date:date};if(task&&task._chainId&&label)latestLabelByChain[task._chainId]=label;});
+      record.data=day;
+    });
+    return {records:dayRecords,relinked:relinked,deduped:deduped,changed:relinked+deduped};
   }
 
   function setCheckInEnabled(t, enabled, date, newChainId) {
@@ -1630,6 +1682,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
     taskLabel: taskLabel,
     ensureTaskChain: ensureTaskChain,
     findContinuationSource: findContinuationSource,
+    repairSameDayChainCollisions: repairSameDayChainCollisions,
     setCheckInEnabled: setCheckInEnabled,
     normalizeDayData: normalizeDayData,
     splitWorkflowBackupData: splitWorkflowBackupData,
@@ -2594,7 +2647,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
       <div style="overflow-x:auto"><table class="help-table">
         <tr><th>功能</th><th>操作方式</th><th>说明</th></tr>
         <tr><td>📁 项目标签</td><td>点击任务卡片右上角 📁</td><td>为任务添加项目标签（如 YbNi4P2、LuNi4P2），支持按项目过滤，历史详情中显示</td></tr>
-        <tr><td><span class="checkin-task-icon is-active" aria-hidden="true">🎯</span> 打卡任务</td><td>任务卡片右上角的靶心打卡按钮</td><td>带绿色勾的靶心表示已设为打卡任务；完成时可选"当日完成"（明天自动续接）或"完全完成"（彻底结束）。取消只暂停打卡属性并保留原创建时间、连续天数和历史，再次设置会恢复原记录</td></tr>
+        <tr><td><span class="checkin-task-icon is-active" aria-hidden="true">🎯</span> 打卡任务</td><td>任务卡片右上角的靶心打卡按钮</td><td>带绿色勾的靶心表示已设为打卡任务；完成时可选"当日完成"（明天自动续接）或"完全完成"（彻底结束）。取消只暂停打卡属性并保留原记录；删除今日自动续接任务会停止该链继续生成，10 秒内撤销可恢复</td></tr>
         <tr><td>日 / 周 / 月 / 年视图</td><td>历史标签顶部视图切换</td><td>按不同时间尺度浏览记录；所有视图都可点具体日期进入详情和编辑，批量操作时使用日视图</td></tr>
         <tr><td>查找旧周复盘</td><td>本周复盘 → 按日期查找周复盘</td><td>选择目标周内任意一天即可直接跳转，不需要连续点击“上周”；“回到本周”可一键复位</td></tr>
         <tr><td>🧭 历史补偿</td><td>历史详情 → 编辑</td><td>把昨天的打卡任务改为"当日完成"后，若今天缺少同链任务，会自动补续接到今日</td></tr>
@@ -3214,8 +3267,8 @@ var _driveSaveQueued = false;
 var _githubSaveInProgress = false;
 var _githubSaveQueued = false;
 var _githubQueuedFeedback = false;
-var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 8;
-var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.08.21.5';
+var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 9;
+var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.08.21.6';
 
 var tokenClient = null;
 var _syncReconcileInProgress = false;
@@ -7255,10 +7308,11 @@ function _findContinuationSource(task,candidates){
   candidates=(candidates||[]).filter(function(candidate){return candidate&&typeof candidate==='object';});if(!task||!candidates.length)return null;
   if(task._continuedFromTaskId){var byId=candidates.find(function(candidate){return String(candidate.id||'')===String(task._continuedFromTaskId);});if(byId)return byId;}
   if(task._chainId){var byChain=candidates.find(function(candidate){return candidate._chainId&&candidate._chainId===task._chainId;});if(byChain)return byChain;}
-  var compatible=candidates.filter(function(candidate){return !task.type||!candidate.type||candidate.type===task.type;});if(compatible.length===1)return compatible[0];if(!compatible.length)return null;
-  var fields=['expect','because','verify','predict','method','conclusion','question','source','problem','choice','project','projectId'];
+  var compatible=candidates.filter(function(candidate){return !task.type||!candidate.type||candidate.type===task.type;});if(!compatible.length)return null;
+  var stableFields=['expect','because','verify','predict','method','conclusion','question','source','problem','choice'],fields=stableFields.concat(['project','projectId']);
+  function proof(candidate){return {sameLabel:!!(_taskLabel(candidate)&&_taskLabel(candidate)===_taskLabel(task)),stableMatches:stableFields.filter(function(field){return task[field]&&candidate[field]&&String(task[field])===String(candidate[field]);}).length};}
   function score(candidate){var value=candidate.type===task.type?8:0;if(!!candidate.isCheckInTask===!!task.isCheckInTask)value+=6;if(_taskLabel(candidate)&&_taskLabel(candidate)===_taskLabel(task))value+=6;fields.forEach(function(field){if(task[field]&&candidate[field]&&String(task[field])===String(candidate[field]))value+=field==='project'||field==='projectId'?4:2;});return value;}
-  var ranked=compatible.map(function(candidate){return {candidate:candidate,score:score(candidate)};}).sort(function(a,b){return b.score-a.score;});return ranked[0].score>=10&&(!ranked[1]||ranked[0].score-ranked[1].score>=3)?ranked[0].candidate:null;
+  var ranked=compatible.map(function(candidate){return {candidate:candidate,score:score(candidate),proof:proof(candidate)};}).sort(function(a,b){return b.score-a.score;});return (ranked[0].proof.sameLabel||ranked[0].proof.stableMatches>0)&&ranked[0].score>=10&&(!ranked[1]||ranked[0].score-ranked[1].score>=3)?ranked[0].candidate:null;
 }
 function _repairLegacyContinuationLineage(){
   var keys=[],days={},changed={};for(var i=0;i<localStorage.length;i++){var key=localStorage.key(i);if(key&&key.indexOf('wf_day_')===0)keys.push(key);}keys.sort();
@@ -7266,6 +7320,14 @@ function _repairLegacyContinuationLineage(){
   function entries(day){var list=(day&&day.tasks||[]).slice();if(day&&day.m&&day.m.taskObj)list.push(day.m.taskObj);return list;}
   keys.forEach(function(key){var day=days[key];if(!day)return;entries(day).forEach(function(task){if(!task||!task._continuedFrom)return;var sourceKey='wf_day_'+task._continuedFrom,sourceDay=days[sourceKey],source=_findContinuationSource(task,entries(sourceDay));if(!source)return;var chain=source._chainId||task._chainId||_newChainId(task.isCheckInTask?'checkin':'chain');if(source._chainId!==chain){source._chainId=chain;changed[sourceKey]=true;}if(task._chainId!==chain){task._chainId=chain;changed[key]=true;}if(task._continuedFromTaskId!==source.id&&source.id){task._continuedFromTaskId=source.id;changed[key]=true;}});});
   var changedKeys=Object.keys(changed);if(changedKeys.length)_createLocalSnapshot('migration-v8-continuation-lineage',false);changedKeys.forEach(function(key){if(days[key])localStorage.setItem(key,JSON.stringify(days[key]));});return changedKeys.length;
+}
+function _repairSameDayChainCollisions(){
+  if(!window.WorkflowCore||typeof window.WorkflowCore.repairSameDayChainCollisions!=='function')return 0;
+  var keys=[],records=[],before={};for(var i=0;i<localStorage.length;i++){var key=localStorage.key(i);if(key&&key.indexOf('wf_day_')===0)keys.push(key);}keys.sort();
+  keys.forEach(function(key){try{var raw=localStorage.getItem(key),data=JSON.parse(raw);before[key]=raw;records.push({date:key.slice(7),key:key,data:data});}catch(e){}});
+  var result=window.WorkflowCore.repairSameDayChainCollisions(records,_newChainId);if(!result||!result.changed)return 0;
+  var changed=[];records.forEach(function(record){var value=JSON.stringify(record.data);if(value!==before[record.key])changed.push({key:record.key,value:value});});
+  if(changed.length)_createLocalSnapshot('migration-v9-chain-collision',false);changed.forEach(function(item){localStorage.setItem(item.key,item.value);});return changed.length;
 }
 
 var WF_MIGRATIONS = {
@@ -7287,7 +7349,8 @@ var WF_MIGRATIONS = {
     return changed + _backfillCheckInMissedHistory();
   },
   7: function(){ return _repairLegacyCheckInTerminalState(); },
-  8: function(){ return _repairLegacyContinuationLineage(); }
+  8: function(){ return _repairLegacyContinuationLineage(); },
+  9: function(){ return _repairSameDayChainCollisions() + _repairLegacyContinuationLineage(); }
 };
 function _normalizeAllStoredDays(){
   var changedCount = 0;
@@ -8077,18 +8140,21 @@ window.setAsMorning = function(id) {
 window.delTask = function(id){
   var idx = todayData.tasks.findIndex(function(x){return x.id === id;});
   if(idx < 0) return;
+  var hiddenBefore=localStorage.getItem('wf_continue_hidden');
   var removed = todayData.tasks.splice(idx, 1)[0];
+  if(removed&&(removed.isCheckInTask||removed._continuedFrom))_hideContinueTask(removed);
   saveDay(today, todayData);
   renderTasks();
 
-  var entry = {task: removed, expiresAt: Date.now() + 10000};
+  var entry = {task: removed, hiddenBefore:hiddenBefore, expiresAt: Date.now() + 10000};
   deletedBuffer.push(entry);
 
-  showToast('任务已删除', 'info', '撤销', function(){
+  showToast(removed&&(removed.isCheckInTask||removed._continuedFrom)?'任务已删除，并停止自动续接':'任务已删除', 'info', '撤销', function(){
     var found = false;
     for(var i = deletedBuffer.length - 1; i >= 0; i--){
       if(deletedBuffer[i].task.id === id){
         todayData.tasks.push(deletedBuffer[i].task);
+        if(deletedBuffer[i].hiddenBefore===null)localStorage.removeItem('wf_continue_hidden');else localStorage.setItem('wf_continue_hidden',deletedBuffer[i].hiddenBefore);
         deletedBuffer.splice(i, 1);
         found = true;
         break;
@@ -11795,8 +11861,9 @@ window.ignoreContinueTask = function(index) {
 window.deleteContinueTaskHistory = function(index) {
   var item = _continueTaskGroups[index];
   if (!item) return;
-  showConfirm('删除“' + item.label + '”在历史中的所有未完成副本？\n已完成记录会保留。', '🗑️', function(){
+  showConfirm('删除“' + item.label + '”在历史中的所有未完成副本，并停止这条任务继续出现？\n已完成记录会保留。', '🗑️', function(){
     _createLocalSnapshot('delete-unfinished-chain', false);
+    _hideContinueTask(item.task);
     var removed = 0;
     var keys = [];
     for (var i=0;i<localStorage.length;i++) {
@@ -12201,10 +12268,11 @@ function autoCheckInContinue() {
         };
       });
     });
+    var hiddenChains=_continueHiddenMap();
     var checkInTasks = Object.keys(latestByChain).map(function(key){ return latestByChain[key]; }).filter(function(entry){
       var task = entry.task;
       var terminalDate=latestFullByLabel[_checkInTerminalLabel(task)];
-      return task.isCheckInTask && (!task.done || task.checkInCompleteType === 'daily') && !(terminalDate&&terminalDate>=entry.sourceDate);
+      return task.isCheckInTask && (!task.done || task.checkInCompleteType === 'daily') && !hiddenChains[_continueHideKey(task)] && !(terminalDate&&terminalDate>=entry.sourceDate);
     });
     if (!checkInTasks.length) return;
 
@@ -13609,10 +13677,10 @@ window.handleImportFile = function(event) {
 
 <!--
 workflow_tool build
-version: 2026.08.21.5
-sourceSha256: 10c09c3186e486bc594d33ccd24c2917a5eb1fafea2dde7441a8b9b7aab0078d
-configSha256: ca416d54a80bf437aac9846bea5cdd0bb30bb161ca3d5759d696d0e862b348f6
-coreSha256: 5641baf541c1a1d1a1a3f4af36afb085b3cb010b5ff27822e96d33c9e227172b
+version: 2026.08.21.6
+sourceSha256: 23181138563d8ee4bcf2cedc3c46a35ec383ac3ce0c4e7f39041dc80488f02d2
+configSha256: 4a8a8f1769cb0e510b3296eb066df2ee7488c4c3c7823851bfa3c3ead2139b5a
+coreSha256: 28dc4fae5ec0b60d0c72982bdf1755d9266b0e05705148d92d120c9d1df5b88d
 appSha256: 2f24aa03f02a5b051051aad95e186b81abef342d0af6958c66b79307c3dc0db3
 exportSha256: 13ad148412f079c37fed48892779a4c15a69b986b274bf432dd0506e64c0fa2a
 syncSha256: d253ac2b5da24d6ab82cae5c41b91c72dc35ffda76ed3b160b3eb4d4025154ea
@@ -13620,5 +13688,5 @@ historySha256: d2d96792bc489871e1e12fdf2483793e1781fec5835bae872974bc6b66894a79
 tasksSha256: cf7b1e78be5c87a40720433883aa80f4c8e36fe389400e217af9bb744ad8a590
 researchSha256: 7f18bf83e2678ea03658117f346225a9af8304668c9f622903770f0292e2c5a8
 stylesSha256: 438038ffa6949e8cb705df0dbad8d9a17ed29abd17f0c072fc70f88118cf55be
-builtAt: 2026-08-21T05:27:41.682Z
+builtAt: 2026-08-21T05:49:15.385Z
 -->
