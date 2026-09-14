@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <meta name="theme-color" content="#4f46e5">
-<meta name="workflow-version" content="2026.09.14.1">
+<meta name="workflow-version" content="2026.09.14.2">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1341,7 +1341,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   else root.WorkflowConfig = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
   return {
-    appVersion: '2026.09.14.1',
+    appVersion: '2026.09.14.2',
     schemaVersion: 9,
     typeLabels: {
       general: '通用',
@@ -3396,7 +3396,7 @@ var _githubSaveInProgress = false;
 var _githubSaveQueued = false;
 var _githubQueuedFeedback = false;
 var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 9;
-var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.09.14.1';
+var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.09.14.2';
 var WORKFLOW_KATEX_FONT_RULE='.katex .katex-html .mord:not(.mathbb):not(.mathcal):not(.mathfrak):not(.amsrm),.katex .katex-html .mord.mathnormal,.katex .katex-html .mord.mathit,.katex .katex-html .mord.mathrm,.katex .katex-html .mord.mathbf,.katex .katex-html .text{font-family:var(--app-font-math)!important;}';
 window.workflowKatexFontStyleHTML=function(){return '<style>'+WORKFLOW_KATEX_FONT_RULE+'</style>';};
 window.workflowKatexStyleHTML=function(){
@@ -13468,6 +13468,29 @@ window.handleImportFile = function(event) {
     if(/\*\*[^*\n]+\*\*$|(^|[^*])\*[^*\n]+\*$|~~[^~\n]+~~$|==[^=\n]+==$|\+\+[^+\n]+\+\+$|\^[^\^\n]+\^$|(^|[^~])~[^~\n]+~$|%%[^%\n]+%%$|`[^`\n]+`$|!?\[[^\]\n]+\]\([^\)\n]+\)$/.test(before))return true;
     return /(^|\n)\s*\|.+\|\s*$/.test(before)&&/\n\s*\|\s*:?-{3,}:?(?:\s*\|\s*:?-{3,}:?)+\s*\|?\s*(?:\n|$)/.test(before);
   }
+  // Some IME/browser input events carry an empty InputEvent.data even though
+  // the DOM already contains the completed Markdown. In that case the
+  // delimiter-based event check above cannot identify the new formula or
+  // formatting boundary. Compare the committed Markdown with its previous
+  // value as a bounded fallback; ordinary characters keep the same signature
+  // count and therefore avoid a full rerender on every keystroke.
+  function _richCompletedFormatDelta(previous,current){
+    previous=String(previous||'');current=String(current||'');if(previous===current)return false;
+    var signatures=[
+      /(^|[^\\$])\$\$[^$\n]+\$\$(?!\$)/g,
+      /(^|[^\\$])\$(?!\$)[^$\n]+\$(?!\$)/g,
+      /\\\([^\n]+\\\)|\\\[[\s\S]+?\\\]/g,
+      /\*\*[^*\n]+\*\*|__[^_\n]+__|~~[^~\n]+~~|==[^=\n]+==|\+\+[^+\n]+\+\+|%%[^%\n]+%%|`[^`\n]+`/g,
+      /(^|[^*])\*[^*\n]+\*(?!\*)|(^|[^_])_[^_\n]+_(?!_)|\^[^^\n]+\^|(^|[^~])~[^~\n]+~/g,
+      /!?\[[^\]\n]+\]\([^\)\n]+\)/g,
+      /(^|\n)\s*(?:#{1,6}\s+\S|[-+*]\s+\S|\d+\.\s+\S|>\s+\S|```[\w+-]*)/g,
+      /(^|\n)\s*\|.+\|\s*(?:\n|$)/g
+    ];
+    return signatures.some(function(pattern){
+      var before=previous.match(pattern),after=current.match(pattern);
+      return (after?after.length:0)>(before?before.length:0);
+    });
+  }
   function _restoreRichPreviewCaret(container){
     if(!container||container._wfRichComposing)return;
     var doc=container.ownerDocument||document,anchor=container.querySelector('.md-caret-anchor');
@@ -13718,10 +13741,14 @@ window.handleImportFile = function(event) {
     function flushQueuedRichEdit(mode){
       if(composing||container._wfRichComposing||_richSourceComposing(container._wfRichSource))return false;
       var hadTimer=!!(timer||maxTimer||dirty);richClearTimer(timer);richClearTimer(maxTimer);timer=null;maxTimer=null;batchStarted=0;if(!hadTimer)return false;
-      var eventInfo=pendingEvent,completedFormat=completedFormatPending;pendingEvent=null;completedFormatPending=false;
+      var eventInfo=pendingEvent,completedFormat=completedFormatPending,sourceBefore=container._wfRichSource?String(container._wfRichSource.value||''):container._wfRichNoteId?String(_readNote(container._wfRichNoteId).content||''):'';pendingEvent=null;completedFormatPending=false;
       var keepNativeCaret=_richSelectionInEmptyBlock(container),length=richDelay().length||String(container._wfRichSource&&container._wfRichSource.value||'').length,deferSurfaces=mode==='max'&&length>5000,simplePatch=!multipleBlocks&&pendingBlock===_richSelectionTopBlock(container)&&eventInfo&&/^(?:insertText|insertCompositionText|deleteContentBackward|deleteContentForward)$/.test(String(eventInfo.inputType||''))?_richActiveBlockPatch(container):null;
       dirty=false;pendingBlock=null;multipleBlocks=false;
       var result=_commitRichPreview(container,{deferSurfaces:true,deferPosition:true,patch:simplePatch});if(result)container._wfRichTextLength=String(result.markdown||'').length;
+      // The delta fallback is specifically for IME/browser events that omit
+      // InputEvent.data. Normal character events must stay on the incremental
+      // path even when a long document already contains Markdown structures.
+      if(!completedFormat&&eventInfo&&String(eventInfo.data||'')===''&&result&&_richCompletedFormatDelta(sourceBefore,result.markdown))completedFormat=true;
       if(!keepNativeCaret&&result&&(completedFormat||_richCompletedFormat(result,eventInfo))){container._wfDeferredSurfaceSync=false;container._wfDeferredRichResult=null;_rerenderCompletedRichFormat(container,result);_syncRichSourcePosition(container,result.index);}
       // A bounded single-block patch is cheap enough to broadcast at the max
       // commit itself. Only structural/full-view updates need the extra pause.
@@ -14382,9 +14409,9 @@ window.handleImportFile = function(event) {
 
 <!--
 workflow_tool build
-version: 2026.09.14.1
-sourceSha256: 4e8e479e8c9173b2ead556414c82c7b984c0ff9d918e379fe567237dd69ab191
-configSha256: 5cb119555e470af7ed2ef689d6e5436cf7c18166df03a4bd56bdba76f7114d94
+version: 2026.09.14.2
+sourceSha256: 6eb183e04311b4acdbc43e2e30437b6e90f67e2f248a5cff4aee250a36ed7fb2
+configSha256: d1ce9661fb5d5127327ec20fee9658b68eb1cbf2b6ce63e0f9e3e8a8770b8480
 coreSha256: e11c59692e6777662a581daa1e1485651eb47cbcfa655aba17a2c0e79f961cfe
 appSha256: 2f24aa03f02a5b051051aad95e186b81abef342d0af6958c66b79307c3dc0db3
 exportSha256: 13ad148412f079c37fed48892779a4c15a69b986b274bf432dd0506e64c0fa2a
@@ -14393,7 +14420,7 @@ historySha256: d2d96792bc489871e1e12fdf2483793e1781fec5835bae872974bc6b66894a79
 tasksSha256: cf7b1e78be5c87a40720433883aa80f4c8e36fe389400e217af9bb744ad8a590
 researchSha256: 7f18bf83e2678ea03658117f346225a9af8304668c9f622903770f0292e2c5a8
 stylesSha256: 438038ffa6949e8cb705df0dbad8d9a17ed29abd17f0c072fc70f88118cf55be
-builtAt: 2026-09-14T09:15:15.359Z
+builtAt: 2026-09-14T12:29:15.534Z
 -->
 
 <!-- Third-party notice: html2canvas/LICENSE
