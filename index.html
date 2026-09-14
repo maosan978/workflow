@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <meta name="theme-color" content="#4f46e5">
-<meta name="workflow-version" content="2026.09.09.5">
+<meta name="workflow-version" content="2026.09.14.1">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1204,7 +1204,7 @@ body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between
 .md-float-body pre{background:var(--surface2);border-radius:var(--radius-xs);padding:10px;overflow-x:auto;margin:6px 0;max-width:100%}
 .md-float-body pre code{white-space:pre-wrap;overflow-wrap:anywhere}
 .md-float-body code{background:var(--surface2);border-radius:3px;padding:1px 4px;font-family:'Fira Code','Consolas',monospace;font-size:12px}
-.katex,.math-fallback{font-size:var(--app-font-size-math)!important}.math-fallback{font-family:var(--app-font-math);font-style:italic;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:0 4px;color:var(--text)}
+.katex,.math-fallback{font-size:var(--app-font-size-math)!important}.katex .katex-html .mord:not(.mathbb):not(.mathcal):not(.mathfrak):not(.amsrm),.katex .katex-html .mord.mathnormal,.katex .katex-html .mord.mathit,.katex .katex-html .mord.mathrm,.katex .katex-html .mord.mathbf,.katex .katex-html .text{font-family:var(--app-font-math)!important}.math-fallback{font-family:var(--app-font-math);font-style:italic;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:0 4px;color:var(--text)}
 .math-fallback.display{display:block;text-align:center;margin:6px 0;padding:8px 10px;font-size:15px}
 @media(max-width:600px){
   .md-preview-body{min-height:110px;max-height:180px;padding:10px 12px 42px;scroll-padding-bottom:46px}
@@ -1341,7 +1341,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   else root.WorkflowConfig = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
   return {
-    appVersion: '2026.09.09.5',
+    appVersion: '2026.09.14.1',
     schemaVersion: 9,
     typeLabels: {
       general: '通用',
@@ -3396,10 +3396,12 @@ var _githubSaveInProgress = false;
 var _githubSaveQueued = false;
 var _githubQueuedFeedback = false;
 var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 9;
-var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.09.09.5';
+var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.09.14.1';
+var WORKFLOW_KATEX_FONT_RULE='.katex .katex-html .mord:not(.mathbb):not(.mathcal):not(.mathfrak):not(.amsrm),.katex .katex-html .mord.mathnormal,.katex .katex-html .mord.mathit,.katex .katex-html .mord.mathrm,.katex .katex-html .mord.mathbf,.katex .katex-html .text{font-family:var(--app-font-math)!important;}';
+window.workflowKatexFontStyleHTML=function(){return '<style>'+WORKFLOW_KATEX_FONT_RULE+'</style>';};
 window.workflowKatexStyleHTML=function(){
   var bundled=document.getElementById('workflowKatexStyles');
-  return bundled?bundled.outerHTML:'<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.min.css">';
+  return (bundled?bundled.outerHTML:'<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.min.css">')+window.workflowKatexFontStyleHTML();
 }
 
 var tokenClient = null;
@@ -5672,7 +5674,7 @@ function _exThemeVars(){
 }
 function _exWrap(inner, label) {
   return '<div style="width:600px;min-width:600px;flex:0 0 600px;background:var(--bg);font-family:var(--app-font-export);font-size:var(--app-font-size);color:var(--export-text);padding:32px;box-sizing:border-box;' + _exThemeVars() + '">'
-    + '<style>.wf-export-md,.wf-export-md *{color:var(--export-text)!important}.wf-export-md p{margin:0 0 6px}.wf-export-md p:last-child{margin-bottom:0}.wf-export-md h1{font-size:18px;margin:6px 0 8px;color:var(--export-text)!important}.wf-export-md h2{font-size:16px;margin:6px 0 7px;color:var(--export-text)!important}.wf-export-md h3{font-size:14px;margin:5px 0 6px;color:var(--export-text)!important}.wf-export-md ul,.wf-export-md ol{margin:4px 0 6px;padding-left:24px;list-style-position:outside}.wf-export-md li{margin:2px 0;padding-left:2px}.wf-export-md code{background:rgba(148,163,184,.18);border-radius:3px;padding:1px 4px;color:var(--export-text)!important}.wf-export-md pre{background:rgba(148,163,184,.18);border-radius:6px;padding:8px;overflow:auto;color:var(--export-text)!important}.wf-export-md .katex,.wf-export-md .katex *,.katex,.katex *{color:var(--export-text)!important}.wf-export-md .katex,.wf-export-md .math-fallback{font-size:var(--app-font-size-math)!important}.math-fallback{font-family:var(--app-font-math);font-style:italic;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:0 4px;color:var(--export-text)!important}.math-fallback.display{display:block;text-align:center;margin:6px 0;padding:8px 10px}</style>'
+    + '<style>.wf-export-md,.wf-export-md *{color:var(--export-text)!important}.wf-export-md p{margin:0 0 6px}.wf-export-md p:last-child{margin-bottom:0}.wf-export-md h1{font-size:18px;margin:6px 0 8px;color:var(--export-text)!important}.wf-export-md h2{font-size:16px;margin:6px 0 7px;color:var(--export-text)!important}.wf-export-md h3{font-size:14px;margin:5px 0 6px;color:var(--export-text)!important}.wf-export-md ul,.wf-export-md ol{margin:4px 0 6px;padding-left:24px;list-style-position:outside}.wf-export-md li{margin:2px 0;padding-left:2px}.wf-export-md code{background:rgba(148,163,184,.18);border-radius:3px;padding:1px 4px;color:var(--export-text)!important}.wf-export-md pre{background:rgba(148,163,184,.18);border-radius:6px;padding:8px;overflow:auto;color:var(--export-text)!important}.wf-export-md .katex,.wf-export-md .katex *,.katex,.katex *{color:var(--export-text)!important}.wf-export-md .katex,.wf-export-md .math-fallback{font-size:var(--app-font-size-math)!important}.math-fallback{font-family:var(--app-font-math);font-style:italic;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:0 4px;color:var(--export-text)!important}.math-fallback.display{display:block;text-align:center;margin:6px 0;padding:8px 10px}'+WORKFLOW_KATEX_FONT_RULE+'</style>'
     + inner
     + '<div style="margin-top:20px;padding-top:14px;border-top:1px solid var(--border);text-align:center;font-size:11px;color:var(--export-muted)">每日工作流 · ' + _exH(label) + '</div>'
     + '</div>';
@@ -14380,9 +14382,9 @@ window.handleImportFile = function(event) {
 
 <!--
 workflow_tool build
-version: 2026.09.09.5
-sourceSha256: 674050639121228930df7b6eb5c2a820f2acfaa38a176cb2c83d5967b4ac89ce
-configSha256: 5d3efb61cc8ec36a7e15eeb77437d0291ac81c09beac8f507bff59f75a69fd2a
+version: 2026.09.14.1
+sourceSha256: 4e8e479e8c9173b2ead556414c82c7b984c0ff9d918e379fe567237dd69ab191
+configSha256: 5cb119555e470af7ed2ef689d6e5436cf7c18166df03a4bd56bdba76f7114d94
 coreSha256: e11c59692e6777662a581daa1e1485651eb47cbcfa655aba17a2c0e79f961cfe
 appSha256: 2f24aa03f02a5b051051aad95e186b81abef342d0af6958c66b79307c3dc0db3
 exportSha256: 13ad148412f079c37fed48892779a4c15a69b986b274bf432dd0506e64c0fa2a
@@ -14391,7 +14393,7 @@ historySha256: d2d96792bc489871e1e12fdf2483793e1781fec5835bae872974bc6b66894a79
 tasksSha256: cf7b1e78be5c87a40720433883aa80f4c8e36fe389400e217af9bb744ad8a590
 researchSha256: 7f18bf83e2678ea03658117f346225a9af8304668c9f622903770f0292e2c5a8
 stylesSha256: 438038ffa6949e8cb705df0dbad8d9a17ed29abd17f0c072fc70f88118cf55be
-builtAt: 2026-09-12T09:13:20.950Z
+builtAt: 2026-09-14T09:15:15.359Z
 -->
 
 <!-- Third-party notice: html2canvas/LICENSE
