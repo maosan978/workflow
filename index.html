@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <meta name="theme-color" content="#4f46e5">
-<meta name="workflow-version" content="2026.09.14.2">
+<meta name="workflow-version" content="2026.09.15.4">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1204,7 +1204,7 @@ body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between
 .md-float-body pre{background:var(--surface2);border-radius:var(--radius-xs);padding:10px;overflow-x:auto;margin:6px 0;max-width:100%}
 .md-float-body pre code{white-space:pre-wrap;overflow-wrap:anywhere}
 .md-float-body code{background:var(--surface2);border-radius:3px;padding:1px 4px;font-family:'Fira Code','Consolas',monospace;font-size:12px}
-.katex,.math-fallback{font-size:var(--app-font-size-math)!important}.katex .katex-html .mord:not(.mathbb):not(.mathcal):not(.mathfrak):not(.amsrm),.katex .katex-html .mord.mathnormal,.katex .katex-html .mord.mathit,.katex .katex-html .mord.mathrm,.katex .katex-html .mord.mathbf,.katex .katex-html .text{font-family:var(--app-font-math)!important}.math-fallback{font-family:var(--app-font-math);font-style:italic;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:0 4px;color:var(--text)}
+.katex,.math-fallback{font-size:var(--app-font-size-math)!important;font-family:var(--app-font-math)!important}.katex .katex-html{font-family:var(--app-font-math)!important}.katex .katex-html .mord:not(.mathbb):not(.mathcal):not(.mathfrak):not(.amsrm),.katex .katex-html .mord.mathnormal,.katex .katex-html .mord.mathit,.katex .katex-html .mord.mathrm,.katex .katex-html .mord.mathbf,.katex .katex-html .mop:not(.op-symbol):not(.mathbb):not(.mathcal):not(.mathfrak):not(.amsrm),.katex .katex-html .mbin,.katex .katex-html .mrel,.katex .katex-html .mopen,.katex .katex-html .mclose,.katex .katex-html .mpunct,.katex .katex-html .minner,.katex .katex-html .text{font-family:var(--app-font-math)!important}.math-fallback{font-family:var(--app-font-math)!important;font-style:italic;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:0 4px;color:var(--text)}
 .math-fallback.display{display:block;text-align:center;margin:6px 0;padding:8px 10px;font-size:15px}
 @media(max-width:600px){
   .md-preview-body{min-height:110px;max-height:180px;padding:10px 12px 42px;scroll-padding-bottom:46px}
@@ -1259,6 +1259,8 @@ body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between
 .task-collapse-header:hover,.note-collapse-header:hover{background:var(--surface)!important}
 .collapsed-md-summary{flex:1;min-width:0;max-height:1.55em;overflow:hidden;color:var(--text);font-size:13px;line-height:1.5;white-space:nowrap;text-overflow:ellipsis;overflow-wrap:normal;pointer-events:none}
 .collapsed-md-summary>*{display:inline!important;margin:0!important;padding:0!important;border:0!important;background:transparent!important;color:inherit!important;font:inherit!important;line-height:inherit!important;vertical-align:baseline!important;box-shadow:none!important}
+.collapsed-md-summary .katex,.collapsed-md-summary .katex-display,.collapsed-md-summary .math-fallback{font-family:var(--app-font-math)!important;font-size:1em!important;line-height:inherit!important;vertical-align:baseline!important}
+.collapsed-md-summary .katex .katex-html{font-family:var(--app-font-math)!important}
 .collapsed-md-summary li{list-style-position:inside}.collapsed-md-summary li+li,.collapsed-md-summary br{display:none!important}
 .collapsed-md-summary pre,.collapsed-md-summary code{white-space:pre!important}.collapsed-md-summary img,.collapsed-md-summary table{max-height:1.35em;max-width:100%;vertical-align:middle}.collapsed-md-summary .katex-display{display:inline!important;margin:0!important}
 /* 输入框focus状态增强 */
@@ -1341,7 +1343,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   else root.WorkflowConfig = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
   return {
-    appVersion: '2026.09.14.2',
+    appVersion: '2026.09.15.4',
     schemaVersion: 9,
     typeLabels: {
       general: '通用',
@@ -3396,8 +3398,8 @@ var _githubSaveInProgress = false;
 var _githubSaveQueued = false;
 var _githubQueuedFeedback = false;
 var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 9;
-var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.09.14.2';
-var WORKFLOW_KATEX_FONT_RULE='.katex .katex-html .mord:not(.mathbb):not(.mathcal):not(.mathfrak):not(.amsrm),.katex .katex-html .mord.mathnormal,.katex .katex-html .mord.mathit,.katex .katex-html .mord.mathrm,.katex .katex-html .mord.mathbf,.katex .katex-html .text{font-family:var(--app-font-math)!important;}';
+var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.09.15.4';
+var WORKFLOW_KATEX_FONT_RULE='.katex,.math-fallback{font-family:var(--app-font-math)!important}.katex .katex-html{font-family:var(--app-font-math)!important}.katex .katex-html .mord:not(.mathbb):not(.mathcal):not(.mathfrak):not(.amsrm),.katex .katex-html .mord.mathnormal,.katex .katex-html .mord.mathit,.katex .katex-html .mord.mathrm,.katex .katex-html .mord.mathbf,.katex .katex-html .mop:not(.op-symbol):not(.mathbb):not(.mathcal):not(.mathfrak):not(.amsrm),.katex .katex-html .mbin,.katex .katex-html .mrel,.katex .katex-html .mopen,.katex .katex-html .mclose,.katex .katex-html .mpunct,.katex .katex-html .minner,.katex .katex-html .text{font-family:var(--app-font-math)!important;}';
 window.workflowKatexFontStyleHTML=function(){return '<style>'+WORKFLOW_KATEX_FONT_RULE+'</style>';};
 window.workflowKatexStyleHTML=function(){
   var bundled=document.getElementById('workflowKatexStyles');
@@ -6371,6 +6373,7 @@ function applyWorkflowTypography(value,persist){
   var style=document.getElementById('workflowScriptFontFaces');if(!style){style=document.createElement('style');style.id='workflowScriptFontFaces';document.head.appendChild(style);}
   var enSrc=_workflowLocalFontSources(en.value),zhSrc=_workflowLocalFontSources(zh.value);style.textContent=(enSrc?'@font-face{font-family:"WF English";src:'+enSrc+';unicode-range:U+0000-024F,U+1E00-1EFF;size-adjust:'+ratio.toFixed(3)+'%;}':'')+(zhSrc?'@font-face{font-family:"WF Chinese";src:'+zhSrc+';unicode-range:U+2E80-2FDF,U+3000-303F,U+31C0-31EF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF;size-adjust:100%;}':'');
   root.style.setProperty('--app-font-mixed','"WF English","WF Chinese",'+en.value+','+zh.value);root.style.setProperty('--app-font-size',base+'pt');root.style.setProperty('--app-font-math',math.value);root.style.setProperty('--app-font-size-math',_normalizeWorkflowFontSize(value.mathSize)+'pt');
+  if(typeof window._syncCollapsedMathFonts==='function')window._syncCollapsedMathFonts(document);
   if(persist!==false)localStorage.setItem(WORKFLOW_TYPOGRAPHY_KEY,JSON.stringify(value));_syncWorkflowTypographyUi(value);if(typeof window._applyPopoutTheme==='function')window._applyPopoutTheme();return value;
 }
 window.setWorkflowScriptFont=function(script,key){var value=_readWorkflowTypography();if(script==='math')value.mathFont=_workflowMathFontItem(key).key;else value[script+'Font']=_normalizeWorkflowFontKey(key);applyWorkflowTypography(value,true);};
@@ -14146,6 +14149,15 @@ window.handleImportFile = function(event) {
     });
   }
 
+  function _syncCollapsedMathFonts(root){
+    if(!root||!root.querySelectorAll)return;
+    var rootSelector='.collapsed-md-summary .katex,.collapsed-md-summary .katex .katex-html,.collapsed-md-summary .math-fallback';
+    if(root.matches&&root.matches('.collapsed-md-summary'))rootSelector='.katex,.katex .katex-html,.math-fallback';
+    root.querySelectorAll(rootSelector).forEach(function(node){node.style.setProperty('font-family','var(--app-font-math)','important');});
+    var selector='.collapsed-md-summary .katex .katex-html .mord:not(.mathbb):not(.mathcal):not(.mathfrak):not(.amsrm),.collapsed-md-summary .katex .katex-html .mord.mathnormal,.collapsed-md-summary .katex .katex-html .mord.mathit,.collapsed-md-summary .katex .katex-html .mord.mathrm,.collapsed-md-summary .katex .katex-html .mord.mathbf,.collapsed-md-summary .katex .katex-html .mop:not(.op-symbol):not(.mathbb):not(.mathcal):not(.mathfrak):not(.amsrm),.collapsed-md-summary .katex .katex-html .mbin,.collapsed-md-summary .katex .katex-html .mrel,.collapsed-md-summary .katex .katex-html .mopen,.collapsed-md-summary .katex .katex-html .mclose,.collapsed-md-summary .katex .katex-html .mpunct,.collapsed-md-summary .katex .katex-html .minner,.collapsed-md-summary .katex .katex-html .text';
+    if(root.matches&&root.matches('.collapsed-md-summary'))selector='.katex .katex-html .mord:not(.mathbb):not(.mathcal):not(.mathfrak):not(.amsrm),.katex .katex-html .mord.mathnormal,.katex .katex-html .mord.mathit,.katex .katex-html .mord.mathrm,.katex .katex-html .mord.mathbf,.katex .katex-html .mop:not(.op-symbol):not(.mathbb):not(.mathcal):not(.mathfrak):not(.amsrm),.katex .katex-html .mbin,.katex .katex-html .mrel,.katex .katex-html .mopen,.katex .katex-html .mclose,.katex .katex-html .mpunct,.katex .katex-html .minner,.katex .katex-html .text';
+    root.querySelectorAll(selector).forEach(function(node){node.style.setProperty('font-family','var(--app-font-math)','important');});
+  }
   function renderMath(el) {
     window._mdMathRenderCount=(window._mdMathRenderCount||0)+1;
     if (typeof renderMathInElement !== 'undefined') {
@@ -14161,6 +14173,7 @@ window.handleImportFile = function(event) {
     } else {
       renderFallbackMath(el);
     }
+    if(el&&(el.matches&&el.matches('.collapsed-md-summary')||el.querySelector&&el.querySelector('.collapsed-md-summary'))) _syncCollapsedMathFonts(el);
   }
   function renderCollapsedMarkdownMath(root){
     if(!root||!root.querySelectorAll)return;
@@ -14354,6 +14367,7 @@ window.handleImportFile = function(event) {
   window.renderMDMath = renderMDMath;
   window.renderMath = renderMath;
   window.renderCollapsedMarkdownMath = renderCollapsedMarkdownMath;
+  window._syncCollapsedMathFonts = _syncCollapsedMathFonts;
   window.attachPreview = attachPreview;
   window.bootMarkdownPreview = bootMarkdownPreview;
 
@@ -14409,9 +14423,9 @@ window.handleImportFile = function(event) {
 
 <!--
 workflow_tool build
-version: 2026.09.14.2
-sourceSha256: 6eb183e04311b4acdbc43e2e30437b6e90f67e2f248a5cff4aee250a36ed7fb2
-configSha256: d1ce9661fb5d5127327ec20fee9658b68eb1cbf2b6ce63e0f9e3e8a8770b8480
+version: 2026.09.15.4
+sourceSha256: f914c1d2c334a607901285ee54336906d949dffc71e321fb29a1d0ca9954b17e
+configSha256: a0174bd72d8d841b41da37e6ee33ed77e530f6766d5601369c153c491cc65e35
 coreSha256: e11c59692e6777662a581daa1e1485651eb47cbcfa655aba17a2c0e79f961cfe
 appSha256: 2f24aa03f02a5b051051aad95e186b81abef342d0af6958c66b79307c3dc0db3
 exportSha256: 13ad148412f079c37fed48892779a4c15a69b986b274bf432dd0506e64c0fa2a
@@ -14420,7 +14434,7 @@ historySha256: d2d96792bc489871e1e12fdf2483793e1781fec5835bae872974bc6b66894a79
 tasksSha256: cf7b1e78be5c87a40720433883aa80f4c8e36fe389400e217af9bb744ad8a590
 researchSha256: 7f18bf83e2678ea03658117f346225a9af8304668c9f622903770f0292e2c5a8
 stylesSha256: 438038ffa6949e8cb705df0dbad8d9a17ed29abd17f0c072fc70f88118cf55be
-builtAt: 2026-09-14T12:29:15.534Z
+builtAt: 2026-09-15T10:37:52.091Z
 -->
 
 <!-- Third-party notice: html2canvas/LICENSE
