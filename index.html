@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <meta name="theme-color" content="#4f46e5">
-<meta name="workflow-version" content="2026.09.15.4">
+<meta name="workflow-version" content="2026.09.19.3">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -30,7 +30,7 @@
   --radius:12px; --radius-sm:8px; --radius-xs:6px; --radius-lg:16px;
   --app-font:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
   --app-font-mixed:var(--app-font); --app-font-math:"Cambria Math","STIX Two Math","Times New Roman",serif;
-  --app-font-size:10.5pt;
+  --app-font-size:10.5pt; --app-content-font-size:10.5pt;
   --app-font-size-math:10.5pt;
   --content-width:760px;
   --header-height:93px;
@@ -56,7 +56,7 @@
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{touch-action:manipulation;overflow-x:hidden}
-body{font-family:var(--app-font-mixed,var(--app-font));
+body{font-family:var(--app-font);
   background:
     linear-gradient(180deg,color-mix(in srgb,var(--primary) 6%,transparent),transparent 260px),
     var(--bg);
@@ -447,8 +447,8 @@ button:focus-visible,[role="button"]:focus-visible,a:focus-visible,input:focus-v
 .appearance-actions{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}.appearance-mini-btn{min-height:28px;padding:4px 9px;border:1px solid var(--border);border-radius:999px;background:var(--surface);color:var(--text2);font:600 11px/1 inherit;cursor:pointer}.appearance-mini-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-bg)}
 html.wf-custom-primary.wf-custom-primary .header{background:var(--custom-header-gradient)!important}
 html.appearance-tuning body,html.appearance-tuning .header,html.appearance-tuning .tabs,html.appearance-tuning .card,html.appearance-tuning .btn,html.appearance-tuning input,html.appearance-tuning textarea,html.appearance-tuning select{transition:none!important}
-.md-preview-body,.note-reading-preview,.md-float-body{font-size:var(--app-font-size)!important}
-@media(min-width:601px){.field input,.field textarea,.field select,.wk-row input,.wk-row textarea,.wk-row select{font-size:var(--app-font-size)}}
+.md-preview-body,.note-reading-preview,.md-float-body{font-family:var(--app-font-mixed,var(--app-font))!important;font-size:var(--app-content-font-size,var(--app-font-size))!important}
+@media(min-width:601px){.field textarea,.wk-row textarea,.field input:not([type]),.field input[type="text"],.field input[type="search"],.wk-row input:not([type]),.wk-row input[type="text"],.wk-row input[type="search"]{font-family:var(--app-font-mixed,var(--app-font));font-size:var(--app-content-font-size,var(--app-font-size))}}
 
 
 
@@ -1124,7 +1124,7 @@ body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between
 .md-preview-body[contenteditable=true]{outline:none;caret-color:var(--primary);cursor:text}
 .md-preview-body[contenteditable=true]:focus{background:color-mix(in srgb,var(--success-bg) 42%,var(--surface));box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--success) 32%,transparent)}
 .md-preview-body[contenteditable=true]:empty::before{content:'在这里直接编辑渲染后的内容';color:var(--text4);pointer-events:none}
-.md-preview-body .rich-edit-target{outline:1px dashed color-mix(in srgb,var(--success) 55%,transparent);outline-offset:3px;background:color-mix(in srgb,var(--success-bg) 54%,transparent);border-radius:3px}
+.md-preview-body .rich-edit-target{outline:1px dashed color-mix(in srgb,var(--success) 55%,transparent);outline-offset:4px;background:color-mix(in srgb,var(--success-bg) 54%,transparent);border-radius:5px;scroll-margin-block:16px}
 .math-preview mark,.wf-export-md mark{padding:0 .12em;border-radius:3px;background:color-mix(in srgb,#facc15 44%,var(--surface));color:inherit;box-decoration-break:clone;-webkit-box-decoration-break:clone}.math-preview u,.wf-export-md u{text-decoration-color:color-mix(in srgb,var(--primary) 72%,currentColor);text-decoration-thickness:1.5px;text-underline-offset:.16em}
 .math-preview .md-comment,.wf-export-md .md-comment{display:inline;padding:.08em .34em;border:1px dashed var(--border);border-radius:4px;background:var(--surface2);color:var(--text3);font-size:.92em}.math-preview .md-callout,.wf-export-md .md-callout{border-left:3px solid var(--primary);background:var(--primary-bg);padding:8px 12px;border-radius:0 var(--radius-xs) var(--radius-xs) 0}.md-callout-label{color:var(--primary);font-size:.86em;letter-spacing:.03em}
 .md-source-editor.md-source-synced{border-color:var(--success)!important;box-shadow:inset 3px 0 0 var(--success),0 0 0 3px color-mix(in srgb,var(--success) 16%,transparent)!important}
@@ -1257,9 +1257,10 @@ body.focus-mode #pane-today>.sec-label,body.focus-mode #pane-today>.flex-between
 .filter-pill.active{background:var(--primary);color:#fff;border-color:var(--primary);font-weight:600}
 .task-collapse-header,.note-collapse-header{user-select:none;transition:background var(--t)}
 .task-collapse-header:hover,.note-collapse-header:hover{background:var(--surface)!important}
-.collapsed-md-summary{flex:1;min-width:0;max-height:1.55em;overflow:hidden;color:var(--text);font-size:13px;line-height:1.5;white-space:nowrap;text-overflow:ellipsis;overflow-wrap:normal;pointer-events:none}
+.collapsed-md-summary{flex:1;min-width:0;max-height:1.75em;overflow:hidden;color:var(--text);font-size:13px;line-height:1.7;white-space:nowrap;text-overflow:ellipsis;overflow-wrap:normal;pointer-events:none}
 .collapsed-md-summary>*{display:inline!important;margin:0!important;padding:0!important;border:0!important;background:transparent!important;color:inherit!important;font:inherit!important;line-height:inherit!important;vertical-align:baseline!important;box-shadow:none!important}
 .collapsed-md-summary .katex,.collapsed-md-summary .katex-display,.collapsed-md-summary .math-fallback{font-family:var(--app-font-math)!important;font-size:1em!important;line-height:inherit!important;vertical-align:baseline!important}
+.collapsed-md-summary .math-fallback{vertical-align:.12em!important}
 .collapsed-md-summary .katex .katex-html{font-family:var(--app-font-math)!important}
 .collapsed-md-summary li{list-style-position:inside}.collapsed-md-summary li+li,.collapsed-md-summary br{display:none!important}
 .collapsed-md-summary pre,.collapsed-md-summary code{white-space:pre!important}.collapsed-md-summary img,.collapsed-md-summary table{max-height:1.35em;max-width:100%;vertical-align:middle}.collapsed-md-summary .katex-display{display:inline!important;margin:0!important}
@@ -1343,7 +1344,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   else root.WorkflowConfig = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
   return {
-    appVersion: '2026.09.15.4',
+    appVersion: '2026.09.19.3',
     schemaVersion: 9,
     typeLabels: {
       general: '通用',
@@ -2738,9 +2739,9 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
     </div>
     <div class="help-section-body"><div class="help-section-inner">
       <p>点击顶部 🎨 打开统一外观面板。字体按中文黑体、中文书写、中文宋体、西文、等宽和通用字体分组，包含微软雅黑、等线、黑体、幼圆、楷体、仿宋、隶书、行书、宋体、华文中宋、Times New Roman、Calibri、Cambria、Arial、Georgia、Garamond、Verdana、Courier New 等；系统未安装时自动使用相近后备字体。</p>
-      <p>正文字号提供 Word 风格常用磅值列表，也可以在 8–36 pt 之间按 0.5 pt 精确输入。“分类排版”可分别选择中文、英文/数字和公式的字体与字号；混排正文、公式、双屏、置顶以及 PNG/PDF 导出会同步继承。移动端输入框仍保留防止浏览器自动放大的安全字号。</p>
+      <p>正文字号提供 Word 风格常用磅值列表，也可以在 8–36 pt 之间按 0.5 pt 精确输入。“分类排版”可分别选择中文、英文/数字和公式的字体与字号；它只调整你输入和导出的内容，不会把导航、按钮、标签等网页界面一起放大。混排正文、公式、双屏、置顶以及 PNG/PDF 导出会同步继承。移动端输入框仍保留防止浏览器自动放大的安全字号。</p>
       <p>主题色、正文、次级文字、说明文字和弱提示文字都可用 R/G/B 滑杆或精确数值自由调整。浅色和深色主题分别记忆，切换主题不会互相覆盖；对比度低于建议值时面板会提示，但仍保留你的选择。</p>
-      <p>拖动颜色或连续调整字号时更新会按浏览器动画帧合并，停止约 0.22 秒后才写入本地；恢复外观设置不会影响任务或历史。自定义颜色、字体和字号会进入 JSON、Drive 与 GitHub 的备份数据。</p>
+      <p>拖动颜色或连续调整字号时更新会按浏览器动画帧合并，停止约 0.22 秒后才写入本地；中文、英文与公式字号可独立设置，调大中文不会反向缩小或连带改变英文，双屏和置顶预览保持相同排版。恢复外观设置不会影响任务或历史。自定义颜色、字体和字号会进入 JSON、Drive 与 GitHub 的备份数据。</p>
     </div></div>
   </div>
 
@@ -2785,7 +2786,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
         <tr><td>☀️ 设为晨间</td><td>任务卡片右上角 ☀️；历史编辑中也可用</td><td>将任意任务整体设为晨间目标，原晨间任务整体回到任务列表；晨间支持项目标签、打卡任务和完整字段预览，只在位置和标注上特殊</td></tr>
         <tr><td>➕ 明日任务</td><td>晚间"明天要做的事"字段旁</td><td>将计划直接添加到明天任务清单，可选择5种任务类型</td></tr>
         <tr><td>📐 完整排版预览</td><td>输入区顶部点击“? 格式”查看语法</td><td>支持标题、引用、注释块、分隔线、代码块/行内代码、链接、图片、列表、任务清单、表格、粗体、斜体、删除线、高亮、下划线、上标、下标、行内批注和 LaTeX 公式；闭合语法、粘贴或换行完成结构后会立即渲染</td></tr>
-        <tr><td>源码 / 渲染编辑</td><td>每个输入区顶部直接切换“源码 / 渲染”</td><td>渲染结果中的标题、段落、文字格式、链接、引用、注释、代码、列表、清单和表格都可直接修改并回写原格式；只有 <code>1.</code>、<code>-</code>、<code>- [ ]</code>、<code>#</code>、<code>&gt;</code> 或代码围栏时也可直接点击后输入。列表中 Enter 继续下一编号，Shift+Enter 在当前编号内换行，空白编号再次 Enter 退出列表。点击公式则在原位置编辑 LaTeX</td></tr>
+        <tr><td>源码 / 渲染编辑</td><td>每个输入区顶部直接切换“源码 / 渲染”</td><td>渲染结果中的标题、段落、文字格式、链接、引用、注释、代码、列表、清单和表格都可直接修改并回写原格式；只有 <code>1.</code>、<code>-</code>、<code>- [ ]</code>、<code>#</code>、<code>&gt;</code> 或代码围栏时也可直接点击后输入。列表中 Enter 继续下一项，Shift+Enter 在当前项内换行，Tab / Shift+Tab 调整层级；嵌套空项再次 Enter 先退一级，顶层空项再次 Enter 会在当前位置退出列表，即使下方还有项目也不会跳到列表或文章尾部。有序列表的后续编号会保持连续。点击公式则在原位置编辑 LaTeX</td></tr>
         <tr><td>▣ 预览窗口</td><td>点击“↗ 双屏”或“▣ 置顶”</td><td>“源码 / 渲染 / 格式 / 双屏 / 置顶”始终排列在同一工具行；窄窗口会压缩间距，不拆成上下两行。两个外部预览同样支持全文编辑，并锁定打开它的输入框；无论在源码、主预览、双屏或置顶中编辑，其他视图都会同步内容，并用细光标标出对应字符位置。按住右下角调节柄拖动即可改变大小；“↗ 双屏”支持 Edge 最大化、最小化和分屏，“▣ 置顶”保持在其他窗口上方</td></tr>
       </table></div>
     </div></div>
@@ -2827,7 +2828,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
       <p><b>折叠摘要：</b>小记收起时显示首个有效内容块的渲染结果，而不是 Markdown 或公式原代码；历史编辑中的小记使用相同规则，展开后仍显示完整内容。</p>
       <p><b>三级收纳：</b>结构固定为“我的收纳盒 → 收纳盒 → 盒内分类 → 小记”。总收纳区、每个盒子和每个分类都能独立折叠；“全部展开 / 全部收起”统一控制内部两层，折叠后不会创建正文、公式或编辑器 DOM。点击小记右侧 <b>📥</b> 可直接选择“盒子 / 分类”；旧数据或没有分类的小记自动进入该盒的“未分类”，失效盒子归入“待整理 / 未归属”。盒子和分类均可自行新建、命名、改色、删除与 <b>📌</b> 置顶，小记也可在分类内置顶，三个置顶层级互不覆盖且保留同组原顺序。盒子、分类数量不设人为上限。收纳不是删除，历史、搜索、备份、云同步及 Markdown、PNG、PDF 导出均保留完整层级；删除分类会把小记移到本盒“未分类”，删除盒子会移到“待整理”，两者均先建立快照且不删除内容。</p>
       <p><b>清单与预览窗口：</b>小记阅读态和编辑预览都可以直接勾选 <code>- [ ]</code>，勾选后保持当前项目位置；展开小记后的内容置顶、双屏、窗口置顶、阅读/编辑和删除保持在同一操作行，不会拆成两行。点击 <b>↗</b> 打开支持最大化、最小化和 Windows 分屏的标准双屏窗口，点击 <b>▣</b> 打开始终位于其他窗口上方的置顶预览。编辑区预览栏不再重复显示这两个入口。</p>
-      <p><b>输入与同步：</b>拼音选词期间暂缓预览重绘，确认候选后再同步完整内容。空列表按 Enter 退出后可直接续写；闭合格式后继续输入也会完成渲染。定位提示不会接收文字或延迟抢回光标。长文刷新复用未变化的段落和公式，阅读模式不重复更新隐藏编辑预览。源码、渲染与独立窗口共享同一份记录，关闭或离开预览前会提交待保存内容；若预览已导航到其他页面，请从主页面重新打开，不会覆盖那个页面。重要记录仍建议定期导出独立备份；修复编辑器不会自动找回旧版本已丢失的文字。</p>
+      <p><b>输入与同步：</b>拼音选词期间暂缓预览重绘，确认候选后再同步完整内容。列表按 Enter 继续下一项、Shift+Enter 在当前项内换行，空列表再按 Enter 退出且不会累积空行；在任务项开头删除任务框只会把当前项改为普通项目。闭合格式后继续输入也会完成渲染。定位提示覆盖完整当前列表项，不会接收文字或延迟抢回光标。长文刷新复用未变化的段落和公式，阅读模式不重复更新隐藏编辑预览。源码、渲染与独立窗口共享同一份记录，关闭或离开预览前会提交待保存内容；若预览已导航到其他页面，请从主页面重新打开，不会覆盖那个页面。重要记录仍建议定期导出独立备份；修复编辑器不会自动找回旧版本已丢失的文字。</p>
     </div></div>
   </div>
 
@@ -3398,7 +3399,7 @@ var _githubSaveInProgress = false;
 var _githubSaveQueued = false;
 var _githubQueuedFeedback = false;
 var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 9;
-var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.09.15.4';
+var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.09.19.3';
 var WORKFLOW_KATEX_FONT_RULE='.katex,.math-fallback{font-family:var(--app-font-math)!important}.katex .katex-html{font-family:var(--app-font-math)!important}.katex .katex-html .mord:not(.mathbb):not(.mathcal):not(.mathfrak):not(.amsrm),.katex .katex-html .mord.mathnormal,.katex .katex-html .mord.mathit,.katex .katex-html .mord.mathrm,.katex .katex-html .mord.mathbf,.katex .katex-html .mop:not(.op-symbol):not(.mathbb):not(.mathcal):not(.mathfrak):not(.amsrm),.katex .katex-html .mbin,.katex .katex-html .mrel,.katex .katex-html .mopen,.katex .katex-html .mclose,.katex .katex-html .mpunct,.katex .katex-html .minner,.katex .katex-html .text{font-family:var(--app-font-math)!important;}';
 window.workflowKatexFontStyleHTML=function(){return '<style>'+WORKFLOW_KATEX_FONT_RULE+'</style>';};
 window.workflowKatexStyleHTML=function(){
@@ -5664,8 +5665,8 @@ function _exThemeVars(){
     '--info-bg': _exCssVar('--info-bg', '#eff6ff'),
     '--warn': _exCssVar('--warn', '#d97706'),
     '--warn-bg': _exCssVar('--warn-bg', '#fffbeb'),
-    '--app-font-export': getComputedStyle(document.body).fontFamily,
-    '--app-font-size': _exCssVar('--app-font-size','10.5pt'),
+    '--app-font-export': _exCssVar('--app-font-mixed',getComputedStyle(document.body).fontFamily),
+    '--app-font-size': _exCssVar('--app-content-font-size',_exCssVar('--app-font-size','10.5pt')),
     '--app-font-math': _exCssVar('--app-font-math','"Cambria Math","Times New Roman",serif'),
     '--app-font-size-math': _exCssVar('--app-font-size-math','10.5pt'),
     '--export-text': dark ? '#f8fafc' : '#0f172a',
@@ -6362,17 +6363,21 @@ function _workflowTypographyDefaults(){var font=_normalizeWorkflowFontKey(localS
 function _readWorkflowTypography(){var value={};try{value=JSON.parse(localStorage.getItem(WORKFLOW_TYPOGRAPHY_KEY)||'{}')||{};}catch(e){}var defaults=_workflowTypographyDefaults();return {zhFont:_normalizeWorkflowFontKey(value.zhFont||defaults.zhFont),enFont:_normalizeWorkflowFontKey(value.enFont||defaults.enFont),mathFont:WORKFLOW_MATH_FONTS.some(function(item){return item.key===value.mathFont;})?value.mathFont:defaults.mathFont,zhSize:_normalizeWorkflowFontSize(value.zhSize||defaults.zhSize),enSize:_normalizeWorkflowFontSize(value.enSize||defaults.enSize),mathSize:_normalizeWorkflowFontSize(value.mathSize||defaults.mathSize)};}
 function _workflowFontItem(key){return WORKFLOW_FONTS.find(function(item){return item.key===key;})||WORKFLOW_FONTS[0];}
 function _workflowMathFontItem(key){return WORKFLOW_MATH_FONTS.find(function(item){return item.key===key;})||WORKFLOW_MATH_FONTS[0];}
-function _workflowLocalFontSources(value){return String(value||'').split(',').map(function(name){return name.trim().replace(/^['"]|['"]$/g,'');}).filter(function(name){return name&&!/^(serif|sans-serif|monospace|cursive|system-ui|-apple-system|BlinkMacSystemFont)$/i.test(name);}).map(function(name){return 'local("'+name.replace(/["\\]/g,'\\$&')+'")';}).join(',');}
+function _workflowLocalFontSources(value,script){
+  var raw=String(value||''),serif=/(?:serif|times|georgia|songti|simsun|宋体|仿宋|fangsong)/i.test(raw),names=raw.split(',').map(function(name){return name.trim().replace(/^['"]|['"]$/g,'');}).filter(function(name){return name&&!/^(serif|sans-serif|monospace|cursive|system-ui|-apple-system|BlinkMacSystemFont)$/i.test(name);});
+  var fallbacks=script==='zh'?(serif?['SimSun','Songti SC','Noto Serif CJK SC','Source Han Serif SC','Droid Sans Fallback']:['Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Droid Sans Fallback']):(serif?['Times New Roman','Liberation Serif','FreeSerif']:['Arial','Liberation Sans','DejaVu Sans']);
+  fallbacks.forEach(function(name){if(names.indexOf(name)<0)names.push(name);});return names.map(function(name){return 'local("'+name.replace(/["\\]/g,'\\$&')+'")';}).join(',');
+}
 function _syncWorkflowTypographyUi(value){
   function fill(id,items,key){var el=document.getElementById(id);if(!el)return;if(!el.options.length)el.innerHTML=items.map(function(item){return '<option value="'+item.key+'">'+item.label+'</option>';}).join('');el.value=key;}
   fill('appearanceZhFontSelect',WORKFLOW_FONTS,value.zhFont);fill('appearanceEnFontSelect',WORKFLOW_FONTS,value.enFont);fill('appearanceMathFontSelect',WORKFLOW_MATH_FONTS,value.mathFont);
   [['appearanceZhSizeInput',value.zhSize],['appearanceEnSizeInput',value.enSize],['appearanceMathSizeInput',value.mathSize]].forEach(function(pair){var el=document.getElementById(pair[0]);if(el&&document.activeElement!==el)el.value=pair[1];});
 }
 function applyWorkflowTypography(value,persist){
-  value=value||_readWorkflowTypography();var root=document.documentElement,zh=_workflowFontItem(value.zhFont),en=_workflowFontItem(value.enFont),math=_workflowMathFontItem(value.mathFont),base=_normalizeWorkflowFontSize(value.zhSize),ratio=Math.max(.5,Math.min(2,_normalizeWorkflowFontSize(value.enSize)/base))*100;
+  value=value||_readWorkflowTypography();var root=document.documentElement,zh=_workflowFontItem(value.zhFont),en=_workflowFontItem(value.enFont),math=_workflowMathFontItem(value.mathFont),zhSize=_normalizeWorkflowFontSize(value.zhSize),enSize=_normalizeWorkflowFontSize(value.enSize),base=Math.max(zhSize,enSize),enRatio=enSize/base*100,zhRatio=zhSize/base*100;
   var style=document.getElementById('workflowScriptFontFaces');if(!style){style=document.createElement('style');style.id='workflowScriptFontFaces';document.head.appendChild(style);}
-  var enSrc=_workflowLocalFontSources(en.value),zhSrc=_workflowLocalFontSources(zh.value);style.textContent=(enSrc?'@font-face{font-family:"WF English";src:'+enSrc+';unicode-range:U+0000-024F,U+1E00-1EFF;size-adjust:'+ratio.toFixed(3)+'%;}':'')+(zhSrc?'@font-face{font-family:"WF Chinese";src:'+zhSrc+';unicode-range:U+2E80-2FDF,U+3000-303F,U+31C0-31EF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF;size-adjust:100%;}':'');
-  root.style.setProperty('--app-font-mixed','"WF English","WF Chinese",'+en.value+','+zh.value);root.style.setProperty('--app-font-size',base+'pt');root.style.setProperty('--app-font-math',math.value);root.style.setProperty('--app-font-size-math',_normalizeWorkflowFontSize(value.mathSize)+'pt');
+  var faceBase=String(base).replace('.','_'),enFace='WF English '+en.key+' '+String(enSize).replace('.','_')+' '+faceBase,zhFace='WF Chinese '+zh.key+' '+String(zhSize).replace('.','_')+' '+faceBase,enSrc=_workflowLocalFontSources(en.value,'en'),zhSrc=_workflowLocalFontSources(zh.value,'zh');style.textContent=(enSrc?'@font-face{font-family:"'+enFace+'";src:'+enSrc+';unicode-range:U+0000-024F,U+1E00-1EFF;size-adjust:'+enRatio.toFixed(3)+'%;}':'')+(zhSrc?'@font-face{font-family:"'+zhFace+'";src:'+zhSrc+';unicode-range:U+2E80-2FDF,U+3000-303F,U+31C0-31EF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF;size-adjust:'+zhRatio.toFixed(3)+'%;}':'');
+  root.style.setProperty('--app-font-mixed','"'+enFace+'","'+zhFace+'",'+en.value+','+zh.value);root.style.setProperty('--app-content-font-size',base+'pt');root.style.setProperty('--app-font-math',math.value);root.style.setProperty('--app-font-size-math',_normalizeWorkflowFontSize(value.mathSize)+'pt');
   if(typeof window._syncCollapsedMathFonts==='function')window._syncCollapsedMathFonts(document);
   if(persist!==false)localStorage.setItem(WORKFLOW_TYPOGRAPHY_KEY,JSON.stringify(value));_syncWorkflowTypographyUi(value);if(typeof window._applyPopoutTheme==='function')window._applyPopoutTheme();return value;
 }
@@ -12848,7 +12853,7 @@ window.handleImportFile = function(event) {
     '--primary-bg','--primary-light','--primary-soft','--accent','--accent-bg',
     '--success','--success-bg','--success-border','--warn','--warn-bg','--danger','--danger-bg',
     '--shadow-xs','--shadow-sm','--shadow','--shadow-md','--shadow-lg','--shadow-glow',
-    '--radius','--radius-sm','--radius-xs','--radius-lg','--t','--app-font','--app-font-mixed','--app-font-math','--app-font-size','--app-font-size-math'
+    '--radius','--radius-sm','--radius-xs','--radius-lg','--t','--app-font','--app-font-mixed','--app-font-math','--app-font-size','--app-content-font-size','--app-font-size-math'
   ];
 
   function setMdFloatButtonState(){
@@ -13182,11 +13187,14 @@ window.handleImportFile = function(event) {
       inline+=_richMarkerAfterChildren(li,liChildren.length);
       var prefix=ordered?(index++)+'. ':'- ';
       if(checkbox)prefix+='['+(checkbox.checked?'x':' ')+'] ';
-      var indent='  '.repeat(depth),parts=inline.replace(/[ \t]+\n/g,'\n').replace(/\n{2,}/g,'\n').split('\n').map(function(line){return line.trim();});
+      // Four spaces per level are valid for ordered, unordered and task-list
+      // children. Two spaces happened to work for bullets but flattened a
+      // nested ordered list after its first Markdown round trip.
+      var indent='    '.repeat(depth),parts=inline.replace(/[ \t]+\n/g,'\n').replace(/\n{2,}/g,'\n').split('\n').map(function(line){return line.trim();});
       while(parts.length&&parts[0]==='')parts.shift();while(parts.length&&parts[parts.length-1]==='')parts.pop();if(!parts.length)parts=[''];
       lines.push(indent+prefix+parts[0]);
       parts.slice(1).forEach(function(line){lines.push(indent+' '.repeat(prefix.length)+line);});
-      nested.forEach(function(child){lines.push(_richListToMarkdown(child,depth+1));});
+      nested.forEach(function(child){lines.push(_richListToMarkdown(child,depth+1).replace(/\n+$/,''));});
     });
     return lines.join('\n')+'\n';
   }
@@ -13246,7 +13254,15 @@ window.handleImportFile = function(event) {
     var rootChildren=Array.prototype.slice.call(container.childNodes||[]);
     rootChildren.forEach(function(node,index){
       var value=_richMarkerBeforeChild(container,node,index)+_richNodeToMarkdown(node),tag=node.nodeType===1?node.tagName:'';
-      if(value&&(tag==='UL'||tag==='OL')&&/^(P|DIV|H[1-6])$/.test(previousTag))out=out.replace(/\n+$/,'')+'\n'+value.replace(/^\n+/,'');
+      // A non-1 ordered list cannot interrupt a paragraph in CommonMark. This
+      // occurs when an empty item in the middle of an ordered list is exited:
+      // the tail remains an <ol start="N"> after the inserted paragraph. Keep
+      // a blank line there so the next render does not absorb "N. ..." into
+      // the paragraph. Lists starting at 1 retain the compact existing form.
+      if(value&&(tag==='UL'||tag==='OL')&&/^(P|DIV|H[1-6])$/.test(previousTag)){
+        var orderedContinuation=tag==='OL'&&parseInt(node.getAttribute('start')||'1',10)!==1;
+        out=out.replace(/\n+$/,'')+(orderedContinuation?'\n\n':'\n')+value.replace(/^\n+/,'');
+      }
       else if(value&&(previousTag==='UL'||previousTag==='OL')&&/^(P|DIV|H[1-6])$/.test(tag))out=out.replace(/\n+$/,'')+'\n\n'+value.replace(/^\n+/,'');
       else out+=value;
       if(tag)previousTag=tag;
@@ -13689,16 +13705,74 @@ window.handleImportFile = function(event) {
     var marker=_richTextBeforeCaret(state.block,state.range),match=marker.match(/^```\s*([\w+-]*)$/);if(!match||marker!==String(state.block.textContent||'').trim())return false;
     var doc=container.ownerDocument||document,pre=doc.createElement('pre'),code=doc.createElement('code'),text=_richStableEmptyText(doc);if(match[1])code.className='language-'+match[1];code.appendChild(text);pre.appendChild(code);return _replaceRichBlock(state.block,pre,text,1);
   }
+  function _changeRichListItemLevel(container,li,outdent){
+    if(!container||!li||!li.parentNode)return false;var list=li.parentNode;if(list.tagName!=='UL'&&list.tagName!=='OL')return false;var doc=container.ownerDocument||document,selection=doc.getSelection&&doc.getSelection(),savedNode=selection&&li.contains(selection.focusNode)?selection.focusNode:null,savedOffset=savedNode?selection.focusOffset:0;
+    if(outdent){
+      var parentItem=list.parentNode;if(!parentItem||parentItem.tagName!=='LI')return false;var outerList=parentItem.parentNode;if(!outerList||(outerList.tagName!=='UL'&&outerList.tagName!=='OL'))return false;
+      outerList.insertBefore(li,parentItem.nextSibling);if(!list.querySelector(':scope > li'))list.remove();
+    }else{
+      var previous=li.previousElementSibling;if(!previous||previous.tagName!=='LI')return false;var nested=null;
+      Array.prototype.forEach.call(previous.children||[],function(child){if(!nested&&child.tagName===list.tagName)nested=child;});
+      if(!nested){nested=list.cloneNode(false);nested.removeAttribute('id');nested.removeAttribute('start');nested.removeAttribute('reversed');previous.appendChild(nested);}nested.appendChild(li);
+    }
+    container.querySelectorAll('.rich-edit-target').forEach(function(node){node.classList.remove('rich-edit-target');});li.classList.add('rich-edit-target');_retainRichCaretFocus(container);if(savedNode&&selection&&li.contains(savedNode)){var restored=doc.createRange(),maxOffset=savedNode.nodeType===3?String(savedNode.nodeValue||'').length:savedNode.childNodes.length;restored.setStart(savedNode,Math.min(savedOffset,maxOffset));restored.collapse(true);selection.removeAllRanges();selection.addRange(restored);}try{li.scrollIntoView({block:'nearest',inline:'nearest'});}catch(e){}
+    container.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:outdent?'formatOutdent':'formatIndent',data:null}));return true;
+  }
   function _handleRichListEnter(container,li){
     if(!container||!li||!li.parentNode)return false;var doc=container.ownerDocument||document,list=li.parentNode,selection=doc.getSelection(),range=selection&&selection.rangeCount&&selection.getRangeAt(0);if(!range||!li.contains(range.startContainer))return false;
+    // Enter replaces a selection before applying list semantics, matching
+    // desktop editors instead of moving the selected text into the next item.
+    if(!range.collapsed){range.deleteContents();range.collapse(true);selection.removeAllRanges();selection.addRange(range);}
     if(_richListItemIsEmpty(li)){
-      var paragraph=doc.createElement('p'),paragraphCaret=doc.createTextNode('\u200B');paragraph.appendChild(paragraphCaret);paragraph.appendChild(doc.createElement('br'));list.parentNode.insertBefore(paragraph,list.nextSibling);li.remove();if(!list.querySelector(':scope > li'))list.remove();_placeRichTextCaret(paragraphCaret,1);
+      // An empty nested item first moves back one list level, matching desktop
+      // editors. A subsequent Enter at the top level exits the list entirely.
+      if(list.parentNode&&list.parentNode.tagName==='LI')return _changeRichListItemLevel(container,li,true);
+      var items=Array.prototype.filter.call(list.children||[],function(item){return item.tagName==='LI';}),itemIndex=items.indexOf(li),trailingItems=itemIndex>=0?items.slice(itemIndex+1):[],parent=list.parentNode;
+      var paragraph=doc.createElement('p'),paragraphCaret=doc.createTextNode('\u200B');paragraph.className='rich-edit-target';paragraph.appendChild(paragraphCaret);paragraph.appendChild(doc.createElement('br'));
+      // Exiting a blank item in the middle splits the list at the caret. The
+      // old implementation appended the paragraph after the complete list,
+      // which looked like a jump to the end of a long article. Keep following
+      // items in a second list after the new paragraph, as Word/Typora do.
+      var trailingList=null;if(trailingItems.length){trailingList=list.cloneNode(false);trailingList.removeAttribute('id');trailingItems.forEach(function(item){trailingList.appendChild(item);});if(trailingList.tagName==='OL'&&!trailingList.hasAttribute('reversed')){var originalStart=parseInt(list.getAttribute('start')||'1',10)||1,tailStart=originalStart+Math.max(0,itemIndex);if(tailStart===1)trailingList.removeAttribute('start');else trailingList.setAttribute('start',String(tailStart));}}
+      li.remove();var headRemains=!!list.querySelector(':scope > li');if(headRemains)parent.insertBefore(paragraph,list.nextSibling);else{parent.insertBefore(paragraph,list);list.remove();}if(trailingList)parent.insertBefore(trailingList,paragraph.nextSibling);_placeRichTextCaret(paragraphCaret,1);try{paragraph.scrollIntoView({block:'nearest',inline:'nearest'});}catch(e){}
     }else{
-      var tail=range.cloneRange();tail.setEnd(li,li.childNodes.length);var fragment=tail.extractContents(),next=doc.createElement('li');next.className=li.className;
+      var prefix=range.cloneRange();prefix.selectNodeContents(li);prefix.setEnd(range.startContainer,range.startOffset);var prefixFragment=prefix.cloneContents(),prefixProbe=prefixFragment.cloneNode(true);prefixProbe.querySelectorAll&&prefixProbe.querySelectorAll('input[type="checkbox"],br,.md-caret-anchor').forEach(function(node){node.remove();});var atItemStart=!String(prefixProbe.textContent||'').replace(/[\s\u200B]/g,'');
+      var next=doc.createElement('li');next.className=li.className;li.classList.remove('rich-edit-target');next.classList.remove('rich-edit-target');next.classList.add('rich-edit-target');
       var checkbox=li.querySelector(':scope > input[type="checkbox"]');if(checkbox){var nextBox=checkbox.cloneNode(true);nextBox.checked=false;next.appendChild(nextBox);next.appendChild(doc.createTextNode(' '));}
-      var caretNode=doc.createTextNode('\u200B');next.appendChild(caretNode);next.appendChild(fragment);if(!String(next.textContent||'').replace(/[\s\u200B]/g,''))next.appendChild(doc.createElement('br'));list.insertBefore(next,li.nextSibling);_placeRichTextCaret(caretNode,1);
+      var caretNode=doc.createTextNode('\u200B');next.appendChild(caretNode);
+      // At the beginning of a non-empty item, Enter inserts a blank item above
+      // and leaves the original content intact. In the middle/end it splits at
+      // the caret or creates the usual empty following item.
+      if(atItemStart){next.appendChild(doc.createElement('br'));list.insertBefore(next,li);_placeRichTextCaret(caretNode,1);}
+      else{
+      var tail=range.cloneRange();tail.setEnd(li,li.childNodes.length);var fragment=tail.extractContents();
+      // Chromium leaves the empty-item placeholder <br> behind after text is
+      // entered. Moving that placeholder into every following item makes the
+      // rendered list gain one visible blank line on each Enter. An empty tail
+      // is structural, not a user-authored soft break, so discard its zero-width
+      // and <br> placeholders before creating exactly one fresh empty item.
+      var tailProbe=fragment.cloneNode(true);tailProbe.querySelectorAll&&tailProbe.querySelectorAll('input[type="checkbox"],br,.md-caret-anchor').forEach(function(node){node.remove();});
+      if(!String(tailProbe.textContent||'').replace(/[\s\u200B]/g,'')){
+        fragment.querySelectorAll&&fragment.querySelectorAll('br,.md-caret-anchor').forEach(function(node){node.remove();});
+        Array.prototype.slice.call(fragment.childNodes||[]).forEach(function(node){if(node.nodeType===3&&!String(node.nodeValue||'').replace(/[\s\u200B]/g,''))node.remove();});
+      }
+      next.appendChild(fragment);if(!String(next.textContent||'').replace(/[\s\u200B]/g,''))next.appendChild(doc.createElement('br'));list.insertBefore(next,li.nextSibling);_placeRichTextCaret(caretNode,1);
+      }
     }
     container.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertParagraph',data:null}));return true;
+  }
+  function _removeRichTaskMarkerAtCaret(container,key){
+    if(!container||!/^(Backspace|Delete)$/.test(String(key||'')))return false;
+    var doc=container.ownerDocument||document,selection=doc.getSelection&&doc.getSelection();if(!selection||!selection.rangeCount||!selection.isCollapsed)return false;
+    var focus=selection.focusNode,node=focus&&(focus.nodeType===1?focus:focus.parentElement),li=node&&node.closest&&node.closest('li');if(!li||!container.contains(li))return false;
+    var checkbox=li.querySelector(':scope > input[type="checkbox"]');if(!checkbox)return false;
+    var firstText=null;for(var i=0;i<li.childNodes.length;i++){if(li.childNodes[i].nodeType===3){firstText=li.childNodes[i];break;}}
+    var atMarker=key==='Backspace'&&((focus===firstText&&selection.focusOffset<=1)||(focus===li&&selection.focusOffset<=2));
+    if(key==='Delete')atMarker=(focus===li&&selection.focusOffset===0)||(focus===firstText&&selection.focusOffset===0);
+    if(!atMarker)return false;
+    checkbox.remove();li.classList.remove('task-list-item','contains-task-list');
+    if(firstText){firstText.nodeValue=String(firstText.nodeValue||'').replace(/^ /,'');_placeRichTextCaret(firstText,0);}else{firstText=_richStableEmptyText(doc);li.insertBefore(firstText,li.firstChild);_placeRichTextCaret(firstText,1);}
+    container.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:key==='Delete'?'deleteContentForward':'deleteContentBackward',data:null}));return true;
   }
   function _prepareRichFormulaNodes(root){
     if(!root||!root.querySelectorAll)return;var nodes=[];if(root.matches&&root.matches('.katex,.katex-display,.math-fallback'))nodes.push(root);nodes=nodes.concat(Array.prototype.slice.call(root.querySelectorAll('.katex,.katex-display,.math-fallback')));
@@ -13738,7 +13812,7 @@ window.handleImportFile = function(event) {
       if(id)_patchNotePreviewSurfaces(container,patch,source,id);
       else _richPreviewEditors.filter(_liveRichPreviewEditor).forEach(function(target){if(target!==container&&target._wfRichSource===source)_applyRichBlockPatch(target,patch,source,'');});
     }
-    function markTarget(target){container.querySelectorAll('.rich-edit-target').forEach(function(node){node.classList.remove('rich-edit-target');});if(!target||!target.closest)return;var editable=target.closest('h1,h2,h3,h4,h5,h6,p,li,td,th,blockquote,pre,code,strong,em,del,mark,u,sup,sub,.md-comment,a');if(editable&&container.contains(editable)&&!_richFormulaNode(container,editable))editable.classList.add('rich-edit-target');}
+    function markTarget(target){container.querySelectorAll('.rich-edit-target').forEach(function(node){node.classList.remove('rich-edit-target');});if(!target||!target.closest)return;var editable=target.closest('li')||target.closest('h1,h2,h3,h4,h5,h6,p,td,th,blockquote,pre,code,strong,em,del,mark,u,sup,sub,.md-comment,a');if(editable&&container.contains(editable)&&!_richFormulaNode(container,editable))editable.classList.add('rich-edit-target');}
     var pendingEvent=null,completedFormatPending=false;
     function richDelay(){var source=container._wfRichSource,length=source?String(source.value||'').length:(container._wfRichTextLength||0),delay;if(!length){length=String(container.textContent||'').length;container._wfRichTextLength=length;}delay=length>12000?{trail:240,max:900}:length>5000?{trail:180,max:650}:length>1800?{trail:105,max:330}:{trail:72,max:240};delay.length=length;return delay;}
     function flushQueuedRichEdit(mode){
@@ -13805,9 +13879,10 @@ window.handleImportFile = function(event) {
     container.addEventListener('keydown',function(ev){
       _markWorkflowEditorActivity();
       if(composing||ev.isComposing||ev.keyCode===229)return;
-      prepareRichHandoff();
       var node=_richFormulaNode(container,ev.target);if(node&&(ev.key==='Enter'||ev.key===' ')){ev.preventDefault();_openRichFormulaEditor(container,node);return;}
       if(ev.target&&ev.target.closest&&ev.target.closest('.formula-source-editor'))return;
+      if((ev.key==='Backspace'||ev.key==='Delete')&&!ev.ctrlKey&&!ev.metaKey&&!ev.altKey&&_removeRichTaskMarkerAtCaret(container,ev.key)){ev.preventDefault();return;}
+      if(ev.key==='Tab'&&!ev.ctrlKey&&!ev.metaKey&&!ev.altKey){var tabSelection=(container.ownerDocument||document).getSelection(),tabFocus=tabSelection&&tabSelection.focusNode,tabItem=tabFocus&&(tabFocus.nodeType===1?tabFocus:tabFocus.parentElement);tabItem=tabItem&&tabItem.closest&&tabItem.closest('li');if(tabItem&&container.contains(tabItem)&&_changeRichListItemLevel(container,tabItem,ev.shiftKey)){ev.preventDefault();return;}}
       if(ev.key===' '&&!ev.ctrlKey&&!ev.metaKey&&!ev.altKey&&_applyRichSpaceInputRule(container)){ev.preventDefault();container.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertReplacementText',data:' '}));return;}
       if(ev.key==='Enter'&&ev.shiftKey&&!ev.ctrlKey&&!ev.metaKey&&!ev.altKey){ev.preventDefault();if(_insertRichSoftBreak(container))richSetTimer(function(){queue({inputType:'insertLineBreak',data:'\n',target:container});},0);return;}
       if(ev.key==='Enter'&&!ev.shiftKey&&!ev.ctrlKey&&!ev.metaKey&&!ev.altKey){if(_applyRichEnterInputRule(container)){ev.preventDefault();container.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertReplacementText',data:'\n'}));return;}var selection=(container.ownerDocument||document).getSelection(),focus=selection&&selection.focusNode,li=focus&&(focus.nodeType===1?focus:focus.parentElement);li=li&&li.closest&&li.closest('li');if(li&&container.contains(li)){ev.preventDefault();_handleRichListEnter(container,li);return;}}
@@ -13924,16 +13999,19 @@ window.handleImportFile = function(event) {
   function _applyPopoutThemeTo(targetWindow){
     if(!_liveMdPopoutSlots().some(function(slot){return slot.window===targetWindow;}))return;
     try{
-      var sourceRoot=getComputedStyle(document.documentElement), sourceBody=getComputedStyle(document.body);
+      var sourceRoot=getComputedStyle(document.documentElement), sourceBody=getComputedStyle(document.body), sourceContent=document.querySelector('.md-preview-body,.note-reading-preview,.md-float-body');
+      var sourceContentStyle=sourceContent&&getComputedStyle(sourceContent);
       var targetRoot=targetWindow.document.documentElement, targetBody=targetWindow.document.body;
       _mdPopoutThemeVars.forEach(function(name){targetRoot.style.setProperty(name,sourceRoot.getPropertyValue(name));});
       targetRoot.classList.toggle('dark',document.documentElement.classList.contains('dark'));
       targetRoot.style.colorScheme=document.documentElement.classList.contains('dark')?'dark':'light';
       if(targetBody){
-        targetBody.style.fontFamily=sourceBody.fontFamily;
-        targetBody.style.fontSize=sourceBody.fontSize;
+        targetBody.style.fontFamily=sourceContentStyle?sourceContentStyle.fontFamily:(sourceRoot.getPropertyValue('--app-font-mixed')||sourceBody.fontFamily);
+        targetBody.style.fontSize=sourceContentStyle?sourceContentStyle.fontSize:(sourceRoot.getPropertyValue('--app-content-font-size')||sourceBody.fontSize);
         targetBody.style.fontWeight=sourceBody.fontWeight;
       }
+      var sourceFaces=document.getElementById('workflowScriptFontFaces'),targetFaces=targetWindow.document.getElementById('workflowScriptFontFaces');
+      if(sourceFaces){if(!targetFaces){targetFaces=targetWindow.document.createElement('style');targetFaces.id='workflowScriptFontFaces';targetWindow.document.head.appendChild(targetFaces);}if(targetFaces.textContent!==sourceFaces.textContent)targetFaces.textContent=sourceFaces.textContent;}
       var sourceHeader=document.querySelector('.header'), targetHeader=targetWindow.document.getElementById('previewTitle');
       if(sourceHeader&&targetHeader){
         var sourceHeaderStyle=getComputedStyle(sourceHeader);
@@ -13999,7 +14077,7 @@ window.handleImportFile = function(event) {
       'main{height:calc(100vh - 76px);margin:14px;padding:16px 18px 32px;overflow:auto;overscroll-behavior:contain;scroll-padding-block:16px 38px;line-height:1.75;color:var(--text);background:var(--surface);border:2px solid var(--success-border);border-left:4px solid var(--success);border-radius:var(--radius);box-shadow:var(--shadow);word-break:break-word;overflow-wrap:anywhere;scrollbar-gutter:stable;outline:none;caret-color:var(--primary)}main:focus{background:color-mix(in srgb,var(--success-bg) 42%,var(--surface));box-shadow:var(--shadow),inset 0 0 0 2px color-mix(in srgb,var(--success) 30%,transparent)}'+
       '#previewResizeGrip{position:fixed;right:4px;bottom:4px;z-index:8;width:38px;height:38px;display:flex;align-items:center;justify-content:center;padding:0;border:1px solid var(--success-border);border-radius:10px;background:color-mix(in srgb,var(--surface) 90%,transparent);color:var(--success);box-shadow:var(--shadow-md);cursor:nwse-resize;touch-action:none;opacity:.88}#previewResizeGrip:hover,#previewResizeGrip:focus-visible,#previewResizeGrip.is-resizing{opacity:1;background:var(--success-bg);outline:2px solid color-mix(in srgb,var(--success) 24%,transparent)}#previewResizeGrip.is-resizing{transform:scale(1.06)}#previewResizeGrip svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}'+
       'main>*{max-width:100%}p{margin:0 0 7px}p:last-child{margin-bottom:0}h1,h2,h3,h4,h5,h6{margin:12px 0 7px;color:var(--text);line-height:1.35}h1:first-child,h2:first-child,h3:first-child{margin-top:0}ul,ol{margin:5px 0 8px;padding-left:24px;list-style-position:outside}li{margin:2px 0;padding-left:2px}blockquote{margin:8px 0;padding:7px 11px;border-left:3px solid var(--primary);border-radius:var(--radius-xs);background:var(--surface2);color:var(--text2)}mark{padding:0 .12em;border-radius:3px;background:color-mix(in srgb,#facc15 44%,var(--surface));color:inherit}u{text-decoration-color:color-mix(in srgb,var(--primary) 72%,currentColor);text-decoration-thickness:1.5px;text-underline-offset:.16em}.md-comment{display:inline;padding:.08em .34em;border:1px dashed var(--border);border-radius:4px;background:var(--surface2);color:var(--text3);font-size:.92em}.md-callout{background:var(--primary-bg);color:var(--text)}.md-callout-label{color:var(--primary);font-size:.86em;letter-spacing:.03em}hr{border:0;border-top:1px solid var(--border);margin:10px 0}a{color:var(--primary)}'+
-      'input[type=checkbox]{width:16px;height:16px;margin-right:6px;vertical-align:-2px;accent-color:var(--primary);cursor:pointer}code{padding:1px 4px;border-radius:4px;background:var(--surface2);color:var(--text);font-family:"Fira Code","Consolas",monospace;font-size:.9em}pre{max-width:100%;margin:8px 0;padding:11px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid var(--border);border-radius:var(--radius-xs);background:var(--surface2)}pre code{padding:0;border:0;background:transparent}table{display:block;width:100%;max-width:100%;margin:8px 0;overflow-x:auto;border-collapse:collapse}td,th{padding:5px 7px;border:1px solid var(--border);text-align:left}th{background:var(--surface2)}.rich-edit-target{outline:1px dashed color-mix(in srgb,var(--success) 55%,transparent);outline-offset:3px;background:color-mix(in srgb,var(--success-bg) 54%,transparent);border-radius:3px}@keyframes mdPositionPulse{0%{opacity:.15;transform:scaleY(.72)}18%{opacity:1;transform:scaleY(1)}72%{opacity:.9}100%{opacity:0;transform:scaleY(1)}}.md-caret-anchor{display:inline-block;width:0;height:1.05em;border-left:2px solid var(--success);margin-left:-1px;overflow:visible;vertical-align:text-bottom;pointer-events:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--success) 14%,transparent);animation:mdPositionPulse 1.05s ease-out both}.katex,.katex-display,.math-fallback{cursor:pointer;font-size:var(--app-font-size-math)!important}.rich-formula-active{display:none!important}.formula-source-editor{display:inline;max-width:100%;margin:0 2px;vertical-align:baseline}.formula-source-editor.display{display:flex;width:100%;margin:7px 0}.formula-source-input{display:inline-block;min-width:5ch;max-width:100%;min-height:1.8em;padding:2px 6px;border:1px solid var(--success-border);border-bottom:2px solid var(--success);border-radius:var(--radius-xs);outline:none;background:var(--success-bg);color:var(--text);box-shadow:none;font-family:var(--app-font-math);font-size:var(--app-font-size-math);line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;vertical-align:middle}.formula-source-editor.display .formula-source-input{display:block;width:100%;max-width:100%;text-align:left}.formula-source-input:focus{background:color-mix(in srgb,var(--success-bg) 76%,var(--surface));box-shadow:0 0 0 2px color-mix(in srgb,var(--success) 22%,transparent)}.katex .katex-mathml{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}.math-fallback{padding:0 4px;color:var(--text);background:var(--surface2);border:1px solid var(--border);border-radius:4px;font-family:var(--app-font-math);font-style:italic}.math-fallback.display{display:block;margin:7px 0;padding:8px;text-align:center}.preview-empty{color:var(--text3)}'+
+      'input[type=checkbox]{width:16px;height:16px;margin-right:6px;vertical-align:-2px;accent-color:var(--primary);cursor:pointer}code{padding:1px 4px;border-radius:4px;background:var(--surface2);color:var(--text);font-family:"Fira Code","Consolas",monospace;font-size:.9em}pre{max-width:100%;margin:8px 0;padding:11px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid var(--border);border-radius:var(--radius-xs);background:var(--surface2)}pre code{padding:0;border:0;background:transparent}table{display:block;width:100%;max-width:100%;margin:8px 0;overflow-x:auto;border-collapse:collapse}td,th{padding:5px 7px;border:1px solid var(--border);text-align:left}th{background:var(--surface2)}.rich-edit-target{outline:1px dashed color-mix(in srgb,var(--success) 55%,transparent);outline-offset:4px;background:color-mix(in srgb,var(--success-bg) 54%,transparent);border-radius:5px;scroll-margin-block:16px}@keyframes mdPositionPulse{0%{opacity:.15;transform:scaleY(.72)}18%{opacity:1;transform:scaleY(1)}72%{opacity:.9}100%{opacity:0;transform:scaleY(1)}}.md-caret-anchor{display:inline-block;width:0;height:1.05em;border-left:2px solid var(--success);margin-left:-1px;overflow:visible;vertical-align:text-bottom;pointer-events:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--success) 14%,transparent);animation:mdPositionPulse 1.05s ease-out both}.katex,.katex-display,.math-fallback{cursor:pointer;font-size:var(--app-font-size-math)!important}.rich-formula-active{display:none!important}.formula-source-editor{display:inline;max-width:100%;margin:0 2px;vertical-align:baseline}.formula-source-editor.display{display:flex;width:100%;margin:7px 0}.formula-source-input{display:inline-block;min-width:5ch;max-width:100%;min-height:1.8em;padding:2px 6px;border:1px solid var(--success-border);border-bottom:2px solid var(--success);border-radius:var(--radius-xs);outline:none;background:var(--success-bg);color:var(--text);box-shadow:none;font-family:var(--app-font-math);font-size:var(--app-font-size-math);line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;vertical-align:middle}.formula-source-editor.display .formula-source-input{display:block;width:100%;max-width:100%;text-align:left}.formula-source-input:focus{background:color-mix(in srgb,var(--success-bg) 76%,var(--surface));box-shadow:0 0 0 2px color-mix(in srgb,var(--success) 22%,transparent)}.katex .katex-mathml{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}.math-fallback{padding:0 4px;color:var(--text);background:var(--surface2);border:1px solid var(--border);border-radius:4px;font-family:var(--app-font-math);font-style:italic}.math-fallback.display{display:block;margin:7px 0;padding:8px;text-align:center}.preview-empty{color:var(--text3)}'+
       '@media(max-width:520px){header{height:44px;padding:0 12px}main{height:calc(100vh - 60px);margin:8px;padding:12px 34px 12px 12px;border-radius:var(--radius-sm)}}'+
       '</style></head><body><header id="previewTitle">全文渲染预览 · '+esc(title||'实时预览')+'</header><main id="previewBody"></main><button id="previewResizeGrip" type="button" title="按住并拖动调节预览窗口大小" aria-label="拖动调节预览窗口大小"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 19h10V9M14 19l5-5"/></svg></button></body></html>');
     target.document.close();
@@ -14423,9 +14501,9 @@ window.handleImportFile = function(event) {
 
 <!--
 workflow_tool build
-version: 2026.09.15.4
-sourceSha256: f914c1d2c334a607901285ee54336906d949dffc71e321fb29a1d0ca9954b17e
-configSha256: a0174bd72d8d841b41da37e6ee33ed77e530f6766d5601369c153c491cc65e35
+version: 2026.09.19.3
+sourceSha256: bf9b969f3df852888f05f33acfb5dfabb360638e84cfbd025acaebe8ae366be6
+configSha256: 6203a90d677f9fb99ec74eb78e2ca14e4302a709b9b53d0b64af878fd6cce4c1
 coreSha256: e11c59692e6777662a581daa1e1485651eb47cbcfa655aba17a2c0e79f961cfe
 appSha256: 2f24aa03f02a5b051051aad95e186b81abef342d0af6958c66b79307c3dc0db3
 exportSha256: 13ad148412f079c37fed48892779a4c15a69b986b274bf432dd0506e64c0fa2a
@@ -14434,7 +14512,7 @@ historySha256: d2d96792bc489871e1e12fdf2483793e1781fec5835bae872974bc6b66894a79
 tasksSha256: cf7b1e78be5c87a40720433883aa80f4c8e36fe389400e217af9bb744ad8a590
 researchSha256: 7f18bf83e2678ea03658117f346225a9af8304668c9f622903770f0292e2c5a8
 stylesSha256: 438038ffa6949e8cb705df0dbad8d9a17ed29abd17f0c072fc70f88118cf55be
-builtAt: 2026-09-15T10:37:52.091Z
+builtAt: 2026-09-19T15:02:01.236Z
 -->
 
 <!-- Third-party notice: html2canvas/LICENSE
