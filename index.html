@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <meta name="theme-color" content="#4f46e5">
-<meta name="workflow-version" content="2026.09.19.3">
+<meta name="workflow-version" content="2026.09.20.1">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -422,7 +422,9 @@ button:focus-visible,[role="button"]:focus-visible,a:focus-visible,input:focus-v
 /* ===== Color Themes ===== */
 .color-panel{position:relative;z-index:500;width:min(330px,calc(100vw - 16px));max-height:calc(100vh - var(--header-height) - 12px);overflow:auto;overscroll-behavior:contain;
   background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-  padding:12px;box-shadow:var(--shadow-lg);flex-direction:column;gap:10px;color:var(--text);scrollbar-gutter:stable}
+  padding:12px;box-shadow:var(--shadow-lg);flex-direction:column;gap:10px;color:var(--text);scrollbar-gutter:stable;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;font-size:13px;line-height:1.5}
+.color-panel>*{flex:0 0 auto}
 #colorPanelContainer{position:absolute;right:8px;top:calc(100% + 7px);z-index:500}
 .color-panel-row{display:flex;gap:6px;justify-content:center}
 .color-chip{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2.5px solid transparent;
@@ -445,6 +447,7 @@ button:focus-visible,[role="button"]:focus-visible,a:focus-visible,input:focus-v
 .appearance-preview{display:flex;align-items:center;gap:8px;min-width:0;padding:7px 9px;border:1px solid var(--border-light);border-radius:var(--radius-xs);background:var(--surface2)}
 .appearance-swatch{width:28px;height:28px;border-radius:7px;border:1px solid color-mix(in srgb,var(--text) 16%,transparent);flex:0 0 auto}.appearance-preview-text{min-width:0;font-size:11px;color:var(--text3);line-height:1.35}.appearance-preview-text b{display:block;color:var(--text);font-size:12px}
 .appearance-actions{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}.appearance-mini-btn{min-height:28px;padding:4px 9px;border:1px solid var(--border);border-radius:999px;background:var(--surface);color:var(--text2);font:600 11px/1 inherit;cursor:pointer}.appearance-mini-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-bg)}
+html.appearance-panel-open :is(.fab,.fab-quick,.fab-notes){opacity:0!important;visibility:hidden;pointer-events:none;transition:none!important}
 html.wf-custom-primary.wf-custom-primary .header{background:var(--custom-header-gradient)!important}
 html.appearance-tuning body,html.appearance-tuning .header,html.appearance-tuning .tabs,html.appearance-tuning .card,html.appearance-tuning .btn,html.appearance-tuning input,html.appearance-tuning textarea,html.appearance-tuning select{transition:none!important}
 .md-preview-body,.note-reading-preview,.md-float-body{font-family:var(--app-font-mixed,var(--app-font))!important;font-size:var(--app-content-font-size,var(--app-font-size))!important}
@@ -1344,7 +1347,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   else root.WorkflowConfig = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
   return {
-    appVersion: '2026.09.19.3',
+    appVersion: '2026.09.20.1',
     schemaVersion: 9,
     typeLabels: {
       general: '通用',
@@ -2273,8 +2276,8 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   </div>
   <div class="work-time-card today-work-time" id="workTimeCard">
     <div class="work-time-head"><span class="work-time-icon" aria-hidden="true">◷</span><div><div class="work-time-title">工作时间</div><div class="work-time-sub">回看昨天的投入，为今天留出可信的时间边界</div></div></div>
-    <div class="work-time-item"><label for="yesterdayActualHours">昨日实际</label><div class="work-time-input"><input type="number" id="yesterdayActualHours" min="0" max="24" step="0.5" placeholder="6.5" oninput="saveWorkTime(this)"><span class="work-time-unit">小时</span></div></div>
-    <div class="work-time-item"><label for="todayExpectedHours">今日预期</label><div class="work-time-input"><input type="number" id="todayExpectedHours" min="0" max="24" step="0.5" placeholder="8" oninput="saveWorkTime(this)"><span class="work-time-unit">小时</span></div></div>
+    <div class="work-time-item"><label for="yesterdayActualHours">昨日实际</label><div class="work-time-input"><input type="number" id="yesterdayActualHours" min="0" max="24" step="0.5" placeholder="6.5" oninput="saveWorkTime(this)" onchange="normalizeWorkTimeInput(this)"><span class="work-time-unit">小时</span></div></div>
+    <div class="work-time-item"><label for="todayExpectedHours">今日预期</label><div class="work-time-input"><input type="number" id="todayExpectedHours" min="0" max="24" step="0.5" placeholder="8" oninput="saveWorkTime(this)" onchange="normalizeWorkTimeInput(this)"><span class="work-time-unit">小时</span></div></div>
   </div>
 
   <div id="dailyQuote" class="daily-quote"><span class="daily-quote-text" id="dailyQuoteText"></span></div>
@@ -2739,7 +2742,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
     </div>
     <div class="help-section-body"><div class="help-section-inner">
       <p>点击顶部 🎨 打开统一外观面板。字体按中文黑体、中文书写、中文宋体、西文、等宽和通用字体分组，包含微软雅黑、等线、黑体、幼圆、楷体、仿宋、隶书、行书、宋体、华文中宋、Times New Roman、Calibri、Cambria、Arial、Georgia、Garamond、Verdana、Courier New 等；系统未安装时自动使用相近后备字体。</p>
-      <p>正文字号提供 Word 风格常用磅值列表，也可以在 8–36 pt 之间按 0.5 pt 精确输入。“分类排版”可分别选择中文、英文/数字和公式的字体与字号；它只调整你输入和导出的内容，不会把导航、按钮、标签等网页界面一起放大。混排正文、公式、双屏、置顶以及 PNG/PDF 导出会同步继承。移动端输入框仍保留防止浏览器自动放大的安全字号。</p>
+      <p>正文字号提供 Word 风格常用磅值列表，也可以在 8–36 pt 之间按 0.5 pt 精确输入。“分类排版”可分别选择中文、英文/数字和公式的字体与字号；它只调整你输入和导出的内容，不会把导航、按钮、标签等网页界面一起放大。外观面板本身保持稳定的界面字号并在内部滚动，36 pt 和窄屏下也不会压缩、遮挡后续控件。混排正文、公式、双屏、置顶以及 PNG/PDF 导出会同步继承。移动端输入框仍保留防止浏览器自动放大的安全字号。</p>
       <p>主题色、正文、次级文字、说明文字和弱提示文字都可用 R/G/B 滑杆或精确数值自由调整。浅色和深色主题分别记忆，切换主题不会互相覆盖；对比度低于建议值时面板会提示，但仍保留你的选择。</p>
       <p>拖动颜色或连续调整字号时更新会按浏览器动画帧合并，停止约 0.22 秒后才写入本地；中文、英文与公式字号可独立设置，调大中文不会反向缩小或连带改变英文，双屏和置顶预览保持相同排版。恢复外观设置不会影响任务或历史。自定义颜色、字体和字号会进入 JSON、Drive 与 GitHub 的备份数据。</p>
     </div></div>
@@ -2891,7 +2894,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
       <p><b>导出格式说明：</b></p>
       <ul style="margin:4px 0 0 16px;padding:0;font-size:12px;color:var(--text2)">
         <li><b>预览</b>：先查看最终卡片、公式和全部区块；窄屏中可在预览区域内滚动</li>
-        <li><b>PNG</b>：高清图片，匹配当前深浅模式和配色，Markdown 与 LaTeX 按网页内容渲染</li>
+        <li><b>PNG</b>：高清图片，匹配当前深浅模式和配色，Markdown 与 LaTeX 按网页内容渲染；若完整内容会超过浏览器的安全画布上限，会明确提示改用 PDF 或 Markdown，不会静默截断底部</li>
         <li><b>PDF</b>：使用与 PNG 相同的完整卡片和当前主题，新窗口打开后选择“另存为 PDF”</li>
         <li><b>Markdown</b>：今日、历史单日和全部历史会包含完整日记录；研究项目详情包含当前地图、关联任务结果和完整演化时间线；月任务和全部历史等纯文本目标不生成图片</li>
         <li><b>JSON</b>：完整数据备份，用于导入恢复</li>
@@ -2904,7 +2907,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
         <button class="btn btn-secondary btn-sm" onclick="openDataHealthModal()">数据健康检查</button>
         <button class="btn btn-secondary btn-sm" onclick="openStorageManagerModal()">存储与缓存管理</button>
       </div>
-      <p style="color:var(--text3);font-size:12px;margin-top:8px">最佳实践：配置 GitHub 或 Drive 同步，数据自动备份到云端；重大编辑和云端恢复前会保留最近 5 次本地快照，同时定期用 💾 导出 JSON 作为离线备份。</p>
+      <p style="color:var(--text3);font-size:12px;margin-top:8px">最佳实践：配置 GitHub 或 Drive 同步，数据自动备份到云端；重大编辑和云端恢复前会保留最近 5 次本地快照，同时定期用 💾 导出 JSON 作为离线备份。存储管理会同时显示工作流数据和浏览器估算的整站占用；空间不足或站点存储被禁用时，顶部会明确显示“未保存 / 快照失败”，整包导入会撤销已经写入的部分并恢复原数据。</p>
     </div></div>
   </div>
 
@@ -3399,7 +3402,7 @@ var _githubSaveInProgress = false;
 var _githubSaveQueued = false;
 var _githubQueuedFeedback = false;
 var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 9;
-var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.09.19.3';
+var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.09.20.1';
 var WORKFLOW_KATEX_FONT_RULE='.katex,.math-fallback{font-family:var(--app-font-math)!important}.katex .katex-html{font-family:var(--app-font-math)!important}.katex .katex-html .mord:not(.mathbb):not(.mathcal):not(.mathfrak):not(.amsrm),.katex .katex-html .mord.mathnormal,.katex .katex-html .mord.mathit,.katex .katex-html .mord.mathrm,.katex .katex-html .mord.mathbf,.katex .katex-html .mop:not(.op-symbol):not(.mathbb):not(.mathcal):not(.mathfrak):not(.amsrm),.katex .katex-html .mbin,.katex .katex-html .mrel,.katex .katex-html .mopen,.katex .katex-html .mclose,.katex .katex-html .mpunct,.katex .katex-html .minner,.katex .katex-html .text{font-family:var(--app-font-math)!important;}';
 window.workflowKatexFontStyleHTML=function(){return '<style>'+WORKFLOW_KATEX_FONT_RULE+'</style>';};
 window.workflowKatexStyleHTML=function(){
@@ -3429,6 +3432,60 @@ var _driveSilentRefreshPending = false;
 var _startupCloudReadPending = {drive: false, github: false};
 var _workflowEditorActivityUntil = 0;
 var _cloudChangeVersion = 0, _driveSavedChangeVersion = 0, _githubSavedChangeVersion = 0;
+var _workflowStorageFailure=null,_workflowStorageFailureToastAt=0,_workflowStorageStrict=false,_workflowStorageTransactionDepth=0;
+function _renderWorkflowStorageFailure(){
+  if(!_workflowStorageFailure)return;
+  var wrap=document.getElementById('savedWrap'),text=document.getElementById('savedText'),dot=wrap&&wrap.querySelector('.saved-dot');
+  if(text)text.textContent=_workflowStorageFailure.label;
+  if(dot){dot.style.background='var(--danger)';dot.style.boxShadow='0 0 6px var(--danger)';}
+  if(wrap){wrap.style.opacity='1';wrap.title=_workflowStorageFailure.message;}
+  if(typeof showToast==='function'&&Date.now()-_workflowStorageFailureToastAt>5000){
+    _workflowStorageFailureToastAt=Date.now();showToast(_workflowStorageFailure.message,'warn');
+  }
+}
+function _setWorkflowStorageItem(key,value){
+  try{
+    Storage.prototype.setItem.call(localStorage,String(key),String(value));
+    return true;
+  }catch(error){
+    var quota=error&&(error.name==='QuotaExceededError'||error.code===22||error.code===1014);
+    var storageKey=String(key),core=/^wf_(day_|week_|note_|research_state)/.test(storageKey),snapshot=/^wf_(snapshot_|last_snapshot_at)/.test(storageKey);
+    var label=core?'未保存':snapshot?'快照失败':'设置未保存';
+    var subject=core?'本次更改尚未保存':snapshot?'当前记录不受影响，但自动快照未建立':'这项设置或同步状态未保存';
+    if(!_workflowStorageFailure||_workflowStorageFailure.kind!=='core'||core)_workflowStorageFailure={key:storageKey,name:error&&error.name||'StorageError',time:Date.now(),kind:core?'core':snapshot?'snapshot':'setting',label:label,message:(quota?'本地存储空间已满，':'浏览器拒绝写入本地数据，')+subject+'。请先导出 JSON，再到存储管理归档或清理旧快照。'};
+    setTimeout(_renderWorkflowStorageFailure,0);
+    if(_workflowStorageStrict)throw error;
+    return false;
+  }
+}
+function _clearWorkflowStorageFailure(){
+  _workflowStorageFailure=null;
+  var wrap=document.getElementById('savedWrap'),dot=wrap&&wrap.querySelector('.saved-dot');
+  if(wrap)wrap.removeAttribute('title');
+  if(dot){dot.style.background='';dot.style.boxShadow='';}
+}
+window._setWorkflowStorageItem=_setWorkflowStorageItem;
+window._getWorkflowStorageFailure=function(){return _workflowStorageFailure&&Object.assign({},_workflowStorageFailure);};
+function _runWorkflowStorageTransaction(action){
+  if(_workflowStorageTransactionDepth)return action();
+  var before=[];
+  for(var i=0;i<localStorage.length;i++){var key=localStorage.key(i);if(key!==null)before.push([key,localStorage.getItem(key)]);}
+  _workflowStorageTransactionDepth=1;_workflowStorageStrict=true;
+  try{return action();}
+  catch(error){
+    _workflowStorageStrict=false;
+    try{
+      localStorage.clear();
+      before.forEach(function(entry){originalSetItem.call(localStorage,entry[0],entry[1]);});
+      _workflowStorageFailure={key:'transaction',name:error&&error.name||'StorageError',time:Date.now(),kind:'operation',label:'操作取消',message:'本地存储空间不足或不可写，本次批量操作已取消，原数据已经恢复。'};
+    }catch(rollbackError){
+      _workflowStorageFailure={key:'transaction-rollback',name:rollbackError&&rollbackError.name||'StorageError',time:Date.now(),kind:'core',label:'恢复失败',message:'导入写入失败，且浏览器未能恢复原本地数据。请立即使用之前导出的 JSON 恢复。'};
+    }
+    _renderWorkflowStorageFailure();
+    throw new Error('本地存储空间不足或不可写，操作已取消，原数据已恢复');
+  }finally{_workflowStorageStrict=false;_workflowStorageTransactionDepth=0;}
+}
+window._runWorkflowStorageTransaction=_runWorkflowStorageTransaction;
 try {
   _startupCloudReadPending.drive = localStorage.getItem('google_connected') === '1';
   _startupCloudReadPending.github = !!(localStorage.getItem('gh_repo') && localStorage.getItem('gh_token'));
@@ -3464,7 +3521,7 @@ window._markWorkflowEditorActivity = _markWorkflowEditorActivity;
 function _setSyncStatus(channel, status, message) {
   try {
     var key = 'wf_sync_status_' + channel;
-    localStorage.setItem(key, JSON.stringify({status: status, message: message || '', time: Date.now()}));
+    _setWorkflowStorageItem(key, JSON.stringify({status: status, message: message || '', time: Date.now()}));
     if(status === 'error' && window.WorkflowApp) window.WorkflowApp.logError(localStorage, channel, message);
   } catch(e) {}
 }
@@ -3525,9 +3582,9 @@ function initGoogleDrive() {
         window._driveRefreshAttempted = false;
         // 落盘令牌+过期时间，刷新时直接复用未过期令牌，避免每次刷新都跳转认证
         try {
-          localStorage.setItem('google_access_token', accessToken);
+          _setWorkflowStorageItem('google_access_token', accessToken);
           var _ttl = parseInt(tokenResponse.expires_in || '3600', 10);
-          localStorage.setItem('google_token_expiry', String(Date.now() + _ttl * 1000));
+          _setWorkflowStorageItem('google_token_expiry', String(Date.now() + _ttl * 1000));
         } catch (e) {}
         showSignedIn();
         _ensureDrivePolling();
@@ -3570,7 +3627,7 @@ window.signInGoogle = function() {
 };
 
 function showSignedIn() {
-  localStorage.setItem('google_connected', '1');
+  _setWorkflowStorageItem('google_connected', '1');
   document.getElementById('googleAuthBtn').style.display = 'none';
   document.getElementById('googleSignout').style.display = 'block';
 }
@@ -3641,7 +3698,7 @@ async function loadFromDrive() {
       var previousDriveFileId = localStorage.getItem('drive_file_id') || '';
       driveFileId = searchData.files[0].id;
       if (previousDriveFileId && previousDriveFileId !== driveFileId) _clearSyncBaseline('Drive');
-      localStorage.setItem('drive_file_id', driveFileId);
+      _setWorkflowStorageItem('drive_file_id', driveFileId);
 
       var fileResp = await _fetchWorkflowCloud(
         'https://www.googleapis.com/drive/v3/files/' + driveFileId + '?alt=media',
@@ -3741,9 +3798,9 @@ async function saveToDrive() {
       var result = await resp.json();
       if (!driveFileId) {
         driveFileId = result.id;
-        localStorage.setItem('drive_file_id', driveFileId);
+        _setWorkflowStorageItem('drive_file_id', driveFileId);
       }
-      localStorage.setItem('wf_backup_time', String(Date.now()));
+      _setWorkflowStorageItem('wf_backup_time', String(Date.now()));
       _rememberSyncBaseline('Drive', allData);
       _driveSavedChangeVersion = Math.max(_driveSavedChangeVersion, uploadChangeVersion);
       _setSyncStatus('drive','ok','已保存到 Drive');
@@ -3896,8 +3953,8 @@ function saveGitHubConfig() {
       if (r.status === 200) {
         var previousRepo = localStorage.getItem('gh_repo') || '';
         if (previousRepo && previousRepo !== repo) _clearSyncBaseline('GitHub');
-        localStorage.setItem('gh_repo', repo);
-        localStorage.setItem('gh_token', token);
+        _setWorkflowStorageItem('gh_repo', repo);
+        _setWorkflowStorageItem('gh_token', token);
         document.getElementById('ghConfigBtn').style.display = 'none';
         document.getElementById('ghStatusBadge').style.display = '';
         document.getElementById('ghConfigModal').style.display = 'none';
@@ -4100,10 +4157,10 @@ function _prepareSyncPayload(source) {
 function _rememberSyncBaseline(source, data) {
   var provider = _syncProviderKey(source);
   var revision = data && data._syncRevision ? String(data._syncRevision) : '';
-  localStorage.setItem('wf_sync_revision_' + provider, revision);
+  _setWorkflowStorageItem('wf_sync_revision_' + provider, revision);
   // 记录真正已写到云端的负载；网络请求期间若继续编辑，下一轮会识别为“仅本地更新”，
   // 不能用请求完成时更新过的本地内容冒充远端共同版本。
-  localStorage.setItem('wf_sync_fingerprint_' + provider, _workflowFingerprint(data || {}));
+  _setWorkflowStorageItem('wf_sync_fingerprint_' + provider, _workflowFingerprint(data || {}));
 }
 
 function _clearSyncBaseline(source) {
@@ -4221,7 +4278,7 @@ function _handleRemoteWorkflowData(source, remoteData, remoteTs, afterLocalChoic
   }
   var analysis = _analyzeWorkflowSync(localData, remoteData, 'wf_day_' + localDateStr());
   if (analysis.equal) {
-    if (remoteTs) localStorage.setItem('wf_backup_time', String(remoteTs));
+    if (remoteTs) _setWorkflowStorageItem('wf_backup_time', String(remoteTs));
     _rememberSyncBaseline(source, remoteData);
     _setSyncStatus(source.toLowerCase(), 'ok', silent ? '云端内容一致' : '已连接，云端内容一致');
     return false;
@@ -4234,7 +4291,7 @@ function _handleRemoteWorkflowData(source, remoteData, remoteTs, afterLocalChoic
       finally { _syncReconcileInProgress = false; }
       _refreshWorkflowAfterDataChange();
     }
-    if (remoteTs) localStorage.setItem('wf_backup_time', String(remoteTs));
+    if (remoteTs) _setWorkflowStorageItem('wf_backup_time', String(remoteTs));
     var message = analysis.needsPush ? '已自动保留本地当天内容并准备同步' : (mergedCount ? '已自动接收云端新增内容' : '云端内容一致');
     _setSyncStatus(source.toLowerCase(), 'ok', message);
     if (!silent && mergedCount) showToast(message, 'success');
@@ -4300,7 +4357,7 @@ function _summaryTextForWorkflowData(data) {
 }
 window._summaryTextForWorkflowData = _summaryTextForWorkflowData;
 
-function _applyWorkflowBackupData(data, options) {
+function _unsafeApplyWorkflowBackupData(data, options) {
   options = options || {};
   var split = _splitWorkflowBackupData(data);
   if (options.clear !== false) {
@@ -4313,37 +4370,38 @@ function _applyWorkflowBackupData(data, options) {
     }
     keysToRemove.forEach(function(k) { localStorage.removeItem(k); });
   }
-  Object.keys(split.days).forEach(function(k){ localStorage.setItem(k, typeof split.days[k] === 'string' ? split.days[k] : JSON.stringify(_normalizeDayData(split.days[k]))); });
-  Object.keys(split.weeks).forEach(function(k){ localStorage.setItem(k, typeof split.weeks[k] === 'string' ? split.weeks[k] : JSON.stringify(split.weeks[k])); });
-  Object.keys(split.notes).forEach(function(k){ localStorage.setItem(k, typeof split.notes[k] === 'string' ? split.notes[k] : JSON.stringify(split.notes[k])); });
-  if (split.settings.wf_theme !== undefined) localStorage.setItem('wf_theme', split.settings.wf_theme || 'light');
-  if (split.settings.theme !== undefined) localStorage.setItem('wf_theme', split.settings.theme || 'light');
-  if (split.settings.wf_color_theme !== undefined) localStorage.setItem('wf_color_theme', split.settings.wf_color_theme || '');
-  if (split.settings.colorTheme !== undefined) localStorage.setItem('wf_color_theme', split.settings.colorTheme || '');
-  if (split.settings.wf_color_custom !== undefined) localStorage.setItem('wf_color_custom', typeof split.settings.wf_color_custom === 'string' ? split.settings.wf_color_custom : JSON.stringify(split.settings.wf_color_custom || {}));
-  if (split.settings.colorCustom !== undefined) localStorage.setItem('wf_color_custom', typeof split.settings.colorCustom === 'string' ? split.settings.colorCustom : JSON.stringify(split.settings.colorCustom || {}));
-  if (split.settings.wf_font !== undefined) localStorage.setItem('wf_font', split.settings.wf_font || '0');
-  if (split.settings.font !== undefined) localStorage.setItem('wf_font', split.settings.font || '0');
-  if (split.settings.wf_font_size !== undefined) localStorage.setItem('wf_font_size', String(split.settings.wf_font_size || '10.5'));
-  if (split.settings.fontSize !== undefined) localStorage.setItem('wf_font_size', String(split.settings.fontSize || '10.5'));
-  if (split.settings.wf_typography !== undefined) localStorage.setItem('wf_typography', typeof split.settings.wf_typography === 'string' ? split.settings.wf_typography : JSON.stringify(split.settings.wf_typography || {}));
-  if (split.settings.typography !== undefined) localStorage.setItem('wf_typography', typeof split.settings.typography === 'string' ? split.settings.typography : JSON.stringify(split.settings.typography || {}));
-  if(split.settings.wf_notes_archive_boxes!==undefined)localStorage.setItem('wf_notes_archive_boxes',typeof split.settings.wf_notes_archive_boxes==='string'?split.settings.wf_notes_archive_boxes:JSON.stringify(split.settings.wf_notes_archive_boxes||[]));
-  if(split.settings.noteArchiveBoxes!==undefined)localStorage.setItem('wf_notes_archive_boxes',typeof split.settings.noteArchiveBoxes==='string'?split.settings.noteArchiveBoxes:JSON.stringify(split.settings.noteArchiveBoxes||[]));
-  if (split.settings.wf_schema_version !== undefined) localStorage.setItem('wf_schema_version', String(split.settings.wf_schema_version || WF_SCHEMA_VERSION));
-  if (split.settings.schemaVersion !== undefined) localStorage.setItem('wf_schema_version', String(split.settings.schemaVersion || WF_SCHEMA_VERSION));
-  if (split.settings.wf_pet_state !== undefined) localStorage.setItem('wf_pet_state', typeof split.settings.wf_pet_state === 'string' ? split.settings.wf_pet_state : JSON.stringify(split.settings.wf_pet_state));
-  if (split.settings.petState !== undefined) localStorage.setItem('wf_pet_state', typeof split.settings.petState === 'string' ? split.settings.petState : JSON.stringify(split.settings.petState));
-  if (split.settings.wf_continue_hidden !== undefined) localStorage.setItem('wf_continue_hidden', typeof split.settings.wf_continue_hidden === 'string' ? split.settings.wf_continue_hidden : JSON.stringify(split.settings.wf_continue_hidden));
-  if (split.settings.continueHidden !== undefined) localStorage.setItem('wf_continue_hidden', typeof split.settings.continueHidden === 'string' ? split.settings.continueHidden : JSON.stringify(split.settings.continueHidden));
-  if (split.settings.wf_research_state !== undefined) localStorage.setItem('wf_research_state', typeof split.settings.wf_research_state === 'string' ? split.settings.wf_research_state : JSON.stringify(split.settings.wf_research_state));
-  if (split.settings.researchState !== undefined) localStorage.setItem('wf_research_state', typeof split.settings.researchState === 'string' ? split.settings.researchState : JSON.stringify(split.settings.researchState));
-  if (split.settings.wf_focus_mode !== undefined) localStorage.setItem('wf_focus_mode', String(split.settings.wf_focus_mode || '0'));
-  if (split.settings.focusMode !== undefined) localStorage.setItem('wf_focus_mode', String(split.settings.focusMode || '0'));
-  localStorage.setItem('wf_backup_time', String(split.lastSync || Date.now()));
+  Object.keys(split.days).forEach(function(k){ _setWorkflowStorageItem(k, typeof split.days[k] === 'string' ? split.days[k] : JSON.stringify(_normalizeDayData(split.days[k]))); });
+  Object.keys(split.weeks).forEach(function(k){ _setWorkflowStorageItem(k, typeof split.weeks[k] === 'string' ? split.weeks[k] : JSON.stringify(split.weeks[k])); });
+  Object.keys(split.notes).forEach(function(k){ _setWorkflowStorageItem(k, typeof split.notes[k] === 'string' ? split.notes[k] : JSON.stringify(split.notes[k])); });
+  if (split.settings.wf_theme !== undefined) _setWorkflowStorageItem('wf_theme', split.settings.wf_theme || 'light');
+  if (split.settings.theme !== undefined) _setWorkflowStorageItem('wf_theme', split.settings.theme || 'light');
+  if (split.settings.wf_color_theme !== undefined) _setWorkflowStorageItem('wf_color_theme', split.settings.wf_color_theme || '');
+  if (split.settings.colorTheme !== undefined) _setWorkflowStorageItem('wf_color_theme', split.settings.colorTheme || '');
+  if (split.settings.wf_color_custom !== undefined) _setWorkflowStorageItem('wf_color_custom', typeof split.settings.wf_color_custom === 'string' ? split.settings.wf_color_custom : JSON.stringify(split.settings.wf_color_custom || {}));
+  if (split.settings.colorCustom !== undefined) _setWorkflowStorageItem('wf_color_custom', typeof split.settings.colorCustom === 'string' ? split.settings.colorCustom : JSON.stringify(split.settings.colorCustom || {}));
+  if (split.settings.wf_font !== undefined) _setWorkflowStorageItem('wf_font', split.settings.wf_font || '0');
+  if (split.settings.font !== undefined) _setWorkflowStorageItem('wf_font', split.settings.font || '0');
+  if (split.settings.wf_font_size !== undefined) _setWorkflowStorageItem('wf_font_size', String(split.settings.wf_font_size || '10.5'));
+  if (split.settings.fontSize !== undefined) _setWorkflowStorageItem('wf_font_size', String(split.settings.fontSize || '10.5'));
+  if (split.settings.wf_typography !== undefined) _setWorkflowStorageItem('wf_typography', typeof split.settings.wf_typography === 'string' ? split.settings.wf_typography : JSON.stringify(split.settings.wf_typography || {}));
+  if (split.settings.typography !== undefined) _setWorkflowStorageItem('wf_typography', typeof split.settings.typography === 'string' ? split.settings.typography : JSON.stringify(split.settings.typography || {}));
+  if(split.settings.wf_notes_archive_boxes!==undefined)_setWorkflowStorageItem('wf_notes_archive_boxes',typeof split.settings.wf_notes_archive_boxes==='string'?split.settings.wf_notes_archive_boxes:JSON.stringify(split.settings.wf_notes_archive_boxes||[]));
+  if(split.settings.noteArchiveBoxes!==undefined)_setWorkflowStorageItem('wf_notes_archive_boxes',typeof split.settings.noteArchiveBoxes==='string'?split.settings.noteArchiveBoxes:JSON.stringify(split.settings.noteArchiveBoxes||[]));
+  if (split.settings.wf_schema_version !== undefined) _setWorkflowStorageItem('wf_schema_version', String(split.settings.wf_schema_version || WF_SCHEMA_VERSION));
+  if (split.settings.schemaVersion !== undefined) _setWorkflowStorageItem('wf_schema_version', String(split.settings.schemaVersion || WF_SCHEMA_VERSION));
+  if (split.settings.wf_pet_state !== undefined) _setWorkflowStorageItem('wf_pet_state', typeof split.settings.wf_pet_state === 'string' ? split.settings.wf_pet_state : JSON.stringify(split.settings.wf_pet_state));
+  if (split.settings.petState !== undefined) _setWorkflowStorageItem('wf_pet_state', typeof split.settings.petState === 'string' ? split.settings.petState : JSON.stringify(split.settings.petState));
+  if (split.settings.wf_continue_hidden !== undefined) _setWorkflowStorageItem('wf_continue_hidden', typeof split.settings.wf_continue_hidden === 'string' ? split.settings.wf_continue_hidden : JSON.stringify(split.settings.wf_continue_hidden));
+  if (split.settings.continueHidden !== undefined) _setWorkflowStorageItem('wf_continue_hidden', typeof split.settings.continueHidden === 'string' ? split.settings.continueHidden : JSON.stringify(split.settings.continueHidden));
+  if (split.settings.wf_research_state !== undefined) _setWorkflowStorageItem('wf_research_state', typeof split.settings.wf_research_state === 'string' ? split.settings.wf_research_state : JSON.stringify(split.settings.wf_research_state));
+  if (split.settings.researchState !== undefined) _setWorkflowStorageItem('wf_research_state', typeof split.settings.researchState === 'string' ? split.settings.researchState : JSON.stringify(split.settings.researchState));
+  if (split.settings.wf_focus_mode !== undefined) _setWorkflowStorageItem('wf_focus_mode', String(split.settings.wf_focus_mode || '0'));
+  if (split.settings.focusMode !== undefined) _setWorkflowStorageItem('wf_focus_mode', String(split.settings.focusMode || '0'));
+  _setWorkflowStorageItem('wf_backup_time', String(split.lastSync || Date.now()));
   _migrateWorkflowData();
   return split.rawCount;
 }
+function _applyWorkflowBackupData(data,options){var run=function(){return _unsafeApplyWorkflowBackupData(data,options);};return typeof _runWorkflowStorageTransaction==='function'?_runWorkflowStorageTransaction(run):run();}
 
 function _refreshWorkflowAfterDataChange() {
   try {
@@ -4403,10 +4461,10 @@ function _mergeDayData(localData, remoteData) {
   return {data: local, addedTasks: addedTasks, conflicts: conflicts};
 }
 
-function _mergeWorkflowBackupData(remoteData) {
+function _unsafeMergeWorkflowBackupData(remoteData) {
   if(window.WorkflowCore) {
     var delegated = window.WorkflowCore.mergeWorkflowBackupData(remoteData, localStorage);
-    localStorage.setItem('wf_backup_time', String(Date.now()));
+    _setWorkflowStorageItem('wf_backup_time', String(Date.now()));
     _migrateWorkflowData();
     return delegated;
   }
@@ -4418,7 +4476,7 @@ function _mergeWorkflowBackupData(remoteData) {
         var remoteDay = typeof val === 'string' ? JSON.parse(val) : val;
         var currentDayRaw = localStorage.getItem(k);
         if(currentDayRaw === null) {
-          localStorage.setItem(k, JSON.stringify(_normalizeDayData(remoteDay)));
+          _setWorkflowStorageItem(k, JSON.stringify(_normalizeDayData(remoteDay)));
           added++;
           return;
         }
@@ -4426,13 +4484,14 @@ function _mergeWorkflowBackupData(remoteData) {
         var mergedJson = JSON.stringify(merged.data);
         if(mergedJson === currentDayRaw) same++;
         else {
-          localStorage.setItem(k, mergedJson);
+          _setWorkflowStorageItem(k, mergedJson);
           added += merged.addedTasks;
           mergedTasks += merged.addedTasks;
         }
         conflicts = conflicts.concat(merged.conflicts.map(function(x){ return k + ':' + x; }));
         return;
       } catch(e) {
+        if(_workflowStorageStrict)throw e;
         conflicts.push(k + ':解析失败');
         return;
       }
@@ -4440,10 +4499,10 @@ function _mergeWorkflowBackupData(remoteData) {
     var storeKey = _workflowStorageKey(k);
     var incoming = typeof val === 'string' ? val : JSON.stringify(val);
     var current = localStorage.getItem(storeKey);
-    if (current === null) { localStorage.setItem(storeKey, incoming); added++; return; }
+    if (current === null) { _setWorkflowStorageItem(storeKey, incoming); added++; return; }
     if (current === incoming) { same++; return; }
     if (storeKey === 'wf_schema_version') {
-      localStorage.setItem(storeKey, String(Math.max(parseInt(current, 10) || 0, parseInt(incoming, 10) || 0)));
+      _setWorkflowStorageItem(storeKey, String(Math.max(parseInt(current, 10) || 0, parseInt(incoming, 10) || 0)));
       same++;
       return;
     }
@@ -4453,10 +4512,11 @@ function _mergeWorkflowBackupData(remoteData) {
   Object.keys(split.weeks).forEach(function(k){ mergeKey(k, split.weeks[k]); });
   Object.keys(split.notes).forEach(function(k){ mergeKey(k, split.notes[k]); });
   Object.keys(split.settings).forEach(function(k){ mergeKey(k, split.settings[k]); });
-  localStorage.setItem('wf_backup_time', String(Date.now()));
+  _setWorkflowStorageItem('wf_backup_time', String(Date.now()));
   _migrateWorkflowData();
   return {added: added, same: same, conflicts: conflicts, mergedTasks: mergedTasks};
 }
+function _mergeWorkflowBackupData(remoteData){var run=function(){return _unsafeMergeWorkflowBackupData(remoteData);};return typeof _runWorkflowStorageTransaction==='function'?_runWorkflowStorageTransaction(run):run();}
 
 function saveToGitHub(depth, feedback) {
   depth = depth || 0; feedback = !!feedback;
@@ -4482,10 +4542,10 @@ function saveToGitHub(depth, feedback) {
   }).then(function(res) {
     if (res.status === 200 || res.status === 201) {
       if (res.json.content && res.json.content.sha) {
-        localStorage.setItem('gh_sha', res.json.content.sha);
+        _setWorkflowStorageItem('gh_sha', res.json.content.sha);
       }
       // 推送成功：本地时间戳对齐刚推送的 _lastSync，避免下次加载误判远程更新而覆盖本地
-      localStorage.setItem('wf_backup_time', String(_payload._lastSync));
+      _setWorkflowStorageItem('wf_backup_time', String(_payload._lastSync));
       _rememberSyncBaseline('GitHub', _payload);
       _githubSavedChangeVersion = Math.max(_githubSavedChangeVersion, uploadChangeVersion);
       _setSyncStatus('github','ok','已保存到 GitHub');
@@ -4495,7 +4555,7 @@ function saveToGitHub(depth, feedback) {
       return _fetchWorkflowCloud('https://api.github.com/repos/' + repo + '/contents/' + GH_FILE_PATH, { headers: ghHeaders() })
         .then(function(r2) { return r2.json(); })
         .then(function(j2) {
-          if (j2.sha) { localStorage.setItem('gh_sha', j2.sha); return saveToGitHub(depth+1, feedback); }
+          if (j2.sha) { _setWorkflowStorageItem('gh_sha', j2.sha); return saveToGitHub(depth+1, feedback); }
         });
     } else if (res.status === 401) {
       _setSyncStatus('github','error','Token 已失效');
@@ -4532,7 +4592,7 @@ function loadFromGitHub() {
     })
     .then(function(j) {
       if (!j || !j.content) return;
-      localStorage.setItem('gh_sha', j.sha);
+      _setWorkflowStorageItem('gh_sha', j.sha);
       var _raw = atob(j.content.replace(/\n/g,''));
       var _arr = new Uint8Array(_raw.length);
       for(var _i=0;_i<_raw.length;_i++) _arr[_i] = _raw.charCodeAt(_i);
@@ -4554,7 +4614,7 @@ function _silentPullGitHub() {
     .then(function(r) { return r.ok ? r.json() : null; })
     .then(function(j) {
       if (!j || !j.content) return;
-      localStorage.setItem('gh_sha', j.sha);
+      _setWorkflowStorageItem('gh_sha', j.sha);
       var _raw = atob(j.content.replace(/\n/g,''));
       var _arr = new Uint8Array(_raw.length);
       for (var _i = 0; _i < _raw.length; _i++) _arr[_i] = _raw.charCodeAt(_i);
@@ -4725,6 +4785,7 @@ function _estimateStorageBuckets(){
   return buckets;
 }
 function _fmtKb(bytes){ return Math.max(1, Math.round(bytes / 1024)) + ' KB'; }
+function _fmtStorageBytes(bytes){bytes=Math.max(0,Number(bytes)||0);if(bytes>=1024*1024*1024)return (bytes/1024/1024/1024).toFixed(1)+' GB';if(bytes>=1024*1024)return (bytes/1024/1024).toFixed(1)+' MB';return _fmtKb(bytes);}
 function _suggestArchiveBeforeDate(){
   var dates = [];
   for(var i=0;i<localStorage.length;i++){
@@ -4789,11 +4850,13 @@ window.openStorageManagerModal = function(){
       '</div>';
   }).join('');
   document.getElementById('storageManagerBody').innerHTML =
-    '<div style="padding:8px 0;border-bottom:1px solid var(--border)"><b>总占用</b><br>'+esc(_fmtKb(total))+' / '+esc(totalKeys)+' 项'+
+    '<div style="padding:8px 0;border-bottom:1px solid var(--border)"><b>工作流数据</b><br>'+esc(_fmtKb(total))+' / '+esc(totalKeys)+' 项<span id="storageOriginEstimate" style="display:block;color:var(--text3);margin-top:3px">正在读取浏览器站点容量…</span>'+
     (total > 4 * 1024 * 1024 ? '<br><span style="color:#b45309">已超过 4MB，建议先归档旧日期并清理旧快照。</span>' : '')+'</div>'+
     rows+
     '<div style="padding:8px 0;border-bottom:1px solid var(--border)"><b>归档建议</b><br>建议归档 '+esc(suggestedBefore)+' 之前的日期，可释放约 '+esc(archiveEstimate.kb)+' KB / '+esc(archiveEstimate.keys.length)+' 天。</div>'+
     '<div style="padding-top:8px;color:var(--text3)">“清理旧快照”会保留最新 1 个，删除更早快照；删除前可先导出完整 JSON。</div>';
+  var estimateEl=document.getElementById('storageOriginEstimate');
+  if(navigator.storage&&navigator.storage.estimate){navigator.storage.estimate().then(function(value){if(!estimateEl||!estimateEl.isConnected)return;var used=Number(value.usage)||0,quota=Number(value.quota)||0;estimateEl.textContent=quota?'当前站点共占用 '+_fmtStorageBytes(used)+' / 浏览器估算可用上限 '+_fmtStorageBytes(quota)+'（含缓存和数据库）':'浏览器未提供站点容量上限';}).catch(function(){if(estimateEl&&estimateEl.isConnected)estimateEl.textContent='浏览器未提供站点容量估算';});}else if(estimateEl)estimateEl.textContent='当前浏览器不支持站点容量估算';
   document.getElementById('storageManagerModal').style.display = 'flex';
 };
 window.closeStorageManagerModal = function(){ document.getElementById('storageManagerModal').style.display = 'none'; };
@@ -4810,7 +4873,7 @@ window.clearOldSnapshots = function(){
   showConfirm('确认删除旧快照？将保留最新 1 个快照。', '🧹', function(){
     var removed = 0;
     list.slice(1).forEach(function(x){ if(x && x.key) { localStorage.removeItem(x.key); removed++; } });
-    localStorage.setItem('wf_snapshot_index', JSON.stringify(list[0] ? [list[0]] : []));
+    _setWorkflowStorageItem('wf_snapshot_index', JSON.stringify(list[0] ? [list[0]] : []));
     showToast('已清理旧快照 ' + removed + ' 个', 'success');
     openStorageManagerModal();
   });
@@ -5084,7 +5147,7 @@ window.runArchiveExport = function(){
       showConfirm('确认删除本地 ' + keys.length + ' 天已归档数据？删除前会生成快照。', '🗄️', function(){
         _createLocalSnapshot('before-archive-delete-' + before, false);
         keys.forEach(function(k){ localStorage.removeItem(k); });
-        localStorage.setItem('wf_backup_time', String(Date.now()));
+        _setWorkflowStorageItem('wf_backup_time', String(Date.now()));
         closeArchiveModal();
         showToast('已导出并删除归档 ' + keys.length + ' 天', 'success');
       });
@@ -5126,7 +5189,7 @@ function _applyRemoteSettingConflict(key){
   if(!remote) return false;
   var incoming = typeof remote.value === 'string' ? remote.value : JSON.stringify(remote.value);
   _createLocalSnapshot('before-apply-remote-setting-' + remote.key, false);
-  localStorage.setItem(remote.key, incoming);
+  _setWorkflowStorageItem(remote.key, incoming);
   return true;
 }
 function _finishConflictResolutionIfReady(){
@@ -5166,7 +5229,7 @@ window.applyRemoteConflictItem = function(idx){
     local[parts[0]][parts[1]] = remote.data[parts[0]][parts[1]];
   }
   _createLocalSnapshot('before-apply-remote-conflict-' + remote.date, false);
-  localStorage.setItem(dayKeyName, JSON.stringify(_normalizeDayData(local)));
+  _setWorkflowStorageItem(dayKeyName, JSON.stringify(_normalizeDayData(local)));
   if(_lastConflictContext && _lastConflictContext.conflicts) _lastConflictContext.conflicts.splice(idx, 1);
   showToast('已应用云端冲突项：' + remote.date, 'success');
   _refreshWorkflowAfterDataChange();
@@ -5185,7 +5248,7 @@ window.applyRemoteConflictField = function(idx, field){
   if(i < 0) { showToast('本地任务不存在', 'warn'); return; }
   _createLocalSnapshot('before-apply-remote-field-' + remote.date + '-' + field, false);
   local.tasks[i][field] = rt[field];
-  localStorage.setItem('wf_day_' + remote.date, JSON.stringify(_normalizeDayData(local)));
+  _setWorkflowStorageItem('wf_day_' + remote.date, JSON.stringify(_normalizeDayData(local)));
   showToast('已应用云端字段：' + field, 'success');
   _refreshWorkflowAfterDataChange();
   openConflictDetailsModal(_lastConflictContext.conflicts || []);
@@ -5213,7 +5276,7 @@ window.applyRemoteNewFields = function(){
     var i = local.tasks.findIndex(function(t){ return window.WorkflowTasks && window.WorkflowTasks.taskMatch ? window.WorkflowTasks.taskMatch(t, rt) : false; });
     if(!rt || i < 0) return;
     Object.keys(rt).forEach(function(f){ if(local.tasks[i][f] === undefined && rt[f] !== undefined) { local.tasks[i][f] = rt[f]; changed++; } });
-    localStorage.setItem('wf_day_' + remote.date, JSON.stringify(_normalizeDayData(local)));
+    _setWorkflowStorageItem('wf_day_' + remote.date, JSON.stringify(_normalizeDayData(local)));
   });
   showToast(changed ? ('已补云端新增字段 ' + changed + ' 个') : '没有可补的云端新增字段', changed ? 'success' : 'info');
   if(changed) _refreshWorkflowAfterDataChange();
@@ -5383,7 +5446,7 @@ window.repairDataHealthIssues = function(){
         try {
           var raw = localStorage.getItem(k);
           var next = JSON.stringify(_normalizeDayData(JSON.parse(raw || '{}')));
-          if(next !== raw) { localStorage.setItem(k, next); fixed++; }
+          if(next !== raw) { _setWorkflowStorageItem(k, next); fixed++; }
         } catch(e) {}
       }
     }
@@ -5432,11 +5495,11 @@ window.restoreSnapshotDay = function(key){
       if(!split.days[dayKeyName]) { showToast('快照中没有 ' + date, 'warn'); return; }
       showConfirm('确认只恢复 ' + date + '？当前这一天的数据和当天小记会先生成快照。', '↩️', function(){
         _createLocalSnapshot('before-restore-snapshot-day-' + date, false);
-        localStorage.setItem(dayKeyName, typeof split.days[dayKeyName] === 'string' ? split.days[dayKeyName] : JSON.stringify(_normalizeDayData(split.days[dayKeyName])));
+        _setWorkflowStorageItem(dayKeyName, typeof split.days[dayKeyName] === 'string' ? split.days[dayKeyName] : JSON.stringify(_normalizeDayData(split.days[dayKeyName])));
         Object.keys(split.notes).forEach(function(k){
           try {
             var n = JSON.parse(typeof split.notes[k] === 'string' ? split.notes[k] : JSON.stringify(split.notes[k]));
-            if(n.timestamp && localDateStr(new Date(n.timestamp)) === date) localStorage.setItem(k, typeof split.notes[k] === 'string' ? split.notes[k] : JSON.stringify(n));
+            if(n.timestamp && localDateStr(new Date(n.timestamp)) === date) _setWorkflowStorageItem(k, typeof split.notes[k] === 'string' ? split.notes[k] : JSON.stringify(n));
           } catch(e) {}
         });
         showToast('已恢复 ' + date, 'success');
@@ -6020,6 +6083,15 @@ function _prepareExportListsForCanvas(root) {
 }
 window._prepareExportListsForCanvas = _prepareExportListsForCanvas;
 
+function _planWorkflowPngCanvas(width,height,desiredScale){
+  width=Math.max(1,Math.ceil(Number(width)||1));height=Math.max(1,Math.ceil(Number(height)||1));desiredScale=Math.max(1,Number(desiredScale)||2);
+  var maxDimension=16384,maxArea=16*1024*1024;
+  var scale=Math.min(desiredScale,maxDimension/width,maxDimension/height,Math.sqrt(maxArea/(width*height)));
+  scale=Math.floor(scale*100)/100;
+  return {ok:scale>=1,width:width,height:height,scale:Math.max(0,scale),outputWidth:Math.ceil(width*Math.max(0,scale)),outputHeight:Math.ceil(height*Math.max(0,scale)),maxDimension:maxDimension,maxArea:maxArea};
+}
+window._planWorkflowPngCanvas=_planWorkflowPngCanvas;
+
 window.doExport = async function(format) {
   var radio = document.querySelector('input[name="exportTarget"]:checked');
   if (!radio) return;
@@ -6216,12 +6288,14 @@ window.doExport = async function(format) {
         _prepareExportListsForCanvas(container);
         var exportRoot=container.firstElementChild||container;
         var scrollH = Math.max(exportRoot.scrollHeight, exportRoot.offsetHeight, container.scrollHeight, 200);
+        var exportW=Math.max(exportRoot.scrollWidth,exportRoot.offsetWidth,600),pngPlan=_planWorkflowPngCanvas(exportW,scrollH,2);
+        if(!pngPlan.ok){showToast('内容过长，单张 PNG 会超过浏览器安全画布上限。请改用 PDF 或 Markdown，内容不会被静默截断。','warn');return;}
         var canvas = await html2canvas(exportRoot, {
-          scale: 2,
+          scale: pngPlan.scale,
           backgroundColor: computedBg,
           useCORS: true,
           logging: false,
-          width: Math.max(exportRoot.scrollWidth, exportRoot.offsetWidth, 600),
+          width: exportW,
           height: scrollH,
           windowHeight: scrollH
         });
@@ -6328,7 +6402,7 @@ function _syncAppearanceFontUi(key){
 }
 function applyWorkflowFont(value,persist){
   var key=_normalizeWorkflowFontKey(value),font=WORKFLOW_FONTS.find(function(item){return item.key===key;})||WORKFLOW_FONTS[0];
-  _setAppearanceTuning();document.documentElement.style.setProperty('--app-font',font.value);if(persist!==false)localStorage.setItem('wf_font',key);_syncAppearanceFontUi(key);
+  _setAppearanceTuning();document.documentElement.style.setProperty('--app-font',font.value);if(persist!==false)_setWorkflowStorageItem('wf_font',key);_syncAppearanceFontUi(key);
   window._appearanceFontApplyCount=(window._appearanceFontApplyCount||0)+1;
   requestAnimationFrame(function(){if(typeof window._syncStickyHeaderOffset==='function')window._syncStickyHeaderOffset();});if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){if(typeof window._syncStickyHeaderOffset==='function')window._syncStickyHeaderOffset();});
   return key;
@@ -6345,10 +6419,10 @@ function _syncAppearanceFontSizeUi(value){
   if(input&&document.activeElement!==input)input.value=value;if(sample)sample.style.fontSize=value+'pt';
 }
 function applyWorkflowFontSize(value,persist){
-  value=_normalizeWorkflowFontSize(value);_setAppearanceTuning();document.documentElement.style.setProperty('--app-font-size',value+'pt');if(persist!==false)localStorage.setItem('wf_font_size',String(value));_syncAppearanceFontSizeUi(value);window._appearanceFontSizeApplyCount=(window._appearanceFontSizeApplyCount||0)+1;requestAnimationFrame(function(){if(typeof window._syncStickyHeaderOffset==='function')window._syncStickyHeaderOffset();});return value;
+  value=_normalizeWorkflowFontSize(value);_setAppearanceTuning();document.documentElement.style.setProperty('--app-font-size',value+'pt');if(persist!==false)_setWorkflowStorageItem('wf_font_size',String(value));_syncAppearanceFontSizeUi(value);window._appearanceFontSizeApplyCount=(window._appearanceFontSizeApplyCount||0)+1;requestAnimationFrame(function(){if(typeof window._syncStickyHeaderOffset==='function')window._syncStickyHeaderOffset();});return value;
 }
 window.setWorkflowFontSize=function(value){clearTimeout(_fontSizeSaveTimer);var result=applyWorkflowFontSize(value,true);if(typeof window._setUnifiedWorkflowTypography==='function')window._setUnifiedWorkflowTypography('size',result);return result;};
-window.previewWorkflowFontSize=function(value){cancelAnimationFrame(_fontSizeFrame);_fontSizeFrame=requestAnimationFrame(function(){_fontSizeFrame=0;applyWorkflowFontSize(value,false);clearTimeout(_fontSizeSaveTimer);_fontSizeSaveTimer=setTimeout(function(){localStorage.setItem('wf_font_size',String(_normalizeWorkflowFontSize(value)));},220);});};
+window.previewWorkflowFontSize=function(value){cancelAnimationFrame(_fontSizeFrame);_fontSizeFrame=requestAnimationFrame(function(){_fontSizeFrame=0;applyWorkflowFontSize(value,false);clearTimeout(_fontSizeSaveTimer);_fontSizeSaveTimer=setTimeout(function(){_setWorkflowStorageItem('wf_font_size',String(_normalizeWorkflowFontSize(value)));},220);});};
 
 var WORKFLOW_TYPOGRAPHY_KEY='wf_typography';
 var WORKFLOW_MATH_FONTS=[
@@ -6379,7 +6453,7 @@ function applyWorkflowTypography(value,persist){
   var faceBase=String(base).replace('.','_'),enFace='WF English '+en.key+' '+String(enSize).replace('.','_')+' '+faceBase,zhFace='WF Chinese '+zh.key+' '+String(zhSize).replace('.','_')+' '+faceBase,enSrc=_workflowLocalFontSources(en.value,'en'),zhSrc=_workflowLocalFontSources(zh.value,'zh');style.textContent=(enSrc?'@font-face{font-family:"'+enFace+'";src:'+enSrc+';unicode-range:U+0000-024F,U+1E00-1EFF;size-adjust:'+enRatio.toFixed(3)+'%;}':'')+(zhSrc?'@font-face{font-family:"'+zhFace+'";src:'+zhSrc+';unicode-range:U+2E80-2FDF,U+3000-303F,U+31C0-31EF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF;size-adjust:'+zhRatio.toFixed(3)+'%;}':'');
   root.style.setProperty('--app-font-mixed','"'+enFace+'","'+zhFace+'",'+en.value+','+zh.value);root.style.setProperty('--app-content-font-size',base+'pt');root.style.setProperty('--app-font-math',math.value);root.style.setProperty('--app-font-size-math',_normalizeWorkflowFontSize(value.mathSize)+'pt');
   if(typeof window._syncCollapsedMathFonts==='function')window._syncCollapsedMathFonts(document);
-  if(persist!==false)localStorage.setItem(WORKFLOW_TYPOGRAPHY_KEY,JSON.stringify(value));_syncWorkflowTypographyUi(value);if(typeof window._applyPopoutTheme==='function')window._applyPopoutTheme();return value;
+  if(persist!==false)_setWorkflowStorageItem(WORKFLOW_TYPOGRAPHY_KEY,JSON.stringify(value));_syncWorkflowTypographyUi(value);if(typeof window._applyPopoutTheme==='function')window._applyPopoutTheme();return value;
 }
 window.setWorkflowScriptFont=function(script,key){var value=_readWorkflowTypography();if(script==='math')value.mathFont=_workflowMathFontItem(key).key;else value[script+'Font']=_normalizeWorkflowFontKey(key);applyWorkflowTypography(value,true);};
 window.setWorkflowScriptSize=function(script,size){var value=_readWorkflowTypography();value[script+'Size']=_normalizeWorkflowFontSize(size);applyWorkflowTypography(value,true);};
@@ -6411,7 +6485,7 @@ function _applyCustomAppearance(mode){
   var meta=document.querySelector('meta[name="theme-color"]'),activePrimary=profile.primary?primary:_cssRgb(getComputedStyle(root).getPropertyValue('--primary'));if(meta)meta.setAttribute('content',_rgbHex(activePrimary));
   window._appearanceApplyCount=(window._appearanceApplyCount||0)+1;
 }
-function _queueAppearanceSave(){clearTimeout(_appearanceSaveTimer);_appearanceSaveTimer=setTimeout(function(){localStorage.setItem(APPEARANCE_COLOR_KEY,JSON.stringify(_appearanceColors));window._appearanceSaveCount=(window._appearanceSaveCount||0)+1;},220);}
+function _queueAppearanceSave(){clearTimeout(_appearanceSaveTimer);_appearanceSaveTimer=setTimeout(function(){_setWorkflowStorageItem(APPEARANCE_COLOR_KEY,JSON.stringify(_appearanceColors));window._appearanceSaveCount=(window._appearanceSaveCount||0)+1;},220);}
 function _currentAppearanceCategory(){var el=document.getElementById('appearanceColorCategory');return el?el.value:'primary';}
 function _currentCategoryRgb(category){var profile=_appearanceProfile(),custom=profile[category];if(custom)return _hexRgb(custom);var css=getComputedStyle(document.documentElement).getPropertyValue('--'+category).trim();return _cssRgb(css);}
 function _relativeLuminance(rgb){var values=[rgb.r,rgb.g,rgb.b].map(function(value){value=value/255;return value<=.03928?value/12.92:Math.pow((value+.055)/1.055,2.4);});return .2126*values[0]+.7152*values[1]+.0722*values[2];}
@@ -6440,7 +6514,7 @@ function applyTheme(t){
   var el = document.documentElement;
   el.classList.remove('light','dark');el.classList.add(t);
   document.getElementById('themeBtn').textContent = t === 'dark' ? '☀️' : '🌙';
-  localStorage.setItem(THEME_KEY, t);
+  _setWorkflowStorageItem(THEME_KEY, t);
   _setAppearanceTuning();_applyCustomAppearance(t);window.loadAppearanceColorControls();
 }
 window.toggleTheme = function(){
@@ -6453,7 +6527,7 @@ function setColorTheme(theme,preserveCustom){
   toRm.forEach(function(c){ el.classList.remove(c); });
   if(theme) el.classList.add(theme);
   if(!preserveCustom){delete _appearanceProfile().primary;_queueAppearanceSave();}_setAppearanceTuning();_applyCustomAppearance();
-  localStorage.setItem('wf_color_theme', theme||'');
+  _setWorkflowStorageItem('wf_color_theme', theme||'');
   document.querySelectorAll('.color-chip').forEach(function(d){
     d.classList.toggle('active', d.getAttribute('data-color')===(theme||''));
   });
@@ -6461,20 +6535,22 @@ function setColorTheme(theme,preserveCustom){
 }
 window.setColorTheme = setColorTheme;
 
-function toggleColorPanel(e){
-  e.stopPropagation();
+function _setAppearancePanelOpen(open){
   var p = document.getElementById('colorPanel');
-  if(p.style.display === 'none' || p.style.display === '') {
-    p.style.display = 'flex';
-    _initAppearancePanel();
-  } else {
-    p.style.display = 'none';
-  }
+  if(!p)return;
+  p.style.display=open?'flex':'none';
+  document.documentElement.classList.toggle('appearance-panel-open',!!open);
+  if(open)_initAppearancePanel();
+}
+window._setAppearancePanelOpen=_setAppearancePanelOpen;
+function toggleColorPanel(e){
+  if(e)e.stopPropagation();
+  var p = document.getElementById('colorPanel');
+  _setAppearancePanelOpen(!p||p.style.display === 'none' || p.style.display === '');
 }
 window.toggleColorPanel = toggleColorPanel;
 document.addEventListener('click', function(){
-  var p = document.getElementById('colorPanel');
-  if(p) p.style.display = 'none';
+  _setAppearancePanelOpen(false);
 });
 
 (function(){
@@ -6511,7 +6587,7 @@ window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change', func
       var visible=isVisible(el);
       if(visibility.get(el)===visible)return;
       visibility.set(el,visible);
-      if(visible)window._promoteWorkflowModal(el);
+      if(visible){_setAppearancePanelOpen(false);window._promoteWorkflowModal(el);}
       else if(!el.classList.contains('confirm-modal'))el.style.removeProperty('z-index');
     });
   });
@@ -6842,7 +6918,7 @@ window.triggerInstall = function(){
 
 window.dismissInstall = function(){
   document.getElementById('installBanner').style.display = 'none';
-  localStorage.setItem('wf_install_dismissed', '1');
+  _setWorkflowStorageItem('wf_install_dismissed', '1');
 };
 
 // ===== Toast System =====
@@ -6974,7 +7050,7 @@ function checkAllDone(){
   if(morningDone && tasksAllDone && eveningDone){
     var todayAchieved = localStorage.getItem('wf_all_done_'+today);
     if(!todayAchieved){
-      localStorage.setItem('wf_all_done_'+today, '1');
+      _setWorkflowStorageItem('wf_all_done_'+today, '1');
       var _achMsgs=[['🌟','今天，你做到了！','晨间+任务+日志三项全收'],['🎉','完美的一天！','这份坚持正在慢慢改变你'],['✨','全部完成！','记录+行动+反思，今天全到位了']];
       var _am=_achMsgs[new Date().getDate()%_achMsgs.length];
       showAchievement(_am[0], _am[1], _am[2]);
@@ -6984,7 +7060,7 @@ function checkAllDone(){
   } else if(tasksAllDone && todayData.tasks.length >= 3){
     var taskAchieved = localStorage.getItem('wf_tasks_done_'+today);
     if(!taskAchieved){
-      localStorage.setItem('wf_tasks_done_'+today, '1');
+      _setWorkflowStorageItem('wf_tasks_done_'+today, '1');
       showAchievement('✅', '所有任务完成！', '今天完成了 '+todayData.tasks.length+' 个任务');
       haptic('success');
     }
@@ -7130,7 +7206,7 @@ window.batchDeleteHistory = function(){
       deletedData[date] = localStorage.getItem(dayKey(date));
       localStorage.removeItem(dayKey(date));
     });
-    localStorage.setItem('wf_backup_time', String(Date.now()));
+    _setWorkflowStorageItem('wf_backup_time', String(Date.now()));
     if (localStorage.getItem('gh_repo') && localStorage.getItem('gh_token')) saveToGitHub(0, true);
     if (accessToken) saveToDrive();
     selectedHistory = {};
@@ -7140,9 +7216,9 @@ window.batchDeleteHistory = function(){
     updateProgress();
     showToast('已删除 ' + dates.length + ' 条记录', 'info', '撤销', function(){
       Object.keys(deletedData).forEach(function(date){
-        localStorage.setItem(dayKey(date), deletedData[date]);
+        _setWorkflowStorageItem(dayKey(date), deletedData[date]);
       });
-      localStorage.setItem('wf_backup_time', String(Date.now()));
+      _setWorkflowStorageItem('wf_backup_time', String(Date.now()));
       if (localStorage.getItem('gh_repo') && localStorage.getItem('gh_token')) saveToGitHub();
       if (accessToken) saveToDrive();
       renderHistory();
@@ -7346,7 +7422,7 @@ window.dismissExamples = function(){
   document.getElementById('exampleBanner').style.display = 'none';
   document.getElementById('exampleTasks').innerHTML = '';
   exampleDismissed = true;
-  localStorage.setItem('wf_examples_done', '1');
+  _setWorkflowStorageItem('wf_examples_done', '1');
 };
 
 function renderExampleTasks(){
@@ -7474,7 +7550,7 @@ function loadDay(d){
   var r = localStorage.getItem(dayKey(d));
   if(!r) return emptyDay();
   try { return _normalizeDayData(JSON.parse(r)); } catch(e) {
-    localStorage.setItem('_corrupt_' + dayKey(d), r);
+    _setWorkflowStorageItem('_corrupt_' + dayKey(d), r);
     showToast('数据损坏：' + d + ' 的数据无法读取，已保存原始备份', 'warn');
     return emptyDay();
   }
@@ -7497,8 +7573,10 @@ function _scheduleAutoSnapshot(){
 function saveDay(d,data,options){
   data = _normalizeDayData(data);
   _scheduleAutoSnapshot();
-  localStorage.setItem(dayKey(d), JSON.stringify(data));flash();
+  if(!_setWorkflowStorageItem(dayKey(d), JSON.stringify(data))){_renderWorkflowStorageFailure();return false;}
+  _clearWorkflowStorageFailure();flash();
   if(options&&options.deferUi)_scheduleDerivedTodayUi();else _refreshDerivedTodayUi();
+  return true;
 }
 
 function _findContinuationSource(task,candidates){
@@ -7517,7 +7595,7 @@ function _repairLegacyContinuationLineage(){
   keys.forEach(function(key){try{days[key]=JSON.parse(localStorage.getItem(key));}catch(e){}});
   function entries(day){var list=(day&&day.tasks||[]).slice();if(day&&day.m&&day.m.taskObj)list.push(day.m.taskObj);return list;}
   keys.forEach(function(key){var day=days[key];if(!day)return;entries(day).forEach(function(task){if(!task||!task._continuedFrom)return;var sourceKey='wf_day_'+task._continuedFrom,sourceDay=days[sourceKey],source=_findContinuationSource(task,entries(sourceDay));if(!source)return;var chain=source._chainId||task._chainId||_newChainId(task.isCheckInTask?'checkin':'chain');if(source._chainId!==chain){source._chainId=chain;changed[sourceKey]=true;}if(task._chainId!==chain){task._chainId=chain;changed[key]=true;}if(task._continuedFromTaskId!==source.id&&source.id){task._continuedFromTaskId=source.id;changed[key]=true;}});});
-  var changedKeys=Object.keys(changed);if(changedKeys.length)_createLocalSnapshot('migration-v8-continuation-lineage',false);changedKeys.forEach(function(key){if(days[key])localStorage.setItem(key,JSON.stringify(days[key]));});return changedKeys.length;
+  var changedKeys=Object.keys(changed);if(changedKeys.length)_createLocalSnapshot('migration-v8-continuation-lineage',false);changedKeys.forEach(function(key){if(days[key])_setWorkflowStorageItem(key,JSON.stringify(days[key]));});return changedKeys.length;
 }
 function _repairSameDayChainCollisions(){
   if(!window.WorkflowCore||typeof window.WorkflowCore.repairSameDayChainCollisions!=='function')return 0;
@@ -7525,7 +7603,7 @@ function _repairSameDayChainCollisions(){
   keys.forEach(function(key){try{var raw=localStorage.getItem(key),data=JSON.parse(raw);before[key]=raw;records.push({date:key.slice(7),key:key,data:data});}catch(e){}});
   var result=window.WorkflowCore.repairSameDayChainCollisions(records,_newChainId);if(!result||!result.changed)return 0;
   var changed=[];records.forEach(function(record){var value=JSON.stringify(record.data);if(value!==before[record.key])changed.push({key:record.key,value:value});});
-  if(changed.length)_createLocalSnapshot('migration-v9-chain-collision',false);changed.forEach(function(item){localStorage.setItem(item.key,item.value);});return changed.length;
+  if(changed.length)_createLocalSnapshot('migration-v9-chain-collision',false);changed.forEach(function(item){_setWorkflowStorageItem(item.key,item.value);});return changed.length;
 }
 
 var WF_MIGRATIONS = {
@@ -7536,7 +7614,7 @@ var WF_MIGRATIONS = {
     var changed = _normalizeAllStoredDays();
     var raw = localStorage.getItem('wf_research_state');
     if(raw && window.WorkflowResearch) {
-      try { localStorage.setItem('wf_research_state', JSON.stringify(window.WorkflowResearch.normalizeState(JSON.parse(raw)))); changed++; } catch(e) {}
+      try { _setWorkflowStorageItem('wf_research_state', JSON.stringify(window.WorkflowResearch.normalizeState(JSON.parse(raw)))); changed++; } catch(e) {}
     }
     return changed;
   },
@@ -7563,7 +7641,7 @@ function _normalizeAllStoredDays(){
       var oldData = JSON.parse(raw);
       var newData = _normalizeDayData(oldData);
       var next = JSON.stringify(newData);
-      if(next !== raw){ localStorage.setItem(k, next); changedCount++; }
+      if(next !== raw){ _setWorkflowStorageItem(k, next); changedCount++; }
     } catch(e) {}
   });
   return changedCount;
@@ -7611,7 +7689,7 @@ function _repairLegacyCheckInTerminalState(){
   });
   var changed=Object.keys(changedKeys);
   if(changed.length)_createLocalSnapshot('migration-v7-checkin-terminal',false);
-  changed.forEach(function(key){localStorage.setItem(key,JSON.stringify(days[key]));});
+  changed.forEach(function(key){_setWorkflowStorageItem(key,JSON.stringify(days[key]));});
   return changed.length;
 }
 function _backfillCheckInMissedHistory(){
@@ -7691,7 +7769,7 @@ function _backfillCheckInMissedHistory(){
     target.task.checkInHistory.sort(function(a,b){return String(a.date||'').localeCompare(String(b.date||''));});
   });
   if(added || Object.keys(changedKeys).length) _createLocalSnapshot('migration-v6-checkin-history', false);
-  Object.keys(changedKeys).forEach(function(key){ localStorage.setItem(key, JSON.stringify(days[key])); });
+  Object.keys(changedKeys).forEach(function(key){ _setWorkflowStorageItem(key, JSON.stringify(days[key])); });
   return Object.keys(changedKeys).length;
 }
 function _migrateWorkflowData(){
@@ -7710,7 +7788,7 @@ function _migrateWorkflowData(){
       changedCount += WF_MIGRATIONS[nextVersion]() || 0;
     }
   }
-  localStorage.setItem('wf_schema_version', String(WF_SCHEMA_VERSION));
+  _setWorkflowStorageItem('wf_schema_version', String(WF_SCHEMA_VERSION));
   if(changedCount || removedLegacyGrowth) _setSyncStatus('local','ok','已迁移 ' + (changedCount + (removedLegacyGrowth?1:0)) + ' 项数据');
 }
 
@@ -7722,7 +7800,7 @@ function _createLocalSnapshot(reason, throttled){
     data._snapshotReason = reason || 'manual';
     data._snapshotTime = now;
     var key = 'wf_snapshot_' + now;
-    localStorage.setItem(key, JSON.stringify(data));
+    _setWorkflowStorageItem(key, JSON.stringify(data));
     var list = JSON.parse(localStorage.getItem('wf_snapshot_index') || '[]');
     list.unshift({key:key,time:now,reason:reason||'manual'});
     list = list.slice(0,5);
@@ -7732,8 +7810,8 @@ function _createLocalSnapshot(reason, throttled){
       var k = localStorage.key(i);
       if(k && k.indexOf('wf_snapshot_')===0 && k !== 'wf_snapshot_index' && !keep[k]) localStorage.removeItem(k);
     }
-    localStorage.setItem('wf_snapshot_index', JSON.stringify(list));
-    localStorage.setItem('wf_last_snapshot_at', String(now));
+    _setWorkflowStorageItem('wf_snapshot_index', JSON.stringify(list));
+    _setWorkflowStorageItem('wf_last_snapshot_at', String(now));
   } catch(e) { console.warn('snapshot failed', e); }
 }
 
@@ -7760,7 +7838,7 @@ function _hideContinueTask(t){
   if(!key) return;
   var hidden = _continueHiddenMap();
   hidden[key] = {label:_taskLabel(t), time:Date.now()};
-  localStorage.setItem('wf_continue_hidden', JSON.stringify(hidden));
+  _setWorkflowStorageItem('wf_continue_hidden', JSON.stringify(hidden));
 }
 // 把某任务的项目标签联动到同一条续接链上的所有任务（跨所有历史天）
 // skipDate: 该天不落盘（用于编辑模式，当前天等"完成编辑"再存）
@@ -7813,6 +7891,7 @@ var _wkDateQuery = '';
 function _wkRefDate(){ var d=new Date(); d.setDate(d.getDate()+_wkOffset*7); return d; }
 function currentWkKey(){ return _wkOffset===0 ? wkKey : ('wf_week_'+getWkId(_wkRefDate())); }
 function flash(){
+  if(_workflowStorageFailure){_renderWorkflowStorageFailure();return;}
   var el = document.getElementById('savedWrap');
   var txt = document.getElementById('savedText');
   txt.textContent = '已保存';
@@ -7861,7 +7940,7 @@ function updateStreak(){
   var _sKey = 'wf_streak_celebrated_' + s;
   if(s > 0 && !localStorage.getItem(_sKey)){
     var _sMilestones = {1:'🌱 开始了！记录第一天，这就是改变的起点。',3:'🔥 连续3天！习惯正在形成。',7:'🏆 整整一周！你已经超过了大多数人。',14:'💎 两周连续！这份坚持，太不容易了。',30:'👑 30天！一个月的坚持，你做到了真正的改变。'};
-    if(_sMilestones[s]){ localStorage.setItem(_sKey,'1'); showToast(_sMilestones[s],'success'); }
+    if(_sMilestones[s]){ _setWorkflowStorageItem(_sKey,'1'); showToast(_sMilestones[s],'success'); }
   }
   if(s >= 1){
     el.style.display = 'inline-flex';
@@ -7961,7 +8040,7 @@ window.toggleMeta = function(){
   var card = document.getElementById('metaCard');
   card.classList.toggle('collapsed');
   card.classList.remove('first-visit');
-  localStorage.setItem('wf_meta_collapsed', card.classList.contains('collapsed'));
+  _setWorkflowStorageItem('wf_meta_collapsed', card.classList.contains('collapsed'));
 };
 
 (function(){
@@ -7972,7 +8051,7 @@ window.toggleMeta = function(){
   }
   if(!visited){
     document.getElementById('metaCard').classList.add('first-visit');
-    localStorage.setItem('wf_meta_visited', '1');
+    _setWorkflowStorageItem('wf_meta_visited', '1');
   }
 })();
 
@@ -8002,7 +8081,7 @@ window.addEventListener('scroll', function(){
 // ===== Onboarding =====
 window.dismissOnboarding = function(){
   document.getElementById('onboardCard').style.display = 'none';
-  localStorage.setItem('wf_onboarding_done', '1');
+  _setWorkflowStorageItem('wf_onboarding_done', '1');
 };
 function checkOnboarding(){
   var hasHistory = false;
@@ -8352,7 +8431,7 @@ window.delTask = function(id){
     for(var i = deletedBuffer.length - 1; i >= 0; i--){
       if(deletedBuffer[i].task.id === id){
         todayData.tasks.push(deletedBuffer[i].task);
-        if(deletedBuffer[i].hiddenBefore===null)localStorage.removeItem('wf_continue_hidden');else localStorage.setItem('wf_continue_hidden',deletedBuffer[i].hiddenBefore);
+        if(deletedBuffer[i].hiddenBefore===null)localStorage.removeItem('wf_continue_hidden');else _setWorkflowStorageItem('wf_continue_hidden',deletedBuffer[i].hiddenBefore);
         deletedBuffer.splice(i, 1);
         found = true;
         break;
@@ -8511,6 +8590,9 @@ document.addEventListener('focusout',function(){
 });
 
 var _pendingWorkTimeDays={};
+function _normalizeWorkflowHours(value){if(value===''||value===null||value===undefined)return '';var number=Number(value);if(!isFinite(number))return '';return String(Math.round(Math.max(0,Math.min(24,number))*2)/2);}
+window._normalizeWorkflowHours=_normalizeWorkflowHours;
+window.normalizeWorkTimeInput=function(input){if(!input)return;input.value=_normalizeWorkflowHours(input.value);window.saveWorkTime(input);};
 function _commitWorkTimeSave(){
   clearTimeout(window.saveWorkTime&&window.saveWorkTime._t);if(window.saveWorkTime)window.saveWorkTime._t=null;
   var pending=_pendingWorkTimeDays;_pendingWorkTimeDays={};
@@ -8522,11 +8604,11 @@ window.saveWorkTime = function(changedEl){
   if(!todayData||(window._isWorkflowComposing&&window._isWorkflowComposing(changedEl)))return;
   var prev=parseDateLocal(today);prev.setDate(prev.getDate()-1);var prevDate=localDateStr(prev),id=changedEl&&changedEl.id;
   if(!id||id==='todayExpectedHours'){
-    var expected=id?changedEl:document.getElementById('todayExpectedHours');if(expected)todayData.workTime.expectedHours=expected.value;
+    var expected=id?changedEl:document.getElementById('todayExpectedHours');if(expected)todayData.workTime.expectedHours=_normalizeWorkflowHours(expected.value);
     _pendingWorkTimeDays[today]=todayData;
   }
   if(!id||id==='yesterdayActualHours'){
-    var prevDay=_pendingWorkTimeDays[prevDate]||loadDay(prevDate),actual=id?changedEl:document.getElementById('yesterdayActualHours');if(actual)prevDay.workTime.actualHours=actual.value;
+    var prevDay=_pendingWorkTimeDays[prevDate]||loadDay(prevDate),actual=id?changedEl:document.getElementById('yesterdayActualHours');if(actual)prevDay.workTime.actualHours=_normalizeWorkflowHours(actual.value);
     _pendingWorkTimeDays[prevDate]=prevDay;
   }
   window._workTimeSingleFieldCollectCount=(window._workTimeSingleFieldCollectCount||0)+(id?1:0);
@@ -8642,7 +8724,7 @@ window.toggleThreeQuestions = function(){
   var isOpen = !body.classList.contains('open');
   body.classList.toggle('open', isOpen);
   trigger.classList.toggle('open', isOpen);
-  localStorage.setItem('wf_tq_open', isOpen ? 'true' : 'false');
+  _setWorkflowStorageItem('wf_tq_open', isOpen ? 'true' : 'false');
 };
 
 // ===== Export =====
@@ -9113,7 +9195,7 @@ var RESEARCH_PETS = {
 function _petState(){
   try { return JSON.parse(localStorage.getItem('wf_pet_state') || '{}'); } catch(e) { return {}; }
 }
-function _savePetState(s){ localStorage.setItem('wf_pet_state', JSON.stringify(s)); }
+function _savePetState(s){ _setWorkflowStorageItem('wf_pet_state', JSON.stringify(s)); }
 function _seedForDate(date){
   var n = 0;
   String(date || localDateStr()).split('').forEach(function(ch){ n = (n * 31 + ch.charCodeAt(0)) % 100000; });
@@ -9715,7 +9797,7 @@ function _histRenderEditBody(){
       '</div>'+
     '</div>'+
     '<div style="font-size:11px;color:var(--text4);margin:8px 0 14px">修改后点"完成编辑"保存，会自动同步并更新统计</div>'+
-    '<div class="work-time-card"><div><label>当日预期工作时间（小时）</label><input type="number" min="0" max="24" step="0.5" value="'+esc(d.workTime.expectedHours)+'" oninput="histEditWorkTime(\'expectedHours\',this.value)"></div><div><label>当日实际工作时间（小时）</label><input type="number" min="0" max="24" step="0.5" value="'+esc(d.workTime.actualHours)+'" oninput="histEditWorkTime(\'actualHours\',this.value)"></div></div>'+
+    '<div class="work-time-card"><div><label>当日预期工作时间（小时）</label><input type="number" min="0" max="24" step="0.5" value="'+esc(d.workTime.expectedHours)+'" oninput="histEditWorkTime(\'expectedHours\',this,false)" onchange="histEditWorkTime(\'expectedHours\',this,true)"></div><div><label>当日实际工作时间（小时）</label><input type="number" min="0" max="24" step="0.5" value="'+esc(d.workTime.actualHours)+'" oninput="histEditWorkTime(\'actualHours\',this,false)" onchange="histEditWorkTime(\'actualHours\',this,true)"></div></div>'+
     // 晨间
     '<div class="detail-section">'+
       '<div onclick="toggleHistMorning()" style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:8px">'+
@@ -9803,7 +9885,7 @@ window.setHistTypeFilter = function(type) {
   _histRenderEditBody();
 };
 window.histEditField = function(id, field, val){ var t=_histFindTask(id); if(t) t[field]=val; };
-window.histEditWorkTime = function(field,val){ if(_histEditData&&_histEditData.workTime)_histEditData.workTime[field]=val; };
+window.histEditWorkTime = function(field,input,commit){if(!_histEditData||!_histEditData.workTime)return;var value=_normalizeWorkflowHours(input&&input.nodeType?input.value:input);if(commit&&input&&input.nodeType&&input.value!==value)input.value=value;_histEditData.workTime[field]=value;};
 window.histEditProblemStep = function(id, idx, val){ var t=_histFindTask(id); if(t) _setProblemStepThought(t, idx, val); };
 window.histEditToggleDone = function(id){
   var t=_histFindTask(id); if(!t) return;
@@ -10056,7 +10138,7 @@ window.histSaveEdit = function(){
         if(n.archived===true)savedNote.archived=true;else delete savedNote.archived;
         var savedBox=n.archiveBoxId&&_noteArchiveBoxById(n.archiveBoxId);if(savedBox)savedNote.archiveBoxId=n.archiveBoxId;else delete savedNote.archiveBoxId;
         if(savedBox&&n.archiveCategoryId&&_noteArchiveCategoryById(savedBox,n.archiveCategoryId))savedNote.archiveCategoryId=n.archiveCategoryId;else delete savedNote.archiveCategoryId;
-        localStorage.setItem('wf_note_'+n.timestamp,JSON.stringify(savedNote));
+        _setWorkflowStorageItem('wf_note_'+n.timestamp,JSON.stringify(savedNote));
       });
       _histDeletedNotes = [];
       _histDeletedTasks = [];
@@ -10291,12 +10373,12 @@ window.deleteHistoryDay = function(date) {
   showConfirm('确定删除 ' + date + ' 的记录吗？此操作不可撤销。', '🗑️', function() {
     var backup = localStorage.getItem('wf_day_' + date);
     localStorage.removeItem('wf_day_' + date);
-    localStorage.setItem('wf_backup_time', String(Date.now()));
+    _setWorkflowStorageItem('wf_backup_time', String(Date.now()));
     if (localStorage.getItem('gh_repo') && localStorage.getItem('gh_token')) saveToGitHub(0, true);
     if (accessToken) saveToDrive();
     showToast('已删除 ' + date + ' 的记录', 'info', '撤销', function() {
-      localStorage.setItem('wf_day_' + date, backup);
-      localStorage.setItem('wf_backup_time', String(Date.now()));
+      _setWorkflowStorageItem('wf_day_' + date, backup);
+      _setWorkflowStorageItem('wf_backup_time', String(Date.now()));
       if (localStorage.getItem('gh_repo') && localStorage.getItem('gh_token')) saveToGitHub();
       if (accessToken) saveToDrive();
       renderHistory();
@@ -10314,9 +10396,11 @@ var _weeklyInputSaveTimer=null;
 function _flushWeeklyInputSave(){
   clearTimeout(_weeklyInputSaveTimer);_weeklyInputSaveTimer=null;
   if(!_weeklyInputKey||!_weeklyInputData)return;
-  localStorage.setItem(_weeklyInputKey,JSON.stringify(_weeklyInputData));flash();
+  if(!_setWorkflowStorageItem(_weeklyInputKey,JSON.stringify(_weeklyInputData))){_renderWorkflowStorageFailure();return false;}
+  _clearWorkflowStorageFailure();flash();
   _weeklyInputKey='';_weeklyInputData=null;
   window._weeklyInputSaveCount=(window._weeklyInputSaveCount||0)+1;
+  return true;
 }
 function _weeklyDataForInput(){
   var key=currentWkKey();
@@ -10473,7 +10557,7 @@ window.addWeekTask = function(){
   var w = loadWk();
   w.tasks = w.tasks || [];
   w.tasks.push({task:'', value:'high', feas:'high'});
-  localStorage.setItem(currentWkKey(), JSON.stringify(w));
+  _setWorkflowStorageItem(currentWkKey(), JSON.stringify(w));
   renderWkTasks(w.tasks);
 };
 
@@ -10487,7 +10571,7 @@ window.delWkTask = function(i){
   _flushWeeklyInputSave();
   var w = loadWk();
   w.tasks.splice(i, 1);
-  localStorage.setItem(currentWkKey(), JSON.stringify(w));
+  _setWorkflowStorageItem(currentWkKey(), JSON.stringify(w));
   renderWkTasks(w.tasks);
 };
 
@@ -10526,9 +10610,11 @@ function _loadResearchState(){
 function _flushResearchStateSave(){
   clearTimeout(_researchStateSaveTimer);_researchStateSaveTimer=null;
   if(!_researchStateDirty||!_researchStateCache)return;
-  localStorage.setItem('wf_research_state',JSON.stringify(_researchStateCache));
+  if(!_setWorkflowStorageItem('wf_research_state',JSON.stringify(_researchStateCache))){_renderWorkflowStorageFailure();return false;}
+  _clearWorkflowStorageFailure();
   window._researchStateWriteCount=(window._researchStateWriteCount||0)+1;
   _researchStateDirty=false;
+  return true;
 }
 function _saveResearchState(state,deferred){
   if(window._isWorkflowComposing&&window._isWorkflowComposing())return;
@@ -10618,7 +10704,7 @@ function _renameResearchTaskProject(projectId,oldName,newName){
     var day;try{day=JSON.parse(localStorage.getItem(key));}catch(e){continue;}var changed=false;
     (day.tasks||[]).forEach(function(t){if(t.projectId===projectId||(!t.projectId&&t.project===oldName)){t.projectId=projectId;t.project=newName;changed=true;}});
     if(day.m&&day.m.taskObj&&(day.m.taskObj.projectId===projectId||(!day.m.taskObj.projectId&&day.m.taskObj.project===oldName))){day.m.taskObj.projectId=projectId;day.m.taskObj.project=newName;changed=true;}
-    if(changed)localStorage.setItem(key,JSON.stringify(_normalizeDayData(day)));
+    if(changed)_setWorkflowStorageItem(key,JSON.stringify(_normalizeDayData(day)));
   }
   if(todayData)todayData=loadDay(today);
 }
@@ -10628,7 +10714,7 @@ function _detachResearchTaskProject(projectId){
     var day;try{day=JSON.parse(localStorage.getItem(key));}catch(e){continue;}var changed=false;
     (day.tasks||[]).forEach(function(t){if(t.projectId===projectId){delete t.projectId;changed=true;}});
     if(day.m&&day.m.taskObj&&day.m.taskObj.projectId===projectId){delete day.m.taskObj.projectId;changed=true;}
-    if(changed)localStorage.setItem(key,JSON.stringify(_normalizeDayData(day)));
+    if(changed)_setWorkflowStorageItem(key,JSON.stringify(_normalizeDayData(day)));
   }
   if(todayData)todayData=loadDay(today);
 }
@@ -10755,7 +10841,7 @@ function _loadNoteArchiveBoxes(){
     return {id:String(box.id),name:name,color:_safeNoteArchiveBoxColor(box.color),pinned:box.pinned===true,categories:categories};
   }).filter(Boolean);
 }
-function _saveNoteArchiveBoxes(boxes){localStorage.setItem('wf_notes_archive_boxes',JSON.stringify(boxes||[]));}
+function _saveNoteArchiveBoxes(boxes){_setWorkflowStorageItem('wf_notes_archive_boxes',JSON.stringify(boxes||[]));}
 function _noteArchiveBoxById(id,boxes){id=String(id||'');return (boxes||_loadNoteArchiveBoxes()).find(function(box){return box.id===id;})||null;}
 function _sortedNoteArchiveBoxes(boxes){return (boxes||_loadNoteArchiveBoxes()).map(function(box,index){return {box:box,index:index};}).sort(function(a,b){return Number(!!b.box.pinned)-Number(!!a.box.pinned)||a.index-b.index;}).map(function(item){return item.box;});}
 function _noteArchiveCategoryById(box,id){id=String(id||'');return box&&Array.isArray(box.categories)?box.categories.find(function(category){return category.id===id;})||null:null;}
@@ -10850,7 +10936,7 @@ window.toggleNoteArchiveCategoryPin=function(boxId,categoryId){var boxes=_loadNo
 window.toggleNotesArchive=function(){var boxes=_loadNoteArchiveBoxes(),boxIds=boxes.map(function(box){return box.id;}),categoryKeys=[];boxes.forEach(function(box){box.categories.forEach(function(category){categoryKeys.push(_noteArchiveCategoryKey(box.id,category.id));});categoryKeys.push(_noteArchiveCategoryKey(box.id,'unclassified'));});var unfiled=getAllNotes().some(function(note){return note.archived===true&&!_noteArchiveBoxById(note.archiveBoxId,boxes);});if(unfiled){boxIds.push('unfiled');categoryKeys.push(_noteArchiveCategoryKey('unfiled','unclassified'));}var anyExpanded=boxIds.some(function(id){return !!window._noteArchiveBoxExpanded[id];})||categoryKeys.some(function(key){return !!window._noteArchiveCategoryExpanded[key];}),shouldExpand=!anyExpanded;boxIds.forEach(function(id){window._noteArchiveBoxExpanded[id]=shouldExpand;});categoryKeys.forEach(function(key){window._noteArchiveCategoryExpanded[key]=shouldExpand;});window._notesArchiveExpanded=shouldExpand;renderNotes();};
 window.setNoteArchiveFilter=function(filter){filter=String(filter||'all');if(filter==='all')return window.toggleNotesArchive();window._noteArchiveBoxExpanded[filter]=true;renderNotes();};
 window.assignNoteArchiveLocation=function(id,value){
-  _flushPendingNoteEdits();try{var key='wf_note_'+id,note=JSON.parse(localStorage.getItem(key));if(!note||typeof note!=='object'||Array.isArray(note))return;var parts=String(value||'').split('::'),box=_noteArchiveBoxById(parts[0]),category=box?_noteArchiveCategoryById(box,parts[1]):null;note.archived=true;window._notesArchiveRootExpanded=true;if(box){note.archiveBoxId=box.id;window._noteArchiveBoxExpanded[box.id]=true;if(category){note.archiveCategoryId=category.id;window._noteArchiveCategoryExpanded[_noteArchiveCategoryKey(box.id,category.id)]=true;}else{delete note.archiveCategoryId;window._noteArchiveCategoryExpanded[_noteArchiveCategoryKey(box.id,'unclassified')]=true;}}else{delete note.archiveBoxId;delete note.archiveCategoryId;window._noteArchiveBoxExpanded.unfiled=true;window._noteArchiveCategoryExpanded[_noteArchiveCategoryKey('unfiled','unclassified')]=true;}localStorage.setItem(key,JSON.stringify(note));renderNotes();}catch(e){showToast('移动收纳位置失败','warn');}
+  _flushPendingNoteEdits();try{var key='wf_note_'+id,note=JSON.parse(localStorage.getItem(key));if(!note||typeof note!=='object'||Array.isArray(note))return;var parts=String(value||'').split('::'),box=_noteArchiveBoxById(parts[0]),category=box?_noteArchiveCategoryById(box,parts[1]):null;note.archived=true;window._notesArchiveRootExpanded=true;if(box){note.archiveBoxId=box.id;window._noteArchiveBoxExpanded[box.id]=true;if(category){note.archiveCategoryId=category.id;window._noteArchiveCategoryExpanded[_noteArchiveCategoryKey(box.id,category.id)]=true;}else{delete note.archiveCategoryId;window._noteArchiveCategoryExpanded[_noteArchiveCategoryKey(box.id,'unclassified')]=true;}}else{delete note.archiveBoxId;delete note.archiveCategoryId;window._noteArchiveBoxExpanded.unfiled=true;window._noteArchiveCategoryExpanded[_noteArchiveCategoryKey('unfiled','unclassified')]=true;}_setWorkflowStorageItem(key,JSON.stringify(note));renderNotes();}catch(e){showToast('移动收纳位置失败','warn');}
 };
 window.assignNoteArchiveBox=function(id,boxId){return window.assignNoteArchiveLocation(id,boxId?String(boxId)+'::':'');};
 window.placeNoteInArchiveLocation=function(id,boxId,categoryId){
@@ -10860,7 +10946,7 @@ window.placeNoteInArchiveLocation=function(id,boxId,categoryId){
     var key='wf_note_'+id,note=JSON.parse(localStorage.getItem(key));if(!note||typeof note!=='object'||Array.isArray(note))return;
     note.archived=true;note.archiveBoxId=box.id;if(category)note.archiveCategoryId=category.id;else delete note.archiveCategoryId;
     note.timestamp=note.timestamp||Date.now();
-    localStorage.setItem(key,JSON.stringify(note));
+    _setWorkflowStorageItem(key,JSON.stringify(note));
     delete window._noteExpandState[id];delete window._noteEditState[id];
     window._notesArchiveRootExpanded=true;window._noteArchiveBoxExpanded[box.id]=true;window._noteArchiveCategoryExpanded[_noteArchiveCategoryKey(box.id,category?category.id:'unclassified')]=true;closeNoteArchivePicker();renderNotes();showToast('已放入“'+box.name+(category?' / '+category.name:' / 未分类')+'”','success');
   }catch(e){showToast('收纳操作失败','warn');}
@@ -10868,7 +10954,7 @@ window.placeNoteInArchiveLocation=function(id,boxId,categoryId){
 window.placeNoteInArchiveBox=function(id,boxId){return window.placeNoteInArchiveLocation(id,boxId,'');};
 window.toggleNoteArchive=function(id,shouldArchive,boxId){
   if(shouldArchive){if(boxId)return window.placeNoteInArchiveBox(id,boxId);return window.openNoteArchivePicker(id);}
-  _flushPendingNoteEdits();try{var key='wf_note_'+id,note=JSON.parse(localStorage.getItem(key));if(!note||typeof note!=='object'||Array.isArray(note))return;delete note.archived;delete note.archiveBoxId;delete note.archiveCategoryId;note.timestamp=note.timestamp||Date.now();localStorage.setItem(key,JSON.stringify(note));delete window._noteExpandState[id];delete window._noteEditState[id];renderNotes();showToast('已移出收纳区','success');}catch(e){showToast('收纳操作失败','warn');}
+  _flushPendingNoteEdits();try{var key='wf_note_'+id,note=JSON.parse(localStorage.getItem(key));if(!note||typeof note!=='object'||Array.isArray(note))return;delete note.archived;delete note.archiveBoxId;delete note.archiveCategoryId;note.timestamp=note.timestamp||Date.now();_setWorkflowStorageItem(key,JSON.stringify(note));delete window._noteExpandState[id];delete window._noteEditState[id];renderNotes();showToast('已移出收纳区','success');}catch(e){showToast('收纳操作失败','warn');}
 };
 window._noteArchivePendingId='';
 window.openNoteArchivePicker=function(id){
@@ -10903,10 +10989,10 @@ window.addNoteArchiveCategory=function(boxId,assignNoteId){
   showInputModal('输入“'+box.name+'”内的新分类名称','例如：待验证灵感','🗂️',function(value){var boxes=_loadNoteArchiveBoxes(),box=_noteArchiveBoxById(boxId,boxes);if(!box){showToast('收纳盒已不存在','warn');return;}var name=String(value||'').trim().slice(0,30);if(!name)return;if(box.categories.some(function(category){return category.name.toLowerCase()===name.toLowerCase();})){showToast('这个收纳盒内已有同名分类','warn');return;}var category={id:'cat_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,6),name:name,color:NOTE_ARCHIVE_BOX_COLORS[(box.categories.length+1)%NOTE_ARCHIVE_BOX_COLORS.length],pinned:false};box.categories.push(category);_saveNoteArchiveBoxes(boxes);window._notesArchiveRootExpanded=true;window._noteArchiveBoxExpanded[box.id]=true;window._noteArchiveCategoryExpanded[_noteArchiveCategoryKey(box.id,category.id)]=true;_renderNoteArchiveCategoryManager();if(assignNoteId)placeNoteInArchiveLocation(assignNoteId,box.id,category.id);else renderNotes();});
 };
 window.updateNoteArchiveCategory=function(boxId,categoryId,field,value){var boxes=_loadNoteArchiveBoxes(),box=_noteArchiveBoxById(boxId,boxes),category=_noteArchiveCategoryById(box,categoryId);if(!category)return;if(field==='name'){var name=String(value||'').trim().slice(0,30);if(!name||box.categories.some(function(item){return item.id!==categoryId&&item.name.toLowerCase()===name.toLowerCase();})){showToast(!name?'分类名称不能为空':'这个收纳盒内已有同名分类','warn');_renderNoteArchiveCategoryManager();return;}category.name=name;}else if(field==='color')category.color=_safeNoteArchiveBoxColor(value);else return;_saveNoteArchiveBoxes(boxes);_renderNoteArchiveCategoryManager();renderNotes();};
-window.deleteNoteArchiveCategory=function(boxId,categoryId){var boxes=_loadNoteArchiveBoxes(),box=_noteArchiveBoxById(boxId,boxes),category=_noteArchiveCategoryById(box,categoryId);if(!category)return;showConfirm('删除分类“'+category.name+'”？其中小记会移入“'+box.name+' / 未分类”，内容不会删除。','🗂️',function(){_flushPendingNoteEdits();var boxes=_loadNoteArchiveBoxes(),box=_noteArchiveBoxById(boxId,boxes);if(!box||!_noteArchiveCategoryById(box,categoryId))return;if(typeof _createLocalSnapshot==='function')_createLocalSnapshot('before-delete-note-archive-category',false);box.categories=box.categories.filter(function(item){return item.id!==categoryId;});_saveNoteArchiveBoxes(boxes);getAllNotes().forEach(function(note){if(note.archiveBoxId===boxId&&note.archiveCategoryId===categoryId){var key='wf_note_'+note.id;delete note.id;delete note.archiveCategoryId;localStorage.setItem(key,JSON.stringify(note));}});delete window._noteArchiveCategoryExpanded[_noteArchiveCategoryKey(boxId,categoryId)];window._noteArchiveBoxExpanded[boxId]=true;window._noteArchiveCategoryExpanded[_noteArchiveCategoryKey(boxId,'unclassified')]=true;_renderNoteArchiveCategoryManager();renderNotes();showToast('分类已删除，小记已移入未分类','success');});};
+window.deleteNoteArchiveCategory=function(boxId,categoryId){var boxes=_loadNoteArchiveBoxes(),box=_noteArchiveBoxById(boxId,boxes),category=_noteArchiveCategoryById(box,categoryId);if(!category)return;showConfirm('删除分类“'+category.name+'”？其中小记会移入“'+box.name+' / 未分类”，内容不会删除。','🗂️',function(){_flushPendingNoteEdits();var boxes=_loadNoteArchiveBoxes(),box=_noteArchiveBoxById(boxId,boxes);if(!box||!_noteArchiveCategoryById(box,categoryId))return;if(typeof _createLocalSnapshot==='function')_createLocalSnapshot('before-delete-note-archive-category',false);box.categories=box.categories.filter(function(item){return item.id!==categoryId;});_saveNoteArchiveBoxes(boxes);getAllNotes().forEach(function(note){if(note.archiveBoxId===boxId&&note.archiveCategoryId===categoryId){var key='wf_note_'+note.id;delete note.id;delete note.archiveCategoryId;_setWorkflowStorageItem(key,JSON.stringify(note));}});delete window._noteArchiveCategoryExpanded[_noteArchiveCategoryKey(boxId,categoryId)];window._noteArchiveBoxExpanded[boxId]=true;window._noteArchiveCategoryExpanded[_noteArchiveCategoryKey(boxId,'unclassified')]=true;_renderNoteArchiveCategoryManager();renderNotes();showToast('分类已删除，小记已移入未分类','success');});};
 window.deleteNoteArchiveBox=function(id){
   var boxes=_loadNoteArchiveBoxes(),box=boxes.find(function(item){return item.id===id;});if(!box)return;
-  showConfirm('删除收纳盒“'+box.name+'”？其中小记会移入“待整理”，小记内容不会删除。','🗃️',function(){_flushPendingNoteEdits();var boxes=_loadNoteArchiveBoxes();if(!_noteArchiveBoxById(id,boxes))return;if(typeof _createLocalSnapshot==='function')_createLocalSnapshot('before-delete-note-archive-box',false);_saveNoteArchiveBoxes(boxes.filter(function(item){return item.id!==id;}));getAllNotes().forEach(function(note){if(note.archiveBoxId===id){var key='wf_note_'+note.id;delete note.id;delete note.archiveBoxId;delete note.archiveCategoryId;localStorage.setItem(key,JSON.stringify(note));}});delete window._noteArchiveBoxExpanded[id];Object.keys(window._noteArchiveCategoryExpanded||{}).forEach(function(key){if(key.indexOf(id+'::')===0)delete window._noteArchiveCategoryExpanded[key];});window._noteArchiveBoxExpanded.unfiled=true;window._noteArchiveCategoryExpanded[_noteArchiveCategoryKey('unfiled','unclassified')]=true;_renderNoteArchiveBoxManager();renderNotes();showToast('收纳盒已删除，小记已移入待整理','success');});
+  showConfirm('删除收纳盒“'+box.name+'”？其中小记会移入“待整理”，小记内容不会删除。','🗃️',function(){_flushPendingNoteEdits();var boxes=_loadNoteArchiveBoxes();if(!_noteArchiveBoxById(id,boxes))return;if(typeof _createLocalSnapshot==='function')_createLocalSnapshot('before-delete-note-archive-box',false);_saveNoteArchiveBoxes(boxes.filter(function(item){return item.id!==id;}));getAllNotes().forEach(function(note){if(note.archiveBoxId===id){var key='wf_note_'+note.id;delete note.id;delete note.archiveBoxId;delete note.archiveCategoryId;_setWorkflowStorageItem(key,JSON.stringify(note));}});delete window._noteArchiveBoxExpanded[id];Object.keys(window._noteArchiveCategoryExpanded||{}).forEach(function(key){if(key.indexOf(id+'::')===0)delete window._noteArchiveCategoryExpanded[key];});window._noteArchiveBoxExpanded.unfiled=true;window._noteArchiveCategoryExpanded[_noteArchiveCategoryKey('unfiled','unclassified')]=true;_renderNoteArchiveBoxManager();renderNotes();showToast('收纳盒已删除，小记已移入待整理','success');});
 };
 window.toggleNoteCollapse = function(id){
   window._noteExpandState[id] = !window._noteExpandState[id];
@@ -10925,7 +11011,7 @@ window.toggleNotePin = function(id){
   try {
     var key='wf_note_'+id, note=JSON.parse(localStorage.getItem(key));if(!note||typeof note!=='object'||Array.isArray(note))return;
     note.pinned=!note.pinned;
-    localStorage.setItem(key,JSON.stringify(note));
+    _setWorkflowStorageItem(key,JSON.stringify(note));
     renderNotes();
     showToast(note.pinned?'小记已置顶':'已取消置顶','success');
   } catch(e){ showToast('置顶失败','warn'); }
@@ -11045,6 +11131,7 @@ window.toggleNotesPanel = function(){
     panel.classList.remove('open');
     backdrop.classList.remove('show');
   } else {
+    if(typeof window._setAppearancePanelOpen==='function')window._setAppearancePanelOpen(false);
     panel.classList.add('open');
     backdrop.classList.add('show');
     var list=document.getElementById('notesList'),loading=document.getElementById('notesLoading');
@@ -11063,7 +11150,8 @@ window.toggleNotesPanel = function(){
 window.addNote = function(){
   var id = Date.now();
   var note = {content:'', timestamp: id};
-  localStorage.setItem('wf_note_'+id, JSON.stringify(note));
+  if(!_setWorkflowStorageItem('wf_note_'+id, JSON.stringify(note))){_renderWorkflowStorageFailure();return;}
+  _clearWorkflowStorageFailure();
   window._noteExpandState[id]=true;
   window._noteEditState[id]=true;
   renderNotes();
@@ -11093,7 +11181,8 @@ function _commitNoteSave(id){
     if(note.content===el.value)return;
     note.content = el.value;
     note.timestamp = note.timestamp || Date.now();
-    localStorage.setItem('wf_note_'+id, JSON.stringify(note));
+    if(!_setWorkflowStorageItem('wf_note_'+id, JSON.stringify(note))){_renderWorkflowStorageFailure();return;}
+    _clearWorkflowStorageFailure();
     window._noteInputSaveCount=(window._noteInputSaveCount||0)+1;
     // The source's Markdown pipeline owns attached preview windows. Do not
     // render the hidden reading copy or broadcast a second full DOM replacement.
@@ -11876,9 +11965,9 @@ function applyFocusMode(enabled){
   var btn=document.getElementById('focusModeBtn');
   if(btn){btn.classList.toggle('active',!!enabled);btn.innerHTML='<span class="ico">◎</span>'+(enabled?'退出专注':'专注');}
 }
-window.toggleFocusMode=function(){var next=localStorage.getItem('wf_focus_mode')!=='1';localStorage.setItem('wf_focus_mode',next?'1':'0');applyFocusMode(next);};
+window.toggleFocusMode=function(){var next=localStorage.getItem('wf_focus_mode')!=='1';_setWorkflowStorageItem('wf_focus_mode',next?'1':'0');applyFocusMode(next);};
 window.enterLowEnergyMode=function(){
-  localStorage.setItem('wf_focus_mode','1'); applyFocusMode(true);
+  _setWorkflowStorageItem('wf_focus_mode','1'); applyFocusMode(true);
   switchTab('today');
   var evening=document.getElementById('eveningCard'); if(evening) evening.scrollIntoView({behavior:'smooth',block:'center'});
   var log=document.getElementById('eLog'); if(log){log.placeholder='今天只写一句：我发现了什么，或我困惑于什么？';setTimeout(function(){log.focus();},350);}
@@ -11918,7 +12007,7 @@ window.quickBackup = function() {
   a.download = 'workflow_backup_' + localDateStr() + '_' + _hm + '.json';
   a.click();
   URL.revokeObjectURL(a.href);
-  localStorage.setItem('wf_backup_time', String(Date.now()));
+  _setWorkflowStorageItem('wf_backup_time', String(Date.now()));
   updateBackupTime();
   showToast('本地备份已下载', 'success');
 };
@@ -12214,7 +12303,7 @@ window.deleteContinueTaskHistory = function(index) {
           return t.done || _continueGroupKey(t, false) !== item.groupKey;
         });
         removed += before - d.tasks.length;
-        if (changed || before !== d.tasks.length) localStorage.setItem(key, JSON.stringify(d));
+        if (changed || before !== d.tasks.length) _setWorkflowStorageItem(key, JSON.stringify(d));
       } catch(e) {}
     });
     _selectedContinueTasks = [];
@@ -12321,7 +12410,7 @@ window.addContinuedTasksToToday = function() {
           try {
             var srcDay = JSON.parse(localStorage.getItem('wf_day_' + date));
             var srcT = (srcDay.tasks || []).find(function(x){ return x.id === tid; });
-            if (srcT) { srcT._chainId = chainId; localStorage.setItem('wf_day_' + date, JSON.stringify(srcDay)); }
+            if (srcT) { srcT._chainId = chainId; _setWorkflowStorageItem('wf_day_' + date, JSON.stringify(srcDay)); }
           } catch(e) {}
         }
         var newTask = JSON.parse(JSON.stringify(src));
@@ -12598,7 +12687,7 @@ function autoCheckInContinue() {
       _ensureTaskChain(srcTask);
       if(!beforeChain && srcTask._chainId) {
         if (entry.fromMorning && entry.sourceDay.m) entry.sourceDay.m.taskObj = srcTask;
-        localStorage.setItem(entry.storageKey, JSON.stringify(entry.sourceDay));
+        _setWorkflowStorageItem(entry.storageKey, JSON.stringify(entry.sourceDay));
       }
       var label = getTaskPrimaryField(srcTask);
       var exists = (todayData.m && todayData.m.taskObj && srcTask._chainId && todayData.m.taskObj._chainId === srcTask._chainId) || todayData.tasks.some(function(t) {
@@ -12622,7 +12711,7 @@ function autoCheckInContinue() {
         if (!newTask._chainId) {
           newTask._chainId = 'chain_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
           srcTask._chainId = newTask._chainId;
-          localStorage.setItem(entry.storageKey, JSON.stringify(entry.sourceDay));
+          _setWorkflowStorageItem(entry.storageKey, JSON.stringify(entry.sourceDay));
         }
 
         // 增加打卡天数
@@ -12866,7 +12955,7 @@ window.handleImportFile = function(event) {
   function _saveMdFloatRect(box){
     if(!box || box.style.display === 'none') return;
     var r = box.getBoundingClientRect();
-    localStorage.setItem('wf_md_float_rect', JSON.stringify({
+    _setWorkflowStorageItem('wf_md_float_rect', JSON.stringify({
       left: Math.round(r.left) + 'px',
       top: Math.round(r.top) + 'px',
       width: Math.round(r.width) + 'px',
@@ -13465,7 +13554,7 @@ window.handleImportFile = function(event) {
     }
     if(noteId){
       var note=_readNote(noteId);
-      if((note.content||'')!==markdown){note.content=markdown;note.timestamp=note.timestamp||Date.now();localStorage.setItem('wf_note_'+noteId,JSON.stringify(note));}
+      if((note.content||'')!==markdown){note.content=markdown;note.timestamp=note.timestamp||Date.now();_setWorkflowStorageItem('wf_note_'+noteId,JSON.stringify(note));}
     }
     var result={markdown:markdown,index:selectionResult&&selectionResult.index,sourceEl:sourceEl,noteId:noteId,patch:options.patch||null};
     if(options.deferSurfaces){container._wfDeferredSurfaceSync=true;container._wfDeferredRichResult=result;}
@@ -13965,7 +14054,7 @@ window.handleImportFile = function(event) {
         if(!localStorage.getItem('wf_note_'+id))return;
         var panel=document.querySelector('.notes-panel-body'), panelScroll=panel?panel.scrollTop:0;
         var note=_readNote(id);note.content=_replaceTaskListState(note.content||'',index,box.checked);note.timestamp=note.timestamp||Date.now();
-        localStorage.setItem('wf_note_'+id,JSON.stringify(note));
+        _setWorkflowStorageItem('wf_note_'+id,JSON.stringify(note));
         _refreshNotePreviewSurfaces(id);
         requestAnimationFrame(function(){if(panel)panel.scrollTop=panelScroll;});
         flash();
@@ -14333,7 +14422,7 @@ window.handleImportFile = function(event) {
         if(!resizing)return;var height=Math.max(90,Math.min(resizing.height+ev.clientY-resizing.y,Math.round(window.innerHeight*.65)));previewBody.style.height=Math.round(height)+'px';previewBody.style.maxHeight='none';ev.preventDefault();
       });
       resizeBtn.addEventListener('pointerup',function(ev){
-        if(resizing){resizing=null;localStorage.setItem('wf_md_mobile_preview_height',String(Math.round(previewBody.getBoundingClientRect().height)));}
+        if(resizing){resizing=null;_setWorkflowStorageItem('wf_md_mobile_preview_height',String(Math.round(previewBody.getBoundingClientRect().height)));}
         try{resizeBtn.releasePointerCapture(ev.pointerId);}catch(e){}
       });
     }
@@ -14501,9 +14590,9 @@ window.handleImportFile = function(event) {
 
 <!--
 workflow_tool build
-version: 2026.09.19.3
-sourceSha256: bf9b969f3df852888f05f33acfb5dfabb360638e84cfbd025acaebe8ae366be6
-configSha256: 6203a90d677f9fb99ec74eb78e2ca14e4302a709b9b53d0b64af878fd6cce4c1
+version: 2026.09.20.1
+sourceSha256: 773e1387945c73eb9dbfee9518eba6d82af528b63774358c6e100871d753ec3f
+configSha256: 874b6d91bcfaaf8eea7456d411fba7d464195a224ed2054a93e8181e892e3e42
 coreSha256: e11c59692e6777662a581daa1e1485651eb47cbcfa655aba17a2c0e79f961cfe
 appSha256: 2f24aa03f02a5b051051aad95e186b81abef342d0af6958c66b79307c3dc0db3
 exportSha256: 13ad148412f079c37fed48892779a4c15a69b986b274bf432dd0506e64c0fa2a
@@ -14512,7 +14601,7 @@ historySha256: d2d96792bc489871e1e12fdf2483793e1781fec5835bae872974bc6b66894a79
 tasksSha256: cf7b1e78be5c87a40720433883aa80f4c8e36fe389400e217af9bb744ad8a590
 researchSha256: 7f18bf83e2678ea03658117f346225a9af8304668c9f622903770f0292e2c5a8
 stylesSha256: 438038ffa6949e8cb705df0dbad8d9a17ed29abd17f0c072fc70f88118cf55be
-builtAt: 2026-09-19T15:02:01.236Z
+builtAt: 2026-09-19T16:44:13.605Z
 -->
 
 <!-- Third-party notice: html2canvas/LICENSE
