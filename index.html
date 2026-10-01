@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <meta name="theme-color" content="#4f46e5">
-<meta name="workflow-version" content="2026.09.20.1">
+<meta name="workflow-version" content="2026.10.01.1">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1347,7 +1347,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   else root.WorkflowConfig = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
   return {
-    appVersion: '2026.09.20.1',
+    appVersion: '2026.10.01.1',
     schemaVersion: 9,
     typeLabels: {
       general: '通用',
@@ -3402,7 +3402,7 @@ var _githubSaveInProgress = false;
 var _githubSaveQueued = false;
 var _githubQueuedFeedback = false;
 var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 9;
-var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.09.20.1';
+var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.10.01.1';
 var WORKFLOW_KATEX_FONT_RULE='.katex,.math-fallback{font-family:var(--app-font-math)!important}.katex .katex-html{font-family:var(--app-font-math)!important}.katex .katex-html .mord:not(.mathbb):not(.mathcal):not(.mathfrak):not(.amsrm),.katex .katex-html .mord.mathnormal,.katex .katex-html .mord.mathit,.katex .katex-html .mord.mathrm,.katex .katex-html .mord.mathbf,.katex .katex-html .mop:not(.op-symbol):not(.mathbb):not(.mathcal):not(.mathfrak):not(.amsrm),.katex .katex-html .mbin,.katex .katex-html .mrel,.katex .katex-html .mopen,.katex .katex-html .mclose,.katex .katex-html .mpunct,.katex .katex-html .minner,.katex .katex-html .text{font-family:var(--app-font-math)!important;}';
 window.workflowKatexFontStyleHTML=function(){return '<style>'+WORKFLOW_KATEX_FONT_RULE+'</style>';};
 window.workflowKatexStyleHTML=function(){
@@ -13444,15 +13444,18 @@ window.handleImportFile = function(event) {
     if(metrics)_showRichSourcePositionMarker(source,metrics);
     source.classList.add('md-source-synced');clearTimeout(source._wfSourceSyncTimer);source._wfSourceSyncTimer=setTimeout(function(){source.classList.remove('md-source-synced');},900);
   }
-  function _syncRichSourcePosition(container,offset,forceVisual){
+  function _syncRichSourcePosition(container,offset,forceVisual,suppressVisual){
     if(!container)return;var source=container._wfRichSource;if(!source||typeof source.setSelectionRange!=='function')return;
     if(typeof offset!=='number')offset=_richSelectionMarkdownOffset(container);if(typeof offset!=='number')return;
     var text=String(source.value||''),position=Math.max(0,Math.min(offset,text.length));
     try{source.setSelectionRange(position,position);}catch(e){}
     source._wfPendingRichPosition=position;
+    if(suppressVisual){
+      clearTimeout(source._wfRichVisualSyncTimer);clearTimeout(source._wfRichVisualMaxTimer);source._wfRichVisualSyncTimer=null;source._wfRichVisualMaxTimer=null;return;
+    }
     if(!forceVisual&&text.length>5000){
-      clearTimeout(source._wfRichVisualSyncTimer);source._wfRichVisualSyncTimer=setTimeout(function(){_applyRichSourcePositionVisual(source,source._wfPendingRichPosition);},220);
-      if(!source._wfRichVisualMaxTimer)source._wfRichVisualMaxTimer=setTimeout(function(){_applyRichSourcePositionVisual(source,source._wfPendingRichPosition);},760);
+      clearTimeout(source._wfRichVisualSyncTimer);clearTimeout(source._wfRichVisualMaxTimer);source._wfRichVisualMaxTimer=null;
+      source._wfRichVisualSyncTimer=setTimeout(function(){source._wfRichVisualSyncTimer=null;_applyRichSourcePositionVisual(source,source._wfPendingRichPosition);},220);
       return;
     }
     _applyRichSourcePositionVisual(source,position);
@@ -13526,9 +13529,10 @@ window.handleImportFile = function(event) {
       // from the saved source when switching mode, not cloned on every commit.
     }
   }
-  function _flushDeferredRichSurfaces(container){
+  function _flushDeferredRichSurfaces(container,options){
     if(!container||!container._wfDeferredSurfaceSync||!container._wfDeferredRichResult)return false;
     if(container._wfRichComposing||_richSourceComposing(container._wfRichSource))return false;
+    options=options||{};
     var timerHost=container._wfRichTimerHost||window;timerHost.clearTimeout(container._wfDeferredSurfaceTimer);container._wfDeferredSurfaceTimer=null;container._wfDeferredSurfaceSync=false;
     var result=container._wfDeferredRichResult;container._wfDeferredRichResult=null;
     var currentSource=result.noteId?(_mdHostDocument.getElementById('note_'+result.noteId)||result.sourceEl):result.sourceEl;
@@ -13537,7 +13541,7 @@ window.handleImportFile = function(event) {
     if(currentSource&&String(currentSource.value||'')!==result.markdown)return false;
     if(result.noteId&&(!localStorage.getItem('wf_note_'+result.noteId)||String(_readNote(result.noteId).content||'')!==result.markdown))return false;
     _broadcastRichPreviewSurfaces(container,result.markdown,result.index,result.sourceEl,result.noteId,true,result.patch);
-    _syncRichSourcePosition(container,result.index);
+    _syncRichSourcePosition(container,result.index,false,!!options.suppressVisual);
     return true;
   }
   function _commitRichPreview(container,options){
@@ -13758,17 +13762,32 @@ window.handleImportFile = function(event) {
     if(!editable.querySelector('br'))editable.appendChild(doc.createElement('br'));
     _placeRichTextCaret(caret,caret.nodeValue.length);_retainRichCaretFocus(container);return true;
   }
-  // Typora 式块级输入规则：在空段开头输入标记和空格时直接建立真实 DOM 结构，
-  // 不经过会清理尾随空格的 Markdown 序列化路径。
+  function _deleteRichPrefixBeforeCaret(block,range){
+    if(!block||!range)return false;
+    try{
+      var prefix=range.cloneRange();prefix.selectNodeContents(block);prefix.setEnd(range.startContainer,range.startOffset);prefix.deleteContents();return true;
+    }catch(e){return false;}
+  }
+  function _moveRichChildrenPreservingMarkup(source,target){
+    if(!source||!target)return;while(source.firstChild)target.appendChild(source.firstChild);
+  }
+  function _richBlockHasSemanticContent(block){
+    if(!block)return false;
+    return !!_richChildren(block).replace(/[\s\u200B]/g,'');
+  }
+  // Typora 式块级输入规则：在段落开头输入标记和空格时直接建立真实 DOM 结构。
+  // 这里只消费光标前的触发前缀，并原样搬运其后的富文本 DOM；绝不能用
+  // textContent 重建正文。KaTeX 同时含无障碍层、视觉层与源码注解，摊平成
+  // textContent 会丢失 Markdown/LaTeX 语义并把同一公式复制成多份文本。
   function _applyRichSpaceInputRule(container){
     var state=_richCaretBlock(container);if(!state)return false;var block=state.block;
     if(block.tagName==='BLOCKQUOTE'||block.closest('pre,code,table'))return false;
     var marker=_richTextBeforeCaret(block,state.range),match=null,type='';
     // 输入“- ”已先成为普通列表；随后输入“[ ] ”时把当前项提升为任务列表。
     if(block.tagName==='LI'){
-      match=marker.match(/^\[([ xX])\]$/);if(!match)return false;
-      var taskDoc=container.ownerDocument||document,taskSuffix=String(block.textContent||'').replace(/\u200B/g,'').slice(marker.length),taskBox=taskDoc.createElement('input'),taskText=taskDoc.createTextNode(' '+taskSuffix);
-      taskBox.type='checkbox';taskBox.checked=match[1].toLowerCase()==='x';taskBox.setAttribute('contenteditable','false');block.textContent='';block.appendChild(taskBox);block.appendChild(taskText);_placeRichTextCaret(taskText,1);return true;
+      match=marker.match(/^\[([ xX])\]$/);if(!match||!_deleteRichPrefixBeforeCaret(block,state.range))return false;
+      var taskDoc=container.ownerDocument||document,taskBox=taskDoc.createElement('input'),taskCaret=taskDoc.createTextNode(' \u200B');
+      taskBox.type='checkbox';taskBox.checked=match[1].toLowerCase()==='x';taskBox.setAttribute('contenteditable','false');block.insertBefore(taskCaret,block.firstChild);block.insertBefore(taskBox,taskCaret);_placeRichTextCaret(taskCaret,2);return true;
     }
     if((match=marker.match(/^(\d+)\.$/)))type='ol';
     else if(/^[-+*]$/.test(marker))type='ul';
@@ -13776,18 +13795,19 @@ window.handleImportFile = function(event) {
     else if((match=marker.match(/^(#{1,6})$/)))type='heading';
     else if(marker==='>')type='quote';
     else return false;
-    var doc=container.ownerDocument||document,suffix=String(block.textContent||'').slice(marker.length).replace(/^\u200B/,'');
+    var doc=container.ownerDocument||document;if(!_deleteRichPrefixBeforeCaret(block,state.range))return false;
+    var hasContent=_richBlockHasSemanticContent(block);
     if(type==='ol'||type==='ul'||type==='task'){
       var list=doc.createElement(type==='ol'?'ol':'ul');if(type==='ol'&&Number(match[1])!==1)list.setAttribute('start',match[1]);
       var li=doc.createElement('li'),caret;
-      if(type==='task'){var box=doc.createElement('input');box.type='checkbox';box.checked=match[1].toLowerCase()==='x';box.setAttribute('contenteditable','false');li.appendChild(box);caret=doc.createTextNode(' '+(suffix||'\u200B'));li.appendChild(caret);}
-      else{caret=doc.createTextNode(suffix||'\u200B');li.appendChild(caret);}
-      if(!suffix)li.appendChild(doc.createElement('br'));list.appendChild(li);return _replaceRichBlock(block,list,caret,suffix?0:(type==='task'?2:1));
+      if(type==='task'){var box=doc.createElement('input');box.type='checkbox';box.checked=match[1].toLowerCase()==='x';box.setAttribute('contenteditable','false');li.appendChild(box);caret=doc.createTextNode(' \u200B');li.appendChild(caret);}
+      else{caret=doc.createTextNode('\u200B');li.appendChild(caret);}
+      _moveRichChildrenPreservingMarkup(block,li);if(!hasContent&&!li.querySelector('br'))li.appendChild(doc.createElement('br'));list.appendChild(li);return _replaceRichBlock(block,list,caret,type==='task'?2:1);
     }
     if(type==='heading'){
-      var heading=doc.createElement('h'+match[1].length),headingText=doc.createTextNode(suffix||'\u200B');heading.appendChild(headingText);if(!suffix)heading.appendChild(doc.createElement('br'));return _replaceRichBlock(block,heading,headingText,suffix?0:1);
+      var heading=doc.createElement('h'+match[1].length),headingCaret=doc.createTextNode('\u200B');heading.appendChild(headingCaret);_moveRichChildrenPreservingMarkup(block,heading);if(!hasContent&&!heading.querySelector('br'))heading.appendChild(doc.createElement('br'));return _replaceRichBlock(block,heading,headingCaret,1);
     }
-    var quote=doc.createElement('blockquote'),paragraph=doc.createElement('p'),quoteText=doc.createTextNode(suffix||'\u200B');paragraph.appendChild(quoteText);if(!suffix)paragraph.appendChild(doc.createElement('br'));quote.appendChild(paragraph);return _replaceRichBlock(block,quote,quoteText,suffix?0:1);
+    var quote=doc.createElement('blockquote'),paragraph=doc.createElement('p'),quoteCaret=doc.createTextNode('\u200B');paragraph.appendChild(quoteCaret);_moveRichChildrenPreservingMarkup(block,paragraph);if(!hasContent&&!paragraph.querySelector('br'))paragraph.appendChild(doc.createElement('br'));quote.appendChild(paragraph);return _replaceRichBlock(block,quote,quoteCaret,1);
   }
   function _applyRichEnterInputRule(container){
     var state=_richCaretBlock(container);if(!state||state.block.tagName==='LI'||state.block.closest('pre,code,table'))return false;
@@ -13908,7 +13928,7 @@ window.handleImportFile = function(event) {
       if(composing||container._wfRichComposing||_richSourceComposing(container._wfRichSource))return false;
       var hadTimer=!!(timer||maxTimer||dirty);richClearTimer(timer);richClearTimer(maxTimer);timer=null;maxTimer=null;batchStarted=0;if(!hadTimer)return false;
       var eventInfo=pendingEvent,completedFormat=completedFormatPending,sourceBefore=container._wfRichSource?String(container._wfRichSource.value||''):container._wfRichNoteId?String(_readNote(container._wfRichNoteId).content||''):'';pendingEvent=null;completedFormatPending=false;
-      var keepNativeCaret=_richSelectionInEmptyBlock(container),length=richDelay().length||String(container._wfRichSource&&container._wfRichSource.value||'').length,deferSurfaces=mode==='max'&&length>5000,simplePatch=!multipleBlocks&&pendingBlock===_richSelectionTopBlock(container)&&eventInfo&&/^(?:insertText|insertCompositionText|deleteContentBackward|deleteContentForward)$/.test(String(eventInfo.inputType||''))?_richActiveBlockPatch(container):null;
+      var keepNativeCaret=_richSelectionInEmptyBlock(container),length=richDelay().length||String(container._wfRichSource&&container._wfRichSource.value||'').length,deferSurfaces=mode==='max'&&length>5000,suppressMaxVisual=mode==='max'&&length>5000,simplePatch=!multipleBlocks&&pendingBlock===_richSelectionTopBlock(container)&&eventInfo&&/^(?:insertText|insertCompositionText|deleteContentBackward|deleteContentForward)$/.test(String(eventInfo.inputType||''))?_richActiveBlockPatch(container):null;
       dirty=false;pendingBlock=null;multipleBlocks=false;
       var result=_commitRichPreview(container,{deferSurfaces:true,deferPosition:true,patch:simplePatch});if(result)container._wfRichTextLength=String(result.markdown||'').length;
       // The delta fallback is specifically for IME/browser events that omit
@@ -13918,8 +13938,8 @@ window.handleImportFile = function(event) {
       if(!keepNativeCaret&&result&&(completedFormat||_richCompletedFormat(result,eventInfo))){container._wfDeferredSurfaceSync=false;container._wfDeferredRichResult=null;_rerenderCompletedRichFormat(container,result);_syncRichSourcePosition(container,result.index);}
       // A bounded single-block patch is cheap enough to broadcast at the max
       // commit itself. Only structural/full-view updates need the extra pause.
-      else if(deferSurfaces&&!simplePatch){_syncRichSourcePosition(container,result&&result.index);richClearTimer(container._wfDeferredSurfaceTimer);container._wfDeferredSurfaceTimer=richSetTimer(function(){_flushDeferredRichSurfaces(container);},280);}
-      else _flushDeferredRichSurfaces(container);
+      else if(deferSurfaces&&!simplePatch){_syncRichSourcePosition(container,result&&result.index,false,suppressMaxVisual);richClearTimer(container._wfDeferredSurfaceTimer);container._wfDeferredSurfaceTimer=richSetTimer(function(){_flushDeferredRichSurfaces(container);},280);}
+      else _flushDeferredRichSurfaces(container,{suppressVisual:suppressMaxVisual});
       return true;
     }
     function queue(ev){
@@ -13949,13 +13969,28 @@ window.handleImportFile = function(event) {
       if(container._wfDisposeFormulaEdit)container._wfDisposeFormulaEdit();
     };
     function prepareRichHandoff(){
-      if(composing||container._wfRichComposing)return false;
-      var flushed=_flushRichPreviewPeers(container._wfRichSource,container._wfRichNoteId,container);
-      if(flushed)_restoreRichPreviewCaret(container);
-      return flushed;
+      if(composing||container._wfRichComposing)return '';
+      var source=container._wfRichSource,sourceRefreshed=false;
+      // A source edit may still be inside its short preview-coalescing window
+      // when the user immediately clicks another rendered surface. Do not let
+      // that stale surface become the new writer: synchronously render the
+      // newest source basis before handing editing ownership to it.
+      if(source&&source._wfQueuedPreviewValue&&source._wfQueuedPreviewValue===String(source.value||'')&&typeof source._mdUpdate==='function'){
+        source._mdUpdate();sourceRefreshed=true;
+      }
+      var flushed=_flushRichPreviewPeers(source,container._wfRichNoteId,container),prepared=flushed||sourceRefreshed;
+      if(prepared)_restoreRichPreviewCaret(container);
+      return sourceRefreshed?'source':(flushed?'peer':'');
     }
     container.addEventListener('focus',function(){prepareRichHandoff();_markWorkflowEditorActivity();});
-    container.addEventListener('pointerdown',function(){if(prepareRichHandoff()){container.focus({preventScroll:true});_restoreRichPreviewCaret(container);}},true);
+    container.addEventListener('pointerdown',function(ev){
+      var handoff=prepareRichHandoff();if(!handoff)return;
+      // If this pointerdown itself replaced stale rendered DOM, its original
+      // target no longer belongs to the current document tree. Consume only
+      // that stale default action, then focus and restore the new source caret.
+      if(handoff==='source')ev.preventDefault();
+      container.focus({preventScroll:true});_restoreRichPreviewCaret(container);
+    },true);
     container.addEventListener('compositionstart',function(){
       composing=true;container._wfRichComposing=true;_markWorkflowEditorActivity();
       richClearTimer(timer);richClearTimer(maxTimer);richClearTimer(container._wfDeferredSurfaceTimer);timer=null;maxTimer=null;container._wfDeferredSurfaceTimer=null;batchStarted=0;
@@ -14590,9 +14625,9 @@ window.handleImportFile = function(event) {
 
 <!--
 workflow_tool build
-version: 2026.09.20.1
-sourceSha256: 773e1387945c73eb9dbfee9518eba6d82af528b63774358c6e100871d753ec3f
-configSha256: 874b6d91bcfaaf8eea7456d411fba7d464195a224ed2054a93e8181e892e3e42
+version: 2026.10.01.1
+sourceSha256: 72fffb7b4a737058db2280fa653c92c86d9b03a57b7abc6b8949f1b204ba5fa6
+configSha256: cccb7c18c054a15e9a294d001649b6a262d4bf3000652ad583c9370476f66b1d
 coreSha256: e11c59692e6777662a581daa1e1485651eb47cbcfa655aba17a2c0e79f961cfe
 appSha256: 2f24aa03f02a5b051051aad95e186b81abef342d0af6958c66b79307c3dc0db3
 exportSha256: 13ad148412f079c37fed48892779a4c15a69b986b274bf432dd0506e64c0fa2a
@@ -14601,7 +14636,7 @@ historySha256: d2d96792bc489871e1e12fdf2483793e1781fec5835bae872974bc6b66894a79
 tasksSha256: cf7b1e78be5c87a40720433883aa80f4c8e36fe389400e217af9bb744ad8a590
 researchSha256: 7f18bf83e2678ea03658117f346225a9af8304668c9f622903770f0292e2c5a8
 stylesSha256: 438038ffa6949e8cb705df0dbad8d9a17ed29abd17f0c072fc70f88118cf55be
-builtAt: 2026-09-19T16:44:13.605Z
+builtAt: 2026-10-01T06:53:19.864Z
 -->
 
 <!-- Third-party notice: html2canvas/LICENSE
