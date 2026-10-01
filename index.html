@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <meta name="theme-color" content="#4f46e5">
-<meta name="workflow-version" content="2026.10.01.1">
+<meta name="workflow-version" content="2026.10.01.8">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1347,7 +1347,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   else root.WorkflowConfig = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
   return {
-    appVersion: '2026.10.01.1',
+    appVersion: '2026.10.01.8',
     schemaVersion: 9,
     typeLabels: {
       general: '通用',
@@ -3402,7 +3402,7 @@ var _githubSaveInProgress = false;
 var _githubSaveQueued = false;
 var _githubQueuedFeedback = false;
 var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 9;
-var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.10.01.1';
+var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.10.01.8';
 var WORKFLOW_KATEX_FONT_RULE='.katex,.math-fallback{font-family:var(--app-font-math)!important}.katex .katex-html{font-family:var(--app-font-math)!important}.katex .katex-html .mord:not(.mathbb):not(.mathcal):not(.mathfrak):not(.amsrm),.katex .katex-html .mord.mathnormal,.katex .katex-html .mord.mathit,.katex .katex-html .mord.mathrm,.katex .katex-html .mord.mathbf,.katex .katex-html .mop:not(.op-symbol):not(.mathbb):not(.mathcal):not(.mathfrak):not(.amsrm),.katex .katex-html .mbin,.katex .katex-html .mrel,.katex .katex-html .mopen,.katex .katex-html .mclose,.katex .katex-html .mpunct,.katex .katex-html .minner,.katex .katex-html .text{font-family:var(--app-font-math)!important;}';
 window.workflowKatexFontStyleHTML=function(){return '<style>'+WORKFLOW_KATEX_FONT_RULE+'</style>';};
 window.workflowKatexStyleHTML=function(){
@@ -13186,7 +13186,15 @@ window.handleImportFile = function(event) {
     // Syntax characters have no rendered glyph: use the nearest safe text boundary.
     var math=/\$\$[\s\S]*?\$\$|(?<!\\)\$(?!\$)[^\n$]+\$|\\\([\s\S]*?\\\)|\\\[[\s\S]*?\\\]/g,match;
     while((match=math.exec(value))){if(caret>match.index&&caret<match.index+match[0].length){caret=match.index+match[0].length;break;}}
-    var candidates=[caret];
+    var candidates=[];
+    // At a Markdown block boundary, prefer the end of the preceding block.
+    // Putting the passive caret marker at the first character of the next
+    // unchanged block changes that block's reconciliation key; for a math
+    // paragraph this needlessly rebuilds an otherwise untouched KaTeX node.
+    var boundaryBack=caret;
+    while(boundaryBack>0&&value.charAt(boundaryBack-1)==='\n')boundaryBack--;
+    if(boundaryBack<=caret-2)candidates.push(boundaryBack);
+    candidates.push(caret);
     for(var distance=1;distance<=12;distance++){candidates.push(caret+distance,caret-distance);}
     var lineEnd=value.indexOf('\n',caret);candidates.push(lineEnd<0?value.length:lineEnd,value.length,0);
     for(var i=0;i<candidates.length;i++){
@@ -13222,8 +13230,9 @@ window.handleImportFile = function(event) {
   function enableTaskListCheckboxes(container, sourceEl){
     if(!container||!sourceEl)return;
     Array.prototype.slice.call(container.querySelectorAll('input[type="checkbox"]')).forEach(function(box,index){
-      box.disabled=false; box.classList.add('task-list-item-checkbox');
-      box.onchange=function(){
+      box.disabled=false;box.setAttribute('contenteditable','false');box.classList.add('task-list-item-checkbox');box.onchange=null;
+      box.onclick=function(ev){
+        if(ev)ev.stopPropagation();
         var oldScroll=container.scrollTop, start=sourceEl.selectionStart, end=sourceEl.selectionEnd;
         sourceEl.value=_replaceTaskListState(sourceEl.value,index,box.checked);
         if(typeof start==='number'&&sourceEl.setSelectionRange)sourceEl.setSelectionRange(start,end);
@@ -13234,9 +13243,22 @@ window.handleImportFile = function(event) {
     });
   }
 
+  function _richFormulaCapsule(node){
+    if(!node||node.nodeType!==1)return node;
+    var owned=node.closest&&node.closest('[data-wf-formula-tex]');if(owned)return owned;
+    if(node.classList.contains('katex-display')||node.classList.contains('math-fallback'))return node;
+    var display=node.closest&&node.closest('.katex-display');if(display)return display;
+    var parent=node.parentElement;
+    if(parent&&parent.tagName==='SPAN'&&parent.childElementCount===1&&parent.firstElementChild===node)return parent;
+    return node;
+  }
   function _richFormulaSource(node,display){
+    var capsule=_richFormulaCapsule(node),capsuleTex=capsule&&capsule.getAttribute&&capsule.getAttribute('data-wf-formula-tex')||'';
     var annotation=node.querySelector&&node.querySelector('annotation[encoding="application/x-tex"]');
-    var tex=annotation?annotation.textContent:(node.getAttribute&&node.getAttribute('data-tex'))||'';
+    // The capsule and data-tex are editor-owned canonical caches. Native
+    // contenteditable boundary deletion can damage KaTeX's MathML annotation
+    // while leaving the visual subtree intact; never let that erase Markdown.
+    var cached=(node.getAttribute&&node.getAttribute('data-tex'))||'',annotated=annotation?String(annotation.textContent||''):'',tex=capsuleTex||cached||annotated;
     return tex?(display?'\n$$'+tex+'$$\n':'$'+tex+'$'):'';
   }
   var _richMarkerContext=null;
@@ -13309,6 +13331,10 @@ window.handleImportFile = function(event) {
     var tag=node.tagName;
     if(node.classList.contains('md-caret-anchor'))return '';
     if(node.classList.contains('formula-source-editor'))return '';
+    if(node.hasAttribute('data-wf-formula-tex')){
+      var capsuleTex=node.getAttribute('data-wf-formula-tex')||'',capsuleDisplay=node.getAttribute('data-wf-formula-display')==='1';
+      return capsuleTex?(capsuleDisplay?'\n$$'+capsuleTex+'$$\n':'$'+capsuleTex+'$'):'';
+    }
     if(node.classList.contains('md-callout-label'))return '';
     if(node.classList.contains('md-comment'))return '%%'+_richChildren(node)+'%%';
     if(node.classList.contains('katex-display'))return _richFormulaSource(node,true);
@@ -13638,8 +13664,26 @@ window.handleImportFile = function(event) {
   }
   function _richFormulaTex(node){
     if(!node)return '';
-    var annotation=node.querySelector&&node.querySelector('annotation[encoding="application/x-tex"]');
-    return annotation?annotation.textContent:(node.getAttribute('data-tex')||'');
+    var capsule=_richFormulaCapsule(node),capsuleTex=capsule&&capsule.getAttribute&&capsule.getAttribute('data-wf-formula-tex')||'';
+    var cached=node.getAttribute&&node.getAttribute('data-tex')||'',annotation=node.querySelector&&node.querySelector('annotation[encoding="application/x-tex"]');
+    return capsuleTex||cached||(annotation?annotation.textContent:'');
+  }
+  function _isRichFormulaCaretGuard(node){return !!(node&&node.nodeType===3&&String(node.nodeValue||'')==='\u200B');}
+  function _ensureRichFormulaCaretGuards(capsule){
+    // Legacy cleanup only. Persistent zero-width guards make the next native
+    // Backspace/Delete consume an invisible character instead of user text.
+    // Logical caret state plus a DOM boundary Range is sufficient now.
+    if(!capsule||!capsule.parentNode)return;_removeRichFormulaCaretGuards(capsule);
+  }
+  function _removeRichFormulaCaretGuards(capsule){
+    if(!capsule)return;var before=capsule.previousSibling,after=capsule.nextSibling;
+    if(_isRichFormulaCaretGuard(before))before.remove();
+    if(_isRichFormulaCaretGuard(after))after.remove();
+  }
+  function _setRichFormulaMetadata(node,tex){
+    if(!node)return;tex=String(tex||'');var capsule=_richFormulaCapsule(node),display=node.classList.contains('katex-display')||node.classList.contains('display')||!!(node.closest&&node.closest('.katex-display'));
+    if(tex){node.setAttribute&&node.setAttribute('data-tex',tex);if(capsule&&capsule.setAttribute){capsule.setAttribute('data-wf-formula-tex',tex);capsule.setAttribute('data-wf-formula-display',display?'1':'0');capsule.setAttribute('contenteditable','false');_ensureRichFormulaCaretGuards(capsule);}}
+    else if(capsule&&capsule.removeAttribute){_removeRichFormulaCaretGuards(capsule);capsule.removeAttribute('data-wf-formula-tex');capsule.removeAttribute('data-wf-formula-display');}
   }
   function _closeRichFormulaEditor(container){
     if(!container)return;
@@ -13649,9 +13693,9 @@ window.handleImportFile = function(event) {
   function _finishRichFormulaEdit(container,node,tex){
     tex=String(tex||'').trim();
     if(tex){
-      node.setAttribute('data-tex',tex);
+      _setRichFormulaMetadata(node,tex);
       var annotation=node.querySelector&&node.querySelector('annotation[encoding="application/x-tex"]');if(annotation)annotation.textContent=tex;
-    }else node.remove();
+    }else{var capsule=_richFormulaCapsule(node);_setRichFormulaMetadata(node,'');if(capsule&&capsule!==node)capsule.remove();else node.remove();}
     container._wfFlushFormulaEdit=null;_closeRichFormulaEditor(container);_commitRichPreview(container);
     var source=container._wfRichSource,id=container._wfRichNoteId;
     if(source){source.dispatchEvent(new Event('change',{bubbles:true}));if(typeof source._mdUpdate==='function')source._mdUpdate();}
@@ -13659,7 +13703,7 @@ window.handleImportFile = function(event) {
   }
   function _stageRichFormulaEdit(container,node,tex){
     var block=node;while(block&&block.parentNode!==container)block=block.parentNode;if(block)block._wfPreviewMarkup=null;
-    tex=String(tex||'');node.setAttribute('data-tex',tex);
+    tex=String(tex||'');_setRichFormulaMetadata(node,tex);
     var annotation=node.querySelector&&node.querySelector('annotation[encoding="application/x-tex"]');if(annotation)annotation.textContent=tex;
     _commitRichPreview(container);
   }
@@ -13725,6 +13769,14 @@ window.handleImportFile = function(event) {
     if(!block||!block.parentNode)return false;block.parentNode.replaceChild(replacement,block);_placeRichTextCaret(caretNode||replacement,caretOffset||0);return true;
   }
   function _richStableEmptyText(doc){return (doc||document).createTextNode('\u200B');}
+  function _richPlaceholderBreak(doc){var br=(doc||document).createElement('br');br.setAttribute('data-wf-placeholder-br','1');return br;}
+  function _consumeRichPlaceholderBreak(container){
+    if(!container)return false;var state=_richCaretBlock(container),block=state&&state.block,removed=false;
+    if(!block)block=_richSelectionTopBlock(container);
+    if(!block||!container.contains(block)||!_richBlockHasSemanticContent(block))return false;
+    block.querySelectorAll&&block.querySelectorAll(':scope > br[data-wf-placeholder-br="1"]').forEach(function(br){br.remove();removed=true;});
+    return removed;
+  }
   function _retainRichCaretFocus(container){
     if(!container)return;var doc=container.ownerDocument||document,selection=doc.getSelection&&doc.getSelection(),range=selection&&selection.rangeCount?selection.getRangeAt(0).cloneRange():null;
     container.focus({preventScroll:true});(doc.defaultView||window).setTimeout(function(){
@@ -13738,11 +13790,19 @@ window.handleImportFile = function(event) {
   function _ensureRichEmptyTarget(container,target){
     if(!container||!target)return false;
     var element=target.nodeType===1?target:target.parentElement;if(!element||element.closest&&element.closest('input[type="checkbox"],.formula-source-editor'))return false;
-    if(element===container&&!String(container.textContent||'').replace(/[\s\u200B]/g,'')){
-      var emptyDoc=container.ownerDocument||document,paragraph=emptyDoc.createElement('p'),emptyCaret=_richStableEmptyText(emptyDoc);paragraph.appendChild(emptyCaret);paragraph.appendChild(emptyDoc.createElement('br'));container.replaceChildren(paragraph);_placeRichTextCaret(emptyCaret,1);_retainRichCaretFocus(container);return true;
+    if(element===container&&!_richBlockHasSemanticContent(container)){
+      var emptyDoc=container.ownerDocument||document,paragraph=emptyDoc.createElement('p'),emptyCaret=_richStableEmptyText(emptyDoc);paragraph.appendChild(emptyCaret);paragraph.appendChild(_richPlaceholderBreak(emptyDoc));container.replaceChildren(paragraph);_placeRichTextCaret(emptyCaret,1);_retainRichCaretFocus(container);return true;
     }
     var block=element.closest&&element.closest('li,p,div,h1,h2,h3,h4,h5,h6,blockquote,pre,code');
+    if(block===container)block=null;
     if((element.tagName==='OL'||element.tagName==='UL')&&!block)block=element.querySelector(':scope > li');
+    if(!block&&element===container){
+      var candidates=Array.prototype.slice.call(container.querySelectorAll('li,p,h1,h2,h3,h4,h5,h6,blockquote,pre')),pointY=container._wfLastPointerY;
+      if(candidates.length){
+        var best=null,bestDistance=Infinity;candidates.forEach(function(candidate){var rect=candidate.getBoundingClientRect(),distance=typeof pointY==='number'?(pointY<rect.top?rect.top-pointY:pointY>rect.bottom?pointY-rect.bottom:0):0;if(distance<bestDistance){best=candidate;bestDistance=distance;}});
+        if(best&&(typeof pointY!=='number'||bestDistance<=18))block=best;
+      }
+    }
     if(!block||block===container||!container.contains(block))return false;
     var raw=String(block.textContent||'').replace(/\u200B/g,'').trim(),lastText=null,walker=(block.ownerDocument||document).createTreeWalker(block,NodeFilter.SHOW_TEXT),next;
     while((next=walker.nextNode()))lastText=next;
@@ -13759,7 +13819,7 @@ window.handleImportFile = function(event) {
     Array.prototype.forEach.call(editable.childNodes||[],function(child){if(child.nodeType===3)caret=child;});
     if(!caret){caret=_richStableEmptyText(doc);editable.appendChild(caret);}else if(caret.nodeValue.indexOf('\u200B')<0)caret.nodeValue+='\u200B';
     if(checkbox&&caret.nodeValue.charAt(0)!==' ')caret.nodeValue=' '+caret.nodeValue;
-    if(!editable.querySelector('br'))editable.appendChild(doc.createElement('br'));
+    if(!editable.querySelector('br'))editable.appendChild(_richPlaceholderBreak(doc));
     _placeRichTextCaret(caret,caret.nodeValue.length);_retainRichCaretFocus(container);return true;
   }
   function _deleteRichPrefixBeforeCaret(block,range){
@@ -13802,12 +13862,12 @@ window.handleImportFile = function(event) {
       var li=doc.createElement('li'),caret;
       if(type==='task'){var box=doc.createElement('input');box.type='checkbox';box.checked=match[1].toLowerCase()==='x';box.setAttribute('contenteditable','false');li.appendChild(box);caret=doc.createTextNode(' \u200B');li.appendChild(caret);}
       else{caret=doc.createTextNode('\u200B');li.appendChild(caret);}
-      _moveRichChildrenPreservingMarkup(block,li);if(!hasContent&&!li.querySelector('br'))li.appendChild(doc.createElement('br'));list.appendChild(li);return _replaceRichBlock(block,list,caret,type==='task'?2:1);
+      _moveRichChildrenPreservingMarkup(block,li);if(!hasContent&&!li.querySelector('br'))li.appendChild(_richPlaceholderBreak(doc));list.appendChild(li);return _replaceRichBlock(block,list,caret,type==='task'?2:1);
     }
     if(type==='heading'){
-      var heading=doc.createElement('h'+match[1].length),headingCaret=doc.createTextNode('\u200B');heading.appendChild(headingCaret);_moveRichChildrenPreservingMarkup(block,heading);if(!hasContent&&!heading.querySelector('br'))heading.appendChild(doc.createElement('br'));return _replaceRichBlock(block,heading,headingCaret,1);
+      var heading=doc.createElement('h'+match[1].length),headingCaret=doc.createTextNode('\u200B');heading.appendChild(headingCaret);_moveRichChildrenPreservingMarkup(block,heading);if(!hasContent&&!heading.querySelector('br'))heading.appendChild(_richPlaceholderBreak(doc));return _replaceRichBlock(block,heading,headingCaret,1);
     }
-    var quote=doc.createElement('blockquote'),paragraph=doc.createElement('p'),quoteCaret=doc.createTextNode('\u200B');paragraph.appendChild(quoteCaret);_moveRichChildrenPreservingMarkup(block,paragraph);if(!hasContent&&!paragraph.querySelector('br'))paragraph.appendChild(doc.createElement('br'));quote.appendChild(paragraph);return _replaceRichBlock(block,quote,quoteCaret,1);
+    var quote=doc.createElement('blockquote'),paragraph=doc.createElement('p'),quoteCaret=doc.createTextNode('\u200B');paragraph.appendChild(quoteCaret);_moveRichChildrenPreservingMarkup(block,paragraph);if(!hasContent&&!paragraph.querySelector('br'))paragraph.appendChild(_richPlaceholderBreak(doc));quote.appendChild(paragraph);return _replaceRichBlock(block,quote,quoteCaret,1);
   }
   function _applyRichEnterInputRule(container){
     var state=_richCaretBlock(container);if(!state||state.block.tagName==='LI'||state.block.closest('pre,code,table'))return false;
@@ -13827,17 +13887,56 @@ window.handleImportFile = function(event) {
     container.querySelectorAll('.rich-edit-target').forEach(function(node){node.classList.remove('rich-edit-target');});li.classList.add('rich-edit-target');_retainRichCaretFocus(container);if(savedNode&&selection&&li.contains(savedNode)){var restored=doc.createRange(),maxOffset=savedNode.nodeType===3?String(savedNode.nodeValue||'').length:savedNode.childNodes.length;restored.setStart(savedNode,Math.min(savedOffset,maxOffset));restored.collapse(true);selection.removeAllRanges();selection.addRange(restored);}try{li.scrollIntoView({block:'nearest',inline:'nearest'});}catch(e){}
     container.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:outdent?'formatOutdent':'formatIndent',data:null}));return true;
   }
-  function _handleRichListEnter(container,li){
-    if(!container||!li||!li.parentNode)return false;var doc=container.ownerDocument||document,list=li.parentNode,selection=doc.getSelection(),range=selection&&selection.rangeCount&&selection.getRangeAt(0);if(!range||!li.contains(range.startContainer))return false;
+  function _normalizeRichFormulaSplitRange(container,block,range,selection){
+    if(!container||!block||!range||!range.collapsed)return range;
+    var boundary=_richFormulaCaretBoundary(container,block,range),target=null,after=false;
+    if(boundary&&boundary.inside)target=boundary.inside;
+    else if(boundary&&boundary.right)target=boundary.right;
+    else if(boundary&&boundary.left){target=boundary.left;after=true;}
+    if(!target)return range;
+    try{
+      var normalized=range.cloneRange();
+      if(after)normalized.setStartAfter(target.top);else normalized.setStartBefore(target.top);
+      normalized.collapse(true);if(selection){selection.removeAllRanges();selection.addRange(normalized);}return normalized;
+    }catch(e){return range;}
+  }
+  function _handleRichParagraphEnter(container,block,forcedRange){
+    if(!container||!block||!block.parentNode||!/^(P|DIV)$/.test(block.tagName))return false;
+    var doc=container.ownerDocument||document,selection=doc.getSelection&&doc.getSelection(),range=forcedRange?forcedRange.cloneRange():(selection&&selection.rangeCount&&selection.getRangeAt(0));
+    if(!range||(range.startContainer!==block&&!block.contains(range.startContainer)))return false;range=_normalizeRichFormulaSplitRange(container,block,range,forcedRange?null:selection);
+    if(!range.collapsed){range.deleteContents();range.collapse(true);if(selection){selection.removeAllRanges();selection.addRange(range);}}
+    var prefix=range.cloneRange();prefix.selectNodeContents(block);prefix.setEnd(range.startContainer,range.startOffset);
+    var prefixProbe=prefix.cloneContents();prefixProbe.querySelectorAll&&prefixProbe.querySelectorAll('br,.md-caret-anchor,.formula-source-editor').forEach(function(node){node.remove();});
+    var atStart=!String(prefixProbe.textContent||'').replace(/[\s\u200B]/g,'');
+    var tail=range.cloneRange();tail.setEnd(block,block.childNodes.length);var fragment=tail.extractContents();
+    var next=block.cloneNode(false);next.removeAttribute('id');next.classList.remove('rich-edit-target');
+    next.appendChild(fragment);
+    function cleanPlaceholders(target){
+      target.querySelectorAll&&target.querySelectorAll('.md-caret-anchor,.formula-source-editor').forEach(function(node){node.remove();});
+      Array.prototype.slice.call(target.childNodes||[]).forEach(function(node){if(node.nodeType===3&&!String(node.nodeValue||'').replace(/\u200B/g,''))node.remove();});
+    }
+    cleanPlaceholders(block);cleanPlaceholders(next);
+    block.classList.remove('rich-edit-target');next.classList.add('rich-edit-target');
+    block.parentNode.insertBefore(next,block.nextSibling);
+    var caret=doc.createTextNode('\u200B');
+    if(atStart){
+      block.appendChild(caret);block.appendChild(_richPlaceholderBreak(doc));_placeRichTextCaret(caret,1);
+    }else{
+      next.insertBefore(caret,next.firstChild);if(!_richBlockHasSemanticContent(next)&&!next.querySelector('br'))next.appendChild(_richPlaceholderBreak(doc));_placeRichTextCaret(caret,1);
+    }
+    container.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertParagraph',data:null}));return true;
+  }
+  function _handleRichListEnter(container,li,forcedRange){
+    if(!container||!li||!li.parentNode)return false;var doc=container.ownerDocument||document,list=li.parentNode,selection=doc.getSelection&&doc.getSelection(),range=forcedRange?forcedRange.cloneRange():(selection&&selection.rangeCount&&selection.getRangeAt(0));if(!range||(range.startContainer!==li&&!li.contains(range.startContainer)))return false;range=_normalizeRichFormulaSplitRange(container,li,range,forcedRange?null:selection);
     // Enter replaces a selection before applying list semantics, matching
     // desktop editors instead of moving the selected text into the next item.
-    if(!range.collapsed){range.deleteContents();range.collapse(true);selection.removeAllRanges();selection.addRange(range);}
+    if(!range.collapsed){range.deleteContents();range.collapse(true);if(selection){selection.removeAllRanges();selection.addRange(range);}}
     if(_richListItemIsEmpty(li)){
       // An empty nested item first moves back one list level, matching desktop
       // editors. A subsequent Enter at the top level exits the list entirely.
       if(list.parentNode&&list.parentNode.tagName==='LI')return _changeRichListItemLevel(container,li,true);
       var items=Array.prototype.filter.call(list.children||[],function(item){return item.tagName==='LI';}),itemIndex=items.indexOf(li),trailingItems=itemIndex>=0?items.slice(itemIndex+1):[],parent=list.parentNode;
-      var paragraph=doc.createElement('p'),paragraphCaret=doc.createTextNode('\u200B');paragraph.className='rich-edit-target';paragraph.appendChild(paragraphCaret);paragraph.appendChild(doc.createElement('br'));
+      var paragraph=doc.createElement('p'),paragraphCaret=doc.createTextNode('\u200B');paragraph.className='rich-edit-target';paragraph.appendChild(paragraphCaret);paragraph.appendChild(_richPlaceholderBreak(doc));
       // Exiting a blank item in the middle splits the list at the caret. The
       // old implementation appended the paragraph after the complete list,
       // which looked like a jump to the end of a long article. Keep following
@@ -13852,7 +13951,7 @@ window.handleImportFile = function(event) {
       // At the beginning of a non-empty item, Enter inserts a blank item above
       // and leaves the original content intact. In the middle/end it splits at
       // the caret or creates the usual empty following item.
-      if(atItemStart){next.appendChild(doc.createElement('br'));list.insertBefore(next,li);_placeRichTextCaret(caretNode,1);}
+      if(atItemStart){next.appendChild(_richPlaceholderBreak(doc));list.insertBefore(next,li);_placeRichTextCaret(caretNode,1);}
       else{
       var tail=range.cloneRange();tail.setEnd(li,li.childNodes.length);var fragment=tail.extractContents();
       // Chromium leaves the empty-item placeholder <br> behind after text is
@@ -13865,10 +13964,408 @@ window.handleImportFile = function(event) {
         fragment.querySelectorAll&&fragment.querySelectorAll('br,.md-caret-anchor').forEach(function(node){node.remove();});
         Array.prototype.slice.call(fragment.childNodes||[]).forEach(function(node){if(node.nodeType===3&&!String(node.nodeValue||'').replace(/[\s\u200B]/g,''))node.remove();});
       }
-      next.appendChild(fragment);if(!String(next.textContent||'').replace(/[\s\u200B]/g,''))next.appendChild(doc.createElement('br'));list.insertBefore(next,li.nextSibling);_placeRichTextCaret(caretNode,1);
+      next.appendChild(fragment);if(!String(next.textContent||'').replace(/[\s\u200B]/g,''))next.appendChild(_richPlaceholderBreak(doc));list.insertBefore(next,li.nextSibling);_placeRichTextCaret(caretNode,1);
       }
     }
     container.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertParagraph',data:null}));return true;
+  }
+  function _richListCaretAtStart(container,li,range,selection){
+    if(!container||!li||!range)return false;range=_normalizeRichFormulaSplitRange(container,li,range,selection);
+    try{
+      var prefix=range.cloneRange();prefix.selectNodeContents(li);prefix.setEnd(range.startContainer,range.startOffset);
+      var probe=prefix.cloneContents();probe.querySelectorAll&&probe.querySelectorAll('input[type="checkbox"],br,.md-caret-anchor,.formula-source-editor').forEach(function(node){node.remove();});
+      return !String(probe.textContent||'').replace(/[\s\u200B]/g,'');
+    }catch(e){return false;}
+  }
+  function _mergeRichListItems(container,target,source,key){
+    if(!container||!target||!source||!target.parentNode||target.parentNode!==source.parentNode)return false;
+    var targetHasContent=_richBlockHasSemanticContent(target),sourceHasContent=_richBlockHasSemanticContent(source);
+    target.querySelectorAll(':scope > .md-caret-anchor,:scope > .formula-source-editor').forEach(function(node){node.remove();});
+    var sourceBox=source.querySelector(':scope > input[type="checkbox"]');if(sourceBox)sourceBox.remove();
+    Array.prototype.slice.call(source.childNodes||[]).forEach(function(node){
+      if(node.nodeType===1&&(node.classList.contains('md-caret-anchor')||node.classList.contains('formula-source-editor')))node.remove();
+      else if(node.nodeType===3&&!String(node.nodeValue||'').replace(/\u200B/g,''))node.remove();
+    });
+    // Structural <br> placeholders belong to an otherwise empty list item.
+    // Do not carry them across a merge or continuous Backspace will expose a
+    // phantom blank line between the previous text and a leading formula.
+    if(!targetHasContent)target.querySelectorAll(':scope > br').forEach(function(node){node.remove();});
+    if(!sourceHasContent)source.querySelectorAll(':scope > br').forEach(function(node){node.remove();});
+    var joinOffset=target.childNodes.length;
+    while(source.firstChild)target.appendChild(source.firstChild);
+    var joinedFormula=_richFormulaBoundaryNeighbor(container,target,target.childNodes[joinOffset]||null,1);
+    source.remove();target.classList.add('rich-edit-target');
+    container.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:key==='Delete'?'deleteContentForward':'deleteContentBackward',data:null}));
+    if(joinedFormula)_placeRichFormulaAtomicCaret(container,joinedFormula,false);else{_placeRichCaret(target,joinOffset);_retainRichCaretFocus(container);}return true;
+  }
+  function _richListCaretAtEnd(li,range){
+    if(!li||!range)return false;
+    try{
+      var suffix=range.cloneRange();suffix.setEnd(li,li.childNodes.length);
+      var probe=suffix.cloneContents();probe.querySelectorAll&&probe.querySelectorAll('input[type="checkbox"],br,.md-caret-anchor,.formula-source-editor').forEach(function(node){node.remove();});
+      return !String(probe.textContent||'').replace(/[\s\u200B]/g,'');
+    }catch(e){return false;}
+  }
+  function _richFormulaTopChild(container,block,node){
+    if(!container||!block||!node)return null;
+    var element=node.nodeType===1?node:node.parentElement,formula=element&&_richFormulaNode(container,element),capsule=element&&element.closest&&element.closest('[data-wf-formula-tex]');
+    if(!formula&&capsule&&capsule!==block&&block.contains(capsule))formula=capsule.matches&&capsule.matches('.katex,.katex-display,.math-fallback')?capsule:capsule.querySelector&&capsule.querySelector('.katex,.katex-display,.math-fallback');
+    if(!formula||!block.contains(formula))return null;
+    var top=capsule&&capsule!==block&&block.contains(capsule)?capsule:formula;while(top&&top.parentNode!==block)top=top.parentNode;
+    return top&&top.parentNode===block?{top:top,formula:formula}:null;
+  }
+  function _richRangeSideIsEmpty(top,range,before){
+    if(!top||!range)return false;
+    try{
+      var probe=range.cloneRange();probe.selectNodeContents(top);
+      if(before)probe.setEnd(range.startContainer,range.startOffset);else probe.setStart(range.startContainer,range.startOffset);
+      var fragment=probe.cloneContents();fragment.querySelectorAll&&fragment.querySelectorAll('.md-caret-anchor,.formula-source-editor,br').forEach(function(node){node.remove();});
+      return !String(fragment.textContent||'').replace(/[\s\u200B]/g,'');
+    }catch(e){return false;}
+  }
+  function _richFormulaBoundaryNeighbor(container,block,node,direction){
+    var cursor=node;
+    while(cursor){
+      var formula=_richFormulaTopChild(container,block,cursor);if(formula)return formula;
+      var ignorable=(cursor.nodeType===1&&(cursor.classList.contains('wf-formula-caret-guard')||cursor.classList.contains('md-caret-anchor')||cursor.classList.contains('formula-source-editor')))||
+        (cursor.nodeType===3&&!String(cursor.nodeValue||'').replace(/[\s\u200B]/g,''));
+      if(!ignorable)return null;cursor=direction<0?cursor.previousSibling:cursor.nextSibling;
+    }
+    return null;
+  }
+  function _richFormulaCaretBoundary(container,block,range){
+    if(!container||!block||!range||!range.collapsed)return null;
+    var start=range.startContainer,inside=_richFormulaTopChild(container,block,start);if(inside)return {inside:inside};
+    var left=null,right=null,offset=range.startOffset,top=null;
+    if(start===block){left=block.childNodes[offset-1]||null;right=block.childNodes[offset]||null;}
+    else{
+      top=start;while(top&&top.parentNode!==block)top=top.parentNode;
+      if(!top||top.parentNode!==block)return null;
+      if(_richRangeSideIsEmpty(top,range,true))left=top.previousSibling;
+      if(_richRangeSideIsEmpty(top,range,false))right=top.nextSibling;
+    }
+    return {left:_richFormulaBoundaryNeighbor(container,block,left,-1),right:_richFormulaBoundaryNeighbor(container,block,right,1)};
+  }
+  function _clearRichFormulaLogicalCaret(container){if(container)container._wfFormulaLogicalCaret=null;}
+  function _captureRichFormulaLogicalCaret(container){
+    if(!container||container._wfRichDisposed)return false;var current=container._wfFormulaLogicalCaret;if(!current)return false;
+    var doc=container.ownerDocument||document,selection=doc.getSelection&&doc.getSelection();
+    if(!selection||!selection.rangeCount||!selection.isCollapsed||!selection.focusNode||!container.contains(selection.focusNode)){_clearRichFormulaLogicalCaret(container);return false;}
+    var state=_richCaretBlock(container);if(!state){_clearRichFormulaLogicalCaret(container);return false;}var boundary=_richFormulaCaretBoundary(container,state.block,state.range),candidates=[];
+    if(boundary&&boundary.left)candidates.push(boundary.left);if(boundary&&boundary.right&&(!boundary.left||boundary.right.top!==boundary.left.top))candidates.push(boundary.right);if(boundary&&boundary.inside)candidates.push(boundary.inside);
+    var wantedTex=String(current.tex||''),target=null;for(var i=0;i<candidates.length;i++){var candidateTex=_richFormulaTex(candidates[i].formula);if((current.top&&candidates[i].top===current.top)||(!target&&wantedTex&&candidateTex===wantedTex))target=candidates[i];}
+    if(!target){_clearRichFormulaLogicalCaret(container);return false;}container._wfFormulaLogicalCaret={top:target.top,after:!!current.after,tex:wantedTex||_richFormulaTex(target.formula)};return true;
+  }
+  function _richFormulaLogicalCaret(container){
+    var state=container&&container._wfFormulaLogicalCaret,top=state&&state.top;
+    if(!top||!top.isConnected||!container.contains(top)){_clearRichFormulaLogicalCaret(container);return null;}
+    return {top:top,after:!!state.after,formula:_richFormulaTopChild(container,top.parentNode,top)};
+  }
+  function _placeRichFormulaAtomicCaret(container,target,after){
+    if(!container||!target||!target.top)return false;var top=target.top;
+    container._wfFormulaLogicalCaret={top:top,after:!!after,tex:target.formula?_richFormulaTex(target.formula):''};
+    var block=top.parentNode,index=block&&Array.prototype.indexOf.call(block.childNodes,top);if(!block||index<0)return true;try{_placeRichCaret(block,index+(after?1:0));}catch(e){}return true;
+  }
+  function _richFormulaSideHasSemanticContent(block,top,before){
+    if(!block||!top)return false;
+    try{
+      var range=(block.ownerDocument||document).createRange();range.selectNodeContents(block);
+      if(before)range.setEndBefore(top);else range.setStartAfter(top);
+      var fragment=range.cloneContents();fragment.querySelectorAll&&fragment.querySelectorAll('.md-caret-anchor,.formula-source-editor,br,input[type="checkbox"]').forEach(function(node){node.remove();});
+      Array.prototype.slice.call(fragment.childNodes||[]).forEach(function(node){if(_isRichFormulaCaretGuard(node))node.remove();});
+      if(fragment.querySelector&&fragment.querySelector('.katex,.katex-display,.math-fallback,[data-wf-formula-tex],img,table,ul,ol,pre,code'))return true;
+      return !!String(fragment.textContent||'').replace(/[\s\u200B]/g,'');
+    }catch(e){return true;}
+  }
+  function _richAdjacentEditableText(block,top,before){
+    if(!block||!top)return null;var cursor=before?top.previousSibling:top.nextSibling;
+    while(cursor){
+      if(_isRichFormulaCaretGuard(cursor)||(cursor.nodeType===1&&(cursor.classList.contains('md-caret-anchor')||cursor.classList.contains('formula-source-editor')))){cursor=before?cursor.previousSibling:cursor.nextSibling;continue;}
+      if(cursor.nodeType===3){if(String(cursor.nodeValue||'').replace(/\u200B/g,''))return {node:cursor,offset:before?String(cursor.nodeValue||'').length:0};cursor=before?cursor.previousSibling:cursor.nextSibling;continue;}
+      if(cursor.nodeType===1&&!_richFormulaTopChild(block.closest&&block.closest('[contenteditable="true"]')||block,block,cursor)){
+        var walker=(block.ownerDocument||document).createTreeWalker(cursor,NodeFilter.SHOW_TEXT),nodes=[],text;while((text=walker.nextNode()))nodes.push(text);
+        for(var i=before?nodes.length-1:0;before?i>=0:i<nodes.length;before?i--:i++){if(String(nodes[i].nodeValue||'').replace(/\u200B/g,''))return {node:nodes[i],offset:before?String(nodes[i].nodeValue||'').length:0};}
+      }
+      break;
+    }
+    return null;
+  }
+  function _deleteRichTextGrapheme(node,before){
+    if(!node||node.nodeType!==3)return false;var value=String(node.nodeValue||'');if(!value)return false;
+    var parts=[];try{if(typeof Intl!=='undefined'&&Intl.Segmenter){parts=Array.from(new Intl.Segmenter(undefined,{granularity:'grapheme'}).segment(value),function(item){return item.segment;});}}catch(e){}
+    if(!parts.length)parts=Array.from(value);if(!parts.length)return false;
+    if(before)parts.pop();else parts.shift();node.nodeValue=parts.join('');return true;
+  }
+  function _pruneRichEmptyInline(node,block){
+    var element=node&&node.parentElement;
+    while(element&&element!==block&&/^(SPAN|STRONG|B|EM|I|DEL|S|MARK|U|SUP|SUB|A)$/.test(element.tagName)){
+      if(Array.prototype.some.call(element.childNodes||[],function(child){return child.nodeType===1||String(child.nodeValue||'').replace(/[\s\u200B]/g,'');}))break;
+      var parent=element.parentElement,next=parent;element.remove();element=next;
+    }
+  }
+  function _deleteRichFormulaAdjacentText(container,block,top,before){
+    var adjacent=_richAdjacentEditableText(block,top,before);if(!adjacent||!_deleteRichTextGrapheme(adjacent.node,before))return false;
+    _pruneRichEmptyInline(adjacent.node,block);_clearRichFormulaLogicalCaret(container);
+    container.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:before?'deleteContentBackward':'deleteContentForward',data:null}));
+    if(adjacent.node.isConnected)_placeRichTextCaret(adjacent.node,before?String(adjacent.node.nodeValue||'').length:0);return true;
+  }
+  function _demoteRichFormulaDelimiter(container,state,opening){
+    if(!container||!state||!state.top||!state.top.parentNode)return false;
+    var top=state.top,block=top.parentNode,target=_richFormulaTopChild(container,block,top),formula=target&&target.formula;
+    if(!formula)return false;
+    var tex=_richFormulaTex(formula),display=top.getAttribute&&top.getAttribute('data-wf-formula-display')==='1'||formula.classList.contains('katex-display')||formula.classList.contains('display');
+    var raw=(display?'$$':'$')+tex+(display?'$$':'$'),demoted=opening?raw.slice(1):raw.slice(0,-1);
+    var doc=container.ownerDocument||document,text=doc.createTextNode(demoted),before=top.previousSibling,after=top.nextSibling;
+    if(_isRichFormulaCaretGuard(before))before.remove();if(_isRichFormulaCaretGuard(after))after.remove();
+    top.parentNode.replaceChild(text,top);_clearRichFormulaLogicalCaret(container);_placeRichTextCaret(text,opening?0:String(text.nodeValue||'').length);
+    container.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:opening?'deleteContentForward':'deleteContentBackward',data:null}));return true;
+  }
+  function _demoteRichFormulaClosingDelimiter(container,state){return _demoteRichFormulaDelimiter(container,state,false);}
+  function _demoteRichFormulaOpeningDelimiter(container,state){return _demoteRichFormulaDelimiter(container,state,true);}
+  function _richInlineFormatSelector(){return 'strong,b,em,i,del,s,mark,u,sup,sub,code,.md-comment,a';}
+  function _richInlineFormatAtom(container,block,node){
+    if(!container||!block||!node)return null;var element=node.nodeType===1?node:node.parentElement;
+    if(!element||!container.contains(element)||_richFormulaNode(container,element))return null;
+    var atom=element.closest&&element.closest(_richInlineFormatSelector());if(!atom||!block.contains(atom))return null;
+    if(atom.tagName==='CODE'&&atom.closest('pre'))return null;
+    while(atom.parentElement&&atom.parentElement!==block&&atom.parentElement.matches&&atom.parentElement.matches(_richInlineFormatSelector())&&!(atom.parentElement.tagName==='CODE'&&atom.parentElement.closest('pre')))atom=atom.parentElement;
+    return atom;
+  }
+  function _richInlineFormatNeighbor(container,block,node,direction){
+    var cursor=node;
+    while(cursor){
+      var atom=_richInlineFormatAtom(container,block,cursor);if(atom)return atom;
+      var ignorable=(cursor.nodeType===1&&(cursor.classList.contains('md-caret-anchor')||cursor.classList.contains('formula-source-editor')))||(cursor.nodeType===3&&!String(cursor.nodeValue||'').replace(/[\s\u200B]/g,''));
+      if(!ignorable)return null;cursor=direction<0?cursor.previousSibling:cursor.nextSibling;
+    }
+    return null;
+  }
+  function _richInlineCaretBoundary(container,block,range){
+    if(!container||!block||!range||!range.collapsed)return null;var start=range.startContainer,inside=_richInlineFormatAtom(container,block,start);if(inside)return {inside:inside};
+    var left=null,right=null,offset=range.startOffset,top=null;
+    if(start===block){left=block.childNodes[offset-1]||null;right=block.childNodes[offset]||null;}
+    else{top=start;while(top&&top.parentNode!==block)top=top.parentNode;if(!top||top.parentNode!==block)return null;if(_richRangeSideIsEmpty(top,range,true))left=top.previousSibling;if(_richRangeSideIsEmpty(top,range,false))right=top.nextSibling;}
+    return {left:_richInlineFormatNeighbor(container,block,left,-1),right:_richInlineFormatNeighbor(container,block,right,1)};
+  }
+  function _clearRichInlineLogicalCaret(container){if(container)container._wfInlineLogicalCaret=null;}
+  function _captureRichInlineLogicalCaret(container){
+    if(!container||container._wfRichDisposed)return false;var current=container._wfInlineLogicalCaret;if(!current)return false;
+    var doc=container.ownerDocument||document,selection=doc.getSelection&&doc.getSelection();
+    if(!selection||!selection.rangeCount||!selection.isCollapsed||!selection.focusNode||!container.contains(selection.focusNode)){_clearRichInlineLogicalCaret(container);return false;}
+    var state=_richCaretBlock(container);if(!state){_clearRichInlineLogicalCaret(container);return false;}var boundary=_richInlineCaretBoundary(container,state.block,state.range),candidates=[];
+    if(boundary&&boundary.left)candidates.push(boundary.left);if(boundary&&boundary.right&&boundary.right!==boundary.left)candidates.push(boundary.right);if(boundary&&boundary.inside)candidates.push(boundary.inside);
+    var target=null,wanted=String(current.source||'');for(var i=0;i<candidates.length;i++){var raw=_richNodeToMarkdown(candidates[i]);if((current.node&&candidates[i]===current.node)||(!target&&wanted&&raw===wanted))target=candidates[i];}
+    if(!target){_clearRichInlineLogicalCaret(container);return false;}container._wfInlineLogicalCaret={node:target,after:!!current.after,source:wanted||_richNodeToMarkdown(target)};return true;
+  }
+  function _richInlineLogicalCaret(container){
+    var state=container&&container._wfInlineLogicalCaret,node=state&&state.node;if(!node||!node.isConnected||!container.contains(node)){_clearRichInlineLogicalCaret(container);return null;}
+    return {node:node,after:!!state.after};
+  }
+  function _placeRichInlineAtomicCaret(container,node,after){
+    if(!container||!node||!node.parentNode)return false;container._wfInlineLogicalCaret={node:node,after:!!after,source:_richNodeToMarkdown(node)};
+    try{var range=(container.ownerDocument||document).createRange(),selection=(container.ownerDocument||document).getSelection();if(after)range.setStartAfter(node);else range.setStartBefore(node);range.collapse(true);selection.removeAllRanges();selection.addRange(range);container.focus({preventScroll:true});_retainRichCaretFocus(container);return true;}catch(e){return false;}
+  }
+  function _demoteRichInlineDelimiter(container,state,opening){
+    if(!container||!state||!state.node||!state.node.parentNode)return false;var node=state.node,raw=_richNodeToMarkdown(node);if(!raw)return false;
+    var demoted=opening?raw.slice(1):raw.slice(0,-1),doc=container.ownerDocument||document,text=doc.createTextNode(demoted);node.parentNode.replaceChild(text,node);_clearRichInlineLogicalCaret(container);_placeRichTextCaret(text,opening?0:String(text.nodeValue||'').length);
+    container.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:opening?'deleteContentForward':'deleteContentBackward',data:null}));return true;
+  }
+  function _demoteRichInlineClosingDelimiter(container,state){return _demoteRichInlineDelimiter(container,state,false);}
+  function _demoteRichInlineOpeningDelimiter(container,state){return _demoteRichInlineDelimiter(container,state,true);}
+  function _deleteRichInlineAdjacentText(container,block,node,before){
+    var adjacent=_richAdjacentEditableText(block,node,before);if(!adjacent||!_deleteRichTextGrapheme(adjacent.node,before))return false;_pruneRichEmptyInline(adjacent.node,block);_clearRichInlineLogicalCaret(container);
+    container.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:before?'deleteContentBackward':'deleteContentForward',data:null}));if(adjacent.node.isConnected)_placeRichTextCaret(adjacent.node,before?String(adjacent.node.nodeValue||'').length:0);return true;
+  }
+  function _richInlineLogicalRange(container,state){
+    if(!container||!state||!state.node||!state.node.parentNode)return null;var range=(container.ownerDocument||document).createRange();try{if(state.after)range.setStartAfter(state.node);else range.setStartBefore(state.node);range.collapse(true);return {block:state.node.closest('li,p,div,h1,h2,h3,h4,h5,h6,blockquote,td,th')||state.node.parentNode,range:range};}catch(e){return null;}
+  }
+  function _handleRichInlineLogicalKey(container,key){
+    var state=_richInlineLogicalCaret(container);if(!state)return false;var node=state.node,block=node.closest('li,p,div,h1,h2,h3,h4,h5,h6,blockquote,td,th')||node.parentNode;
+    if(key==='ArrowLeft'){if(state.after)return _placeRichInlineAtomicCaret(container,node,false);var left=_richAdjacentEditableText(block,node,true);if(left){_clearRichInlineLogicalCaret(container);_placeRichTextCaret(left.node,left.offset);}return true;}
+    if(key==='ArrowRight'){if(!state.after)return _placeRichInlineAtomicCaret(container,node,true);var right=_richAdjacentEditableText(block,node,false);if(right){_clearRichInlineLogicalCaret(container);_placeRichTextCaret(right.node,right.offset);}return true;}
+    if(key==='Backspace'){
+      if(state.after)return _demoteRichInlineClosingDelimiter(container,state);
+      if(block.tagName==='LI'&&!_richFormulaSideHasSemanticContent(block,node,true)){if(_removeRichTaskMarkerLogical(block)){_clearRichInlineLogicalCaret(container);container.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'deleteContentBackward',data:null}));return true;}_clearRichInlineLogicalCaret(container);var previous=block.previousElementSibling;if(previous&&previous.tagName==='LI')return _mergeRichListItems(container,previous,block,'Backspace');return _backspaceFirstRichListItem(container,block);}
+      if(_deleteRichInlineAdjacentText(container,block,node,true))return true;_clearRichInlineLogicalCaret(container);return false;
+    }
+    if(key==='Delete'){
+      if(!state.after)return _demoteRichInlineOpeningDelimiter(container,state);
+      if(_deleteRichInlineAdjacentText(container,block,node,false))return true;_clearRichInlineLogicalCaret(container);return false;
+    }
+    if(key==='Enter'){var logical=_richInlineLogicalRange(container,state);if(!logical)return true;_clearRichInlineLogicalCaret(container);if(block.tagName==='LI')return _handleRichListEnter(container,block,logical.range);if(/^(P|DIV)$/.test(block.tagName))return _handleRichParagraphEnter(container,block,logical.range);return true;}
+    return false;
+  }
+  function _handleRichInlineBoundaryKey(container,key){
+    if(!container||!/^(Backspace|Delete)$/.test(String(key||'')))return false;var state=_richCaretBlock(container);if(!state)return false;var boundary=_richInlineCaretBoundary(container,state.block,state.range);if(!boundary)return false;
+    if(key==='Backspace'){
+      if(boundary.right)return _deleteRichInlineAdjacentText(container,state.block,boundary.right,true);
+      if(boundary.left){_placeRichInlineAtomicCaret(container,boundary.left,true);return _handleRichInlineLogicalKey(container,'Backspace');}
+    }else{
+      if(boundary.left)return _deleteRichInlineAdjacentText(container,state.block,boundary.left,false);
+      if(boundary.right){_placeRichInlineAtomicCaret(container,boundary.right,false);return _handleRichInlineLogicalKey(container,'Delete');}
+    }
+    return false;
+  }
+  function _moveRichInlineAcrossBoundary(container,key){
+    if(!container||!/^(ArrowLeft|ArrowRight)$/.test(String(key||'')))return false;var state=_richCaretBlock(container);if(!state)return false;var boundary=_richInlineCaretBoundary(container,state.block,state.range);if(!boundary)return false;var target=null,after=false;
+    if(boundary.inside){target=boundary.inside;after=key==='ArrowRight';}else if(key==='ArrowLeft'&&boundary.left){target=boundary.left;after=false;}else if(key==='ArrowRight'&&boundary.right){target=boundary.right;after=true;}if(!target)return false;return _placeRichInlineAtomicCaret(container,target,after);
+  }
+  function _richPointerInlineEdge(container,ev){
+    if(!container||!ev||typeof ev.clientX!=='number'||typeof ev.clientY!=='number')return null;var doc=container.ownerDocument||document,current=doc.elementFromPoint&&doc.elementFromPoint(ev.clientX,ev.clientY),target=current&&container.contains(current)?current:ev.target,element=target&&(target.nodeType===1?target:target.parentElement);if(!element||!container.contains(element)||_richFormulaNode(container,element))return null;
+    var block=element.closest&&element.closest('li,p,div,h1,h2,h3,h4,h5,h6,blockquote,td,th');if(!block||block===container)return null;var nodes=Array.prototype.slice.call(block.querySelectorAll(_richInlineFormatSelector())).filter(function(node){return !(node.tagName==='CODE'&&node.closest('pre'));}),best=null,bestDistance=Infinity,after=false;
+    nodes.forEach(function(node){var rect=node.getBoundingClientRect();if(ev.clientY<rect.top-4||ev.clientY>rect.bottom+4)return;var ld=Math.abs(ev.clientX-rect.left),rd=Math.abs(ev.clientX-rect.right),distance=Math.min(ld,rd);if(distance>7||distance>=bestDistance)return;best=node;bestDistance=distance;after=rd<ld;});
+    return best?{node:best,after:after}:null;
+  }
+  function _applyRichPointerInlineEdge(container,edge){return !!(edge&&edge.node&&edge.node.isConnected&&_placeRichInlineAtomicCaret(container,edge.node,edge.after));}
+  function _richFormulaLogicalRange(container,state){
+    if(!container||!state||!state.top||!state.top.parentNode)return null;var doc=container.ownerDocument||document,range=doc.createRange();
+    try{if(state.after)range.setStartAfter(state.top);else range.setStartBefore(state.top);range.collapse(true);return {block:state.top.parentNode,range:range};}catch(e){return null;}
+  }
+  function _removeRichTaskMarkerLogical(li){
+    if(!li)return false;var checkbox=li.querySelector(':scope > input[type="checkbox"]');if(!checkbox)return false;
+    checkbox.remove();li.classList.remove('task-list-item','contains-task-list');var first=li.firstChild;
+    if(first&&first.nodeType===3)first.nodeValue=String(first.nodeValue||'').replace(/^ /,'');
+    return true;
+  }
+  function _handleRichFormulaLogicalKey(container,key){
+    var state=_richFormulaLogicalCaret(container);if(!state)return false;var top=state.top,block=top.parentNode,doc=container.ownerDocument||document;
+    if(key==='ArrowLeft'){
+      if(state.after)return _placeRichFormulaAtomicCaret(container,{top:top},false);
+      var left=_richAdjacentEditableText(block,top,true);if(left){_clearRichFormulaLogicalCaret(container);_placeRichTextCaret(left.node,left.offset);}return true;
+    }
+    if(key==='ArrowRight'){
+      if(!state.after)return _placeRichFormulaAtomicCaret(container,{top:top},true);
+      var right=_richAdjacentEditableText(block,top,false);if(right){_clearRichFormulaLogicalCaret(container);_placeRichTextCaret(right.node,right.offset);}return true;
+    }
+    if(key==='Backspace'){
+      if(state.after)return _demoteRichFormulaClosingDelimiter(container,state);
+      if(block.tagName==='LI'&&!_richFormulaSideHasSemanticContent(block,top,true)){
+        if(_removeRichTaskMarkerLogical(block)){_clearRichFormulaLogicalCaret(container);container.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'deleteContentBackward',data:null}));return true;}
+        _clearRichFormulaLogicalCaret(container);var previous=block.previousElementSibling;if(previous&&previous.tagName==='LI')return _mergeRichListItems(container,previous,block,'Backspace');return _backspaceFirstRichListItem(container,block);
+      }
+      if(_deleteRichFormulaAdjacentText(container,block,top,true))return true;_clearRichFormulaLogicalCaret(container);return false;
+    }
+    if(key==='Delete'){
+      if(!state.after)return _demoteRichFormulaOpeningDelimiter(container,state);
+      if(_deleteRichFormulaAdjacentText(container,block,top,false))return true;_clearRichFormulaLogicalCaret(container);return false;
+    }
+    if(key==='Enter'){
+      var logical=_richFormulaLogicalRange(container,state);if(!logical)return true;_clearRichFormulaLogicalCaret(container);
+      if(block.tagName==='LI')return _handleRichListEnter(container,block,logical.range);
+      if(/^(P|DIV)$/.test(block.tagName))return _handleRichParagraphEnter(container,block,logical.range);
+      return true;
+    }
+    return false;
+  }
+  function _moveRichCaretAcrossFormula(container,key){
+    if(!container||!/^(Backspace|Delete)$/.test(String(key||'')))return false;
+    var state=_richCaretBlock(container);if(!state)return false;var block=state.block,boundary=_richFormulaCaretBoundary(container,block,state.range);if(!boundary)return false;
+    if(boundary.inside)return _placeRichFormulaAtomicCaret(container,boundary.inside,key==='Backspace');
+    if(key==='Backspace'){
+      if(boundary.right)return _deleteRichFormulaAdjacentText(container,block,boundary.right.top,true);
+      if(boundary.left){_placeRichFormulaAtomicCaret(container,boundary.left,true);return _handleRichFormulaLogicalKey(container,'Backspace');}
+    }else{
+      if(boundary.left)return _deleteRichFormulaAdjacentText(container,block,boundary.left.top,false);
+      if(boundary.right){_placeRichFormulaAtomicCaret(container,boundary.right,false);return _handleRichFormulaLogicalKey(container,'Delete');}
+    }
+    return false;
+  }
+  function _moveRichArrowAcrossFormula(container,key){
+    if(!container||!/^(ArrowLeft|ArrowRight)$/.test(String(key||'')))return false;
+    var state=_richCaretBlock(container);if(!state)return false;var block=state.block,boundary=_richFormulaCaretBoundary(container,block,state.range);if(!boundary)return false;
+    var target=null,after=false;
+    if(key==='ArrowLeft'){
+      if(boundary.inside)target=boundary.inside;
+      else if(boundary.left)target=boundary.left;
+      after=false;
+    }else{
+      if(boundary.inside)target=boundary.inside;
+      else if(boundary.right)target=boundary.right;
+      after=true;
+    }
+    if(!target)return false;
+    try{return _placeRichFormulaAtomicCaret(container,target,after);}catch(e){return false;}
+  }
+  function _richPointerFormulaEdge(container,ev){
+    if(!container||!ev||typeof ev.clientX!=='number'||typeof ev.clientY!=='number')return null;
+    var doc=container.ownerDocument||document,current=doc.elementFromPoint&&doc.elementFromPoint(ev.clientX,ev.clientY),target=current&&container.contains(current)?current:ev.target,element=target&&(target.nodeType===1?target:target.parentElement);
+    if(!element||!container.contains(element))return null;var directFormula=_richFormulaNode(container,element);
+    var localBlock=element.closest&&element.closest('li,p,h1,h2,h3,h4,h5,h6,blockquote,td,th');
+    var scope=localBlock&&container.contains(localBlock)?localBlock:container;
+    var formulas=directFormula?[directFormula]:Array.prototype.slice.call(scope.querySelectorAll('.katex,.math-fallback')),best=null,bestDistance=Infinity,after=false,bestBlock=null;
+    for(var i=0;i<formulas.length;i++){
+      var formula=formulas[i],rect=formula.getBoundingClientRect();if(ev.clientY<rect.top-6||ev.clientY>rect.bottom+6)continue;
+      var leftDistance=Math.abs(ev.clientX-rect.left),rightDistance=Math.abs(ev.clientX-rect.right),distance=Math.min(leftDistance,rightDistance),limit=directFormula?Math.min(4,Math.max(2,rect.width*.22)):12;
+      if(distance>limit||distance>=bestDistance)continue;
+      var block=formula.closest&&formula.closest('li,p,div,h1,h2,h3,h4,h5,h6,blockquote,td,th');if(!block||block===container||!container.contains(block))continue;
+      var targetInfo=_richFormulaTopChild(container,block,formula);if(!targetInfo)continue;
+      best=targetInfo;bestDistance=distance;after=rightDistance<leftDistance;bestBlock=block;
+    }
+    return best?{target:best,after:after,block:bestBlock}:null;
+  }
+  function _applyRichPointerFormulaEdge(container,edge){
+    if(!container||!edge||!edge.target||!edge.target.top||!edge.target.top.isConnected)return false;
+    try{container.focus({preventScroll:true});_placeRichFormulaAtomicCaret(container,edge.target,edge.after);_retainRichCaretFocus(container);return true;}catch(e){return false;}
+  }
+  function _snapRichPointerToFormulaEdge(container,ev){
+    var edge=_richPointerFormulaEdge(container,ev);if(!edge)return false;
+    if(ev.preventDefault)ev.preventDefault();return _applyRichPointerFormulaEdge(container,edge);
+  }
+  function _advanceRichOrderedListAfterFirstRemoval(list){
+    if(!list||list.tagName!=='OL'||list.hasAttribute('reversed')||!list.querySelector(':scope > li'))return;
+    var start=parseInt(list.getAttribute('start')||'1',10)||1,startNext=start+1;if(startNext===1)list.removeAttribute('start');else list.setAttribute('start',String(startNext));
+  }
+  function _moveRichListItemBody(source,target){
+    if(!source||!target)return [];
+    var nested=[],box=source.querySelector(':scope > input[type="checkbox"]');if(box)box.remove();
+    Array.prototype.slice.call(source.childNodes||[]).forEach(function(node){
+      if(node.nodeType===1&&(node.classList.contains('md-caret-anchor')||node.classList.contains('formula-source-editor')))node.remove();
+      else if(node.nodeType===1&&(node.tagName==='UL'||node.tagName==='OL'))nested.push(node);
+      else if(node.nodeType===3&&!String(node.nodeValue||'').replace(/\u200B/g,''))node.remove();
+      else target.appendChild(node);
+    });
+    return nested;
+  }
+  function _backspaceFirstRichListItem(container,li){
+    if(!container||!li||!li.parentNode)return false;var list=li.parentNode,parent=list.parentNode;
+    if(parent&&parent.tagName==='LI')return _changeRichListItemLevel(container,li,true);
+    var doc=container.ownerDocument||document,previous=list.previousElementSibling,target=null,created=false;
+    if(previous&&/^(P|DIV|H[1-6])$/.test(previous.tagName))target=previous;
+    else{target=doc.createElement('p');parent.insertBefore(target,list);created=true;}
+    var targetHasContent=_richBlockHasSemanticContent(target);
+    target.querySelectorAll&&target.querySelectorAll(':scope > .md-caret-anchor,:scope > .formula-source-editor').forEach(function(node){node.remove();});
+    if(!targetHasContent)target.querySelectorAll&&target.querySelectorAll(':scope > br').forEach(function(node){node.remove();});
+    Array.prototype.slice.call(target.childNodes||[]).forEach(function(node){if(node.nodeType===3&&!String(node.nodeValue||'').replace(/\u200B/g,''))node.remove();});
+    var joinOffset=target.childNodes.length,nested=_moveRichListItemBody(li,target),joinedFormula=_richFormulaBoundaryNeighbor(container,target,target.childNodes[joinOffset]||null,1);li.remove();_advanceRichOrderedListAfterFirstRemoval(list);
+    var insertBefore=list;for(var i=0;i<nested.length;i++)parent.insertBefore(nested[i],insertBefore);
+    if(!list.querySelector(':scope > li'))list.remove();
+    if(!_richBlockHasSemanticContent(target)&&!target.querySelector('br'))target.appendChild(_richPlaceholderBreak(doc));
+    target.classList.add('rich-edit-target');container.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'deleteContentBackward',data:null}));
+    if(joinedFormula)_placeRichFormulaAtomicCaret(container,joinedFormula,false);else{_placeRichCaret(target,Math.min(joinOffset,target.childNodes.length));_retainRichCaretFocus(container);}return true;
+  }
+  function _deleteLastRichListItemForward(container,li){
+    if(!container||!li||!li.parentNode)return false;var list=li.parentNode,nextBlock=list.nextElementSibling;
+    if(!nextBlock)return true;
+    if(!/^(P|DIV|H[1-6])$/.test(nextBlock.tagName))return true;
+    var joinOffset=li.childNodes.length;_moveRichChildrenPreservingMarkup(nextBlock,li);var joinedFormula=_richFormulaBoundaryNeighbor(container,li,li.childNodes[joinOffset]||null,1);nextBlock.remove();li.classList.add('rich-edit-target');
+    container.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'deleteContentForward',data:null}));
+    if(joinedFormula)_placeRichFormulaAtomicCaret(container,joinedFormula,false);else{_placeRichCaret(li,joinOffset);_retainRichCaretFocus(container);}return true;
+  }
+  function _handleRichListBoundaryDelete(container,key){
+    if(!container||!/^(Backspace|Delete)$/.test(String(key||'')))return false;
+    var doc=container.ownerDocument||document,selection=doc.getSelection&&doc.getSelection(),range=selection&&selection.rangeCount&&selection.getRangeAt(0);
+    if(!range||!range.collapsed||!selection.focusNode||!container.contains(selection.focusNode))return false;
+    var focus=selection.focusNode,element=focus.nodeType===1?focus:focus.parentElement,li=element&&element.closest&&element.closest('li');
+    if(!li||!container.contains(li))return false;
+    if(key==='Backspace'&&_richListCaretAtStart(container,li,range,selection)){
+      var previous=li.previousElementSibling;if(previous&&previous.tagName==='LI')return _mergeRichListItems(container,previous,li,key);
+      return _backspaceFirstRichListItem(container,li);
+    }
+    if(key==='Delete'&&_richListCaretAtEnd(li,range)){
+      var next=li.nextElementSibling;if(next&&next.tagName==='LI')return _mergeRichListItems(container,li,next,key);
+      return _deleteLastRichListItemForward(container,li);
+    }
+    return false;
   }
   function _removeRichTaskMarkerAtCaret(container,key){
     if(!container||!/^(Backspace|Delete)$/.test(String(key||'')))return false;
@@ -13885,7 +14382,11 @@ window.handleImportFile = function(event) {
   }
   function _prepareRichFormulaNodes(root){
     if(!root||!root.querySelectorAll)return;var nodes=[];if(root.matches&&root.matches('.katex,.katex-display,.math-fallback'))nodes.push(root);nodes=nodes.concat(Array.prototype.slice.call(root.querySelectorAll('.katex,.katex-display,.math-fallback')));
-    nodes.forEach(function(node){if(node.getAttribute('contenteditable')!=='false')node.setAttribute('contenteditable','false');if(node.getAttribute('role')!=='button')node.setAttribute('role','button');if(node.getAttribute('tabindex')!=='0')node.setAttribute('tabindex','0');if(node.getAttribute('title')!=='点击编辑公式源码')node.setAttribute('title','点击编辑公式源码');if(node.getAttribute('aria-label')!=='公式，点击编辑源码')node.setAttribute('aria-label','公式，点击编辑源码');});
+    nodes.forEach(function(node){
+      var annotation=node.querySelector&&node.querySelector('annotation[encoding="application/x-tex"]'),tex=node.getAttribute('data-tex')||node.getAttribute('data-wf-formula-tex')||(annotation?String(annotation.textContent||''):'');
+      if(tex)_setRichFormulaMetadata(node,tex);
+      if(node.getAttribute('contenteditable')!=='false')node.setAttribute('contenteditable','false');if(node.getAttribute('role')!=='button')node.setAttribute('role','button');if(node.getAttribute('tabindex')!=='0')node.setAttribute('tabindex','0');if(node.getAttribute('title')!=='点击编辑公式源码')node.setAttribute('title','点击编辑公式源码');if(node.getAttribute('aria-label')!=='公式，点击编辑源码')node.setAttribute('aria-label','公式，点击编辑源码');
+    });
   }
   function _flushRichPreviewPeers(source,noteId,except){
     var noteMatch=source&&String(source.id||'').match(/^note_(.+)$/);noteId=noteId||(noteMatch&&noteMatch[1]);
@@ -13909,7 +14410,9 @@ window.handleImportFile = function(event) {
     _richPreviewEditors=_richPreviewEditors.filter(_liveRichPreviewEditor);
     _richPreviewEditors.push(container);
     var timer=null,maxTimer=null,batchStarted=0,composing=false,dirty=false,pendingBlock=null,multipleBlocks=false;
-    var richTimerHost=(container.ownerDocument&&container.ownerDocument.defaultView)||window;container._wfRichTimerHost=richTimerHost;
+    var richTimerHost=(container.ownerDocument&&container.ownerDocument.defaultView)||window,richSelectionDoc=container.ownerDocument||document;container._wfRichTimerHost=richTimerHost;
+    function captureFormulaSelection(){_captureRichFormulaLogicalCaret(container);_captureRichInlineLogicalCaret(container);}
+    richSelectionDoc.addEventListener('selectionchange',captureFormulaSelection);
     function richClearTimer(id){if(id!==null&&typeof id!=='undefined')richTimerHost.clearTimeout(id);}
     function richSetTimer(fn,delay){return richTimerHost.setTimeout(function(){if(!container._wfRichDisposed)fn();},delay);}
     function syncPosition(offset){
@@ -13966,6 +14469,7 @@ window.handleImportFile = function(event) {
       try{richClearTimer(timer);richClearTimer(maxTimer);richClearTimer(container._wfDeferredSurfaceTimer);richClearTimer(container._wfRichPointerEditingTimer);}catch(e){}
       timer=null;maxTimer=null;pendingEvent=null;pendingBlock=null;dirty=false;multipleBlocks=false;batchStarted=0;completedFormatPending=false;
       container._wfDeferredSurfaceTimer=null;container._wfDeferredSurfaceSync=false;container._wfDeferredRichResult=null;
+      try{richSelectionDoc.removeEventListener('selectionchange',captureFormulaSelection);}catch(e){}
       if(container._wfDisposeFormulaEdit)container._wfDisposeFormulaEdit();
     };
     function prepareRichHandoff(){
@@ -13984,6 +14488,7 @@ window.handleImportFile = function(event) {
     }
     container.addEventListener('focus',function(){prepareRichHandoff();_markWorkflowEditorActivity();});
     container.addEventListener('pointerdown',function(ev){
+      var pointerElement=ev.target&&(ev.target.nodeType===1?ev.target:ev.target.parentElement);if(pointerElement&&pointerElement.closest&&pointerElement.closest('input[type="checkbox"],.formula-source-editor'))return;
       var handoff=prepareRichHandoff();if(!handoff)return;
       // If this pointerdown itself replaced stale rendered DOM, its original
       // target no longer belongs to the current document tree. Consume only
@@ -13997,19 +14502,32 @@ window.handleImportFile = function(event) {
       var source=container._wfRichSource;if(source){if(source._mdCancelScheduledUpdate)source._mdCancelScheduledUpdate();clearTimeout(source._wfRichVisualSyncTimer);clearTimeout(source._wfRichVisualMaxTimer);source._wfRichVisualSyncTimer=null;source._wfRichVisualMaxTimer=null;}
     });
     container.addEventListener('compositionend',function(ev){composing=false;container._wfRichComposing=false;_markWorkflowEditorActivity();queue({inputType:'insertCompositionText',data:ev.data||'',target:ev.target});});
-    container.addEventListener('input',function(ev){_markWorkflowEditorActivity();queue(ev);});
-    container.addEventListener('pointerdown',function(ev){var node=_richFormulaNode(container,ev.target);if(!node){container._wfRichPointerEditing=true;richClearTimer(container._wfRichPointerEditingTimer);container._wfRichPointerEditingTimer=richSetTimer(function(){container._wfRichPointerEditing=false;},180);container.focus({preventScroll:true});markTarget(ev.target);var pointerTarget=ev.target,pointerId=ev.pointerId,pointerDoc=container.ownerDocument||document;function cleanup(){pointerDoc.removeEventListener('pointerup',finish,true);pointerDoc.removeEventListener('pointercancel',cancel,true);}function finish(upEvent){if(upEvent.pointerId!==pointerId)return;cleanup();if(pointerTarget&&_ensureRichEmptyTarget(container,pointerTarget)){upEvent.preventDefault();return;}syncPosition();}function cancel(cancelEvent){if(cancelEvent.pointerId===pointerId)cleanup();}pointerDoc.addEventListener('pointerup',finish,true);pointerDoc.addEventListener('pointercancel',cancel,true);return;}container._wfFormulaPointer=true;richSetTimer(function(){container._wfFormulaPointer=false;},350);});
-    container.addEventListener('click',function(ev){var node=_richFormulaNode(container,ev.target);if(!node){if(_ensureRichEmptyTarget(container,ev.target)){ev.preventDefault();var clickSelection=(container.ownerDocument||document).getSelection(),clickFocus=clickSelection&&clickSelection.focusNode;markTarget(clickFocus&&(clickFocus.nodeType===1?clickFocus:clickFocus.parentElement));}return;}container._wfFormulaPointer=false;ev.preventDefault();ev.stopPropagation();_openRichFormulaEditor(container,node);});
+    container.addEventListener('input',function(ev){_clearRichFormulaLogicalCaret(container);_clearRichInlineLogicalCaret(container);if(/^(insertText|insertCompositionText)$/.test(String(ev.inputType||'')))_consumeRichPlaceholderBreak(container);_markWorkflowEditorActivity();queue(ev);});
+    container.addEventListener('pointerdown',function(ev){container._wfLastPointerY=ev.clientY;var pointerElement=ev.target&&(ev.target.nodeType===1?ev.target:ev.target.parentElement);if(pointerElement&&pointerElement.closest&&pointerElement.closest('input[type="checkbox"],.formula-source-editor'))return;var node=_richFormulaNode(container,ev.target);if(!node){container._wfRichPointerEditing=true;richClearTimer(container._wfRichPointerEditingTimer);container._wfRichPointerEditingTimer=richSetTimer(function(){container._wfRichPointerEditing=false;},180);var pointerTarget=ev.target,pointerId=ev.pointerId,pointerDoc=container.ownerDocument||document,pointerEdge=_richPointerFormulaEdge(container,ev),inlineEdge=!pointerEdge?_richPointerInlineEdge(container,ev):null;if(pointerEdge){container._wfPendingFormulaPointerEdge={pointerId:pointerId,edge:pointerEdge};ev.preventDefault();}else if(inlineEdge){container._wfPendingInlinePointerEdge={pointerId:pointerId,edge:inlineEdge};ev.preventDefault();}container.focus({preventScroll:true});markTarget(ev.target);function cleanup(){pointerDoc.removeEventListener('pointerup',finish,true);pointerDoc.removeEventListener('pointercancel',cancel,true);}function finish(upEvent){if(upEvent.pointerId!==pointerId)return;cleanup();var pending=container._wfPendingFormulaPointerEdge,inlinePending=container._wfPendingInlinePointerEdge;if(pending&&pending.pointerId===pointerId){container._wfPendingFormulaPointerEdge=null;upEvent.preventDefault();var pointerX=upEvent.clientX,pointerY=upEvent.clientY,probe={clientX:pointerX,clientY:pointerY,target:pointerTarget},edge=_richPointerFormulaEdge(container,probe)||pending.edge;if(_applyRichPointerFormulaEdge(container,edge)){markTarget((container.ownerDocument||document).elementFromPoint(pointerX,pointerY)||pointerTarget);syncPosition();}richSetTimer(function(){var refreshed=_richPointerFormulaEdge(container,probe);if(refreshed)_applyRichPointerFormulaEdge(container,refreshed);},0);return;}if(inlinePending&&inlinePending.pointerId===pointerId){container._wfPendingInlinePointerEdge=null;upEvent.preventDefault();var inlineX=upEvent.clientX,inlineY=upEvent.clientY,inlineProbe={clientX:inlineX,clientY:inlineY,target:pointerTarget},inlineEdgeNow=_richPointerInlineEdge(container,inlineProbe)||inlinePending.edge;if(_applyRichPointerInlineEdge(container,inlineEdgeNow)){markTarget((container.ownerDocument||document).elementFromPoint(inlineX,inlineY)||pointerTarget);syncPosition();}richSetTimer(function(){var refreshed=_richPointerInlineEdge(container,inlineProbe);if(refreshed)_applyRichPointerInlineEdge(container,refreshed);},0);return;}if(pointerTarget&&_ensureRichEmptyTarget(container,pointerTarget)){upEvent.preventDefault();return;}syncPosition();}function cancel(cancelEvent){if(cancelEvent.pointerId===pointerId){container._wfPendingFormulaPointerEdge=null;container._wfPendingInlinePointerEdge=null;cleanup();}}pointerDoc.addEventListener('pointerup',finish,true);pointerDoc.addEventListener('pointercancel',cancel,true);return;}container._wfFormulaPointer=true;richSetTimer(function(){container._wfFormulaPointer=false;},350);});
+    container.addEventListener('click',function(ev){var clickEdge=_richPointerFormulaEdge(container,ev);if(clickEdge){ev.preventDefault();_clearRichInlineLogicalCaret(container);var clickX=ev.clientX,clickY=ev.clientY,clickTarget=ev.target;if(_applyRichPointerFormulaEdge(container,clickEdge)){markTarget(clickTarget);syncPosition();var refreshedClick=_richPointerFormulaEdge(container,{clientX:clickX,clientY:clickY,target:clickTarget});if(refreshedClick)_applyRichPointerFormulaEdge(container,refreshedClick);}return;}var inlineClickEdge=_richPointerInlineEdge(container,ev);if(inlineClickEdge){ev.preventDefault();_clearRichFormulaLogicalCaret(container);if(_applyRichPointerInlineEdge(container,inlineClickEdge)){markTarget(ev.target);syncPosition();}return;}var node=_richFormulaNode(container,ev.target);if(!node){_clearRichFormulaLogicalCaret(container);_clearRichInlineLogicalCaret(container);if(_ensureRichEmptyTarget(container,ev.target)){ev.preventDefault();var clickSelection=(container.ownerDocument||document).getSelection(),clickFocus=clickSelection&&clickSelection.focusNode;markTarget(clickFocus&&(clickFocus.nodeType===1?clickFocus:clickFocus.parentElement));syncPosition();return;}var doc=container.ownerDocument||document,selection=doc.getSelection&&doc.getSelection(),focus=selection&&selection.focusNode;_retainRichCaretFocus(container);markTarget(focus&&(focus.nodeType===1?focus:focus.parentElement));syncPosition();return;}container._wfFormulaPointer=false;_clearRichFormulaLogicalCaret(container);_clearRichInlineLogicalCaret(container);ev.preventDefault();ev.stopPropagation();_openRichFormulaEditor(container,node);});
     container.addEventListener('keydown',function(ev){
       _markWorkflowEditorActivity();
       if(composing||ev.isComposing||ev.keyCode===229)return;
+      // A structural edit must become the new source/DOM baseline before the
+      // next physical key is interpreted. Otherwise rapid Enter -> Enter/text
+      // can carry the old insertParagraph marker into later text input and a
+      // delayed rerender may replace the newly outdented/current list item.
+      if(dirty&&pendingEvent&&/^(insertParagraph|insertLineBreak|insertReplacementText|insertFromPaste|insertFromDrop)$/.test(String(pendingEvent.inputType||'')))flushQueuedRichEdit('forced');
       var node=_richFormulaNode(container,ev.target);if(node&&(ev.key==='Enter'||ev.key===' ')){ev.preventDefault();_openRichFormulaEditor(container,node);return;}
       if(ev.target&&ev.target.closest&&ev.target.closest('.formula-source-editor'))return;
-      if((ev.key==='Backspace'||ev.key==='Delete')&&!ev.ctrlKey&&!ev.metaKey&&!ev.altKey&&_removeRichTaskMarkerAtCaret(container,ev.key)){ev.preventDefault();return;}
+      if(/^(Backspace|Delete|ArrowLeft|ArrowRight|Enter)$/.test(String(ev.key||''))&&!ev.shiftKey&&!ev.ctrlKey&&!ev.metaKey&&!ev.altKey&&_handleRichFormulaLogicalKey(container,ev.key)){ev.preventDefault();if(/^Arrow/.test(ev.key))syncPosition();return;}
+      if(/^(Backspace|Delete|ArrowLeft|ArrowRight|Enter)$/.test(String(ev.key||''))&&!ev.shiftKey&&!ev.ctrlKey&&!ev.metaKey&&!ev.altKey&&_handleRichInlineLogicalKey(container,ev.key)){ev.preventDefault();if(/^Arrow/.test(ev.key))syncPosition();return;}
+      if((ev.key==='Backspace'||ev.key==='Delete')&&!ev.ctrlKey&&!ev.metaKey&&!ev.altKey){
+        if(_removeRichTaskMarkerAtCaret(container,ev.key)){ev.preventDefault();return;}
+        if(_handleRichListBoundaryDelete(container,ev.key)){ev.preventDefault();return;}
+        if(_moveRichCaretAcrossFormula(container,ev.key)){ev.preventDefault();syncPosition();return;}
+        if(_handleRichInlineBoundaryKey(container,ev.key)){ev.preventDefault();syncPosition();return;}
+      }
+      if((ev.key==='ArrowLeft'||ev.key==='ArrowRight')&&!ev.ctrlKey&&!ev.metaKey&&!ev.altKey){if(_moveRichArrowAcrossFormula(container,ev.key)||_moveRichInlineAcrossBoundary(container,ev.key)){ev.preventDefault();syncPosition();return;}}
       if(ev.key==='Tab'&&!ev.ctrlKey&&!ev.metaKey&&!ev.altKey){var tabSelection=(container.ownerDocument||document).getSelection(),tabFocus=tabSelection&&tabSelection.focusNode,tabItem=tabFocus&&(tabFocus.nodeType===1?tabFocus:tabFocus.parentElement);tabItem=tabItem&&tabItem.closest&&tabItem.closest('li');if(tabItem&&container.contains(tabItem)&&_changeRichListItemLevel(container,tabItem,ev.shiftKey)){ev.preventDefault();return;}}
       if(ev.key===' '&&!ev.ctrlKey&&!ev.metaKey&&!ev.altKey&&_applyRichSpaceInputRule(container)){ev.preventDefault();container.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertReplacementText',data:' '}));return;}
       if(ev.key==='Enter'&&ev.shiftKey&&!ev.ctrlKey&&!ev.metaKey&&!ev.altKey){ev.preventDefault();if(_insertRichSoftBreak(container))richSetTimer(function(){queue({inputType:'insertLineBreak',data:'\n',target:container});},0);return;}
-      if(ev.key==='Enter'&&!ev.shiftKey&&!ev.ctrlKey&&!ev.metaKey&&!ev.altKey){if(_applyRichEnterInputRule(container)){ev.preventDefault();container.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertReplacementText',data:'\n'}));return;}var selection=(container.ownerDocument||document).getSelection(),focus=selection&&selection.focusNode,li=focus&&(focus.nodeType===1?focus:focus.parentElement);li=li&&li.closest&&li.closest('li');if(li&&container.contains(li)){ev.preventDefault();_handleRichListEnter(container,li);return;}}
+      if(ev.key==='Enter'&&!ev.shiftKey&&!ev.ctrlKey&&!ev.metaKey&&!ev.altKey){if(_applyRichEnterInputRule(container)){ev.preventDefault();container.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertReplacementText',data:'\n'}));return;}var selection=(container.ownerDocument||document).getSelection(),focus=selection&&selection.focusNode,focusElement=focus&&(focus.nodeType===1?focus:focus.parentElement),li=focusElement&&focusElement.closest&&focusElement.closest('li');if(li&&container.contains(li)){ev.preventDefault();_handleRichListEnter(container,li);return;}var paragraph=focusElement&&focusElement.closest&&focusElement.closest('p,div');if(paragraph&&paragraph!==container&&container.contains(paragraph)&&_handleRichParagraphEnter(container,paragraph)){ev.preventDefault();return;}}
       if((ev.ctrlKey||ev.metaKey)&&!ev.altKey){var key=String(ev.key||'').toLowerCase(),cmd=key==='b'?'bold':key==='i'?'italic':(key==='x'&&ev.shiftKey?'strikeThrough':'');if(cmd){ev.preventDefault();try{(container.ownerDocument||document).execCommand(cmd,false,null);}catch(e){}queue();}}
     });
     container.addEventListener('keyup',function(ev){if(!composing&&!ev.isComposing&&/^(Arrow|Home|End|Page)/.test(String(ev.key||'')))syncPosition();});
@@ -14042,6 +14560,7 @@ window.handleImportFile = function(event) {
 
   function _readNote(id){try{return JSON.parse(localStorage.getItem('wf_note_'+id)||'{}');}catch(e){return {};}}
   function _setRichPreviewHTML(container,html,hasMath){
+    _clearRichFormulaLogicalCaret(container);
     // Parse the complete source, but keep the unchanged prefix/suffix DOM intact.
     // Keys describe pre-math markup, never textContent: formatting and TeX remain semantic.
     var stage=container.ownerDocument.createElement('div');stage.innerHTML=html||'';
@@ -14084,8 +14603,9 @@ window.handleImportFile = function(event) {
   }
   function _bindStaticNoteCheckbox(box,index,container,id){
       if(!box||index<0)return;
-      box.disabled=false;box.classList.add('task-list-item-checkbox');
-      box.onchange=function(){
+      box.disabled=false;box.setAttribute('contenteditable','false');box.classList.add('task-list-item-checkbox');box.onchange=null;
+      box.onclick=function(ev){
+        if(ev)ev.stopPropagation();
         if(!localStorage.getItem('wf_note_'+id))return;
         var panel=document.querySelector('.notes-panel-body'), panelScroll=panel?panel.scrollTop:0;
         var note=_readNote(id);note.content=_replaceTaskListState(note.content||'',index,box.checked);note.timestamp=note.timestamp||Date.now();
@@ -14625,9 +15145,9 @@ window.handleImportFile = function(event) {
 
 <!--
 workflow_tool build
-version: 2026.10.01.1
-sourceSha256: 72fffb7b4a737058db2280fa653c92c86d9b03a57b7abc6b8949f1b204ba5fa6
-configSha256: cccb7c18c054a15e9a294d001649b6a262d4bf3000652ad583c9370476f66b1d
+version: 2026.10.01.8
+sourceSha256: 580ecbbed83668b73f634cfb3694c2a0a745c53e1a4ba6afd283c84e6fdf082b
+configSha256: 6255d80646884d759a2c2d71c1d698c54d008215d45a6b58deb9e38be06cb6cd
 coreSha256: e11c59692e6777662a581daa1e1485651eb47cbcfa655aba17a2c0e79f961cfe
 appSha256: 2f24aa03f02a5b051051aad95e186b81abef342d0af6958c66b79307c3dc0db3
 exportSha256: 13ad148412f079c37fed48892779a4c15a69b986b274bf432dd0506e64c0fa2a
@@ -14636,7 +15156,6 @@ historySha256: d2d96792bc489871e1e12fdf2483793e1781fec5835bae872974bc6b66894a79
 tasksSha256: cf7b1e78be5c87a40720433883aa80f4c8e36fe389400e217af9bb744ad8a590
 researchSha256: 7f18bf83e2678ea03658117f346225a9af8304668c9f622903770f0292e2c5a8
 stylesSha256: 438038ffa6949e8cb705df0dbad8d9a17ed29abd17f0c072fc70f88118cf55be
-builtAt: 2026-10-01T06:53:19.864Z
 -->
 
 <!-- Third-party notice: html2canvas/LICENSE
