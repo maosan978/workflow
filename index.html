@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <meta name="theme-color" content="#4f46e5">
-<meta name="workflow-version" content="2026.10.01.8">
+<meta name="workflow-version" content="2026.10.03.1">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1347,7 +1347,7 @@ input[type="text"]:focus,input[type="number"]:focus,textarea:focus{border-color:
   else root.WorkflowConfig = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
   return {
-    appVersion: '2026.10.01.8',
+    appVersion: '2026.10.03.1',
     schemaVersion: 9,
     typeLabels: {
       general: '通用',
@@ -3402,7 +3402,7 @@ var _githubSaveInProgress = false;
 var _githubSaveQueued = false;
 var _githubQueuedFeedback = false;
 var WF_SCHEMA_VERSION = (window.WorkflowConfig && window.WorkflowConfig.schemaVersion) || 9;
-var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.10.01.8';
+var WF_APP_VERSION = (window.WorkflowConfig && window.WorkflowConfig.appVersion) || '2026.10.03.1';
 var WORKFLOW_KATEX_FONT_RULE='.katex,.math-fallback{font-family:var(--app-font-math)!important}.katex .katex-html{font-family:var(--app-font-math)!important}.katex .katex-html .mord:not(.mathbb):not(.mathcal):not(.mathfrak):not(.amsrm),.katex .katex-html .mord.mathnormal,.katex .katex-html .mord.mathit,.katex .katex-html .mord.mathrm,.katex .katex-html .mord.mathbf,.katex .katex-html .mop:not(.op-symbol):not(.mathbb):not(.mathcal):not(.mathfrak):not(.amsrm),.katex .katex-html .mbin,.katex .katex-html .mrel,.katex .katex-html .mopen,.katex .katex-html .mclose,.katex .katex-html .mpunct,.katex .katex-html .minner,.katex .katex-html .text{font-family:var(--app-font-math)!important;}';
 window.workflowKatexFontStyleHTML=function(){return '<style>'+WORKFLOW_KATEX_FONT_RULE+'</style>';};
 window.workflowKatexStyleHTML=function(){
@@ -13262,6 +13262,19 @@ window.handleImportFile = function(event) {
     return tex?(display?'\n$$'+tex+'$$\n':'$'+tex+'$'):'';
   }
   var _richMarkerContext=null;
+  var _richMarkdownBlockCache=typeof WeakMap==='function'?new WeakMap():null;
+  function _invalidateRichMarkdownBlock(container,node){
+    if(!_richMarkdownBlockCache||!container||!node)return;
+    var top=node.nodeType===1?node:node.parentNode;
+    while(top&&top.parentNode!==container)top=top.parentNode;
+    if(top&&top.parentNode===container)_richMarkdownBlockCache.delete(top);
+  }
+  function _richMarkerTouchesRoot(container,node,index){
+    var context=_richMarkerContext;if(!context)return false;
+    if(context.beforeNode)return context.node===node||(node.contains&&node.contains(context.node));
+    if(context.node===container)return Math.max(0,Number(context.offset)||0)===index;
+    return context.node===node||(node.contains&&node.contains(context.node));
+  }
   function _richMarkerBeforeChild(parent,child,index){
     var context=_richMarkerContext;if(!context)return '';
     if(context.beforeNode&&context.node===child)return context.marker;
@@ -13368,7 +13381,10 @@ window.handleImportFile = function(event) {
     var out='',previousTag='';
     var rootChildren=Array.prototype.slice.call(container.childNodes||[]);
     rootChildren.forEach(function(node,index){
-      var value=_richMarkerBeforeChild(container,node,index)+_richNodeToMarkdown(node),tag=node.nodeType===1?node.tagName:'';
+      var markerTouches=_richMarkerTouchesRoot(container,node,index),cached=!markerTouches&&_richMarkdownBlockCache&&_richMarkdownBlockCache.get(node),serialized;
+      if(cached&&cached.tag===(node.nodeType===1?node.tagName:'')){serialized=cached.value;window._richMarkdownBlockCacheHitCount=(window._richMarkdownBlockCacheHitCount||0)+1;}
+      else{serialized=_richNodeToMarkdown(node);if(!markerTouches&&_richMarkdownBlockCache)_richMarkdownBlockCache.set(node,{tag:node.nodeType===1?node.tagName:'',value:serialized});window._richMarkdownBlockCacheMissCount=(window._richMarkdownBlockCacheMissCount||0)+1;}
+      var value=_richMarkerBeforeChild(container,node,index)+serialized,tag=node.nodeType===1?node.tagName:'';
       // A non-1 ordered list cannot interrupt a paragraph in CommonMark. This
       // occurs when an empty item in the middle of an ordered list is exited:
       // the tail remains an <ol start="N"> after the inserted paragraph. Keep
@@ -14409,7 +14425,7 @@ window.handleImportFile = function(event) {
     container._wfRichBound=true;
     _richPreviewEditors=_richPreviewEditors.filter(_liveRichPreviewEditor);
     _richPreviewEditors.push(container);
-    var timer=null,maxTimer=null,batchStarted=0,composing=false,dirty=false,pendingBlock=null,multipleBlocks=false;
+    var timer=null,maxTimer=null,batchStarted=0,composing=false,dirty=false,pendingBlock=null,multipleBlocks=false,richMarkdownObserver=null;
     var richTimerHost=(container.ownerDocument&&container.ownerDocument.defaultView)||window,richSelectionDoc=container.ownerDocument||document;container._wfRichTimerHost=richTimerHost;
     function captureFormulaSelection(){_captureRichFormulaLogicalCaret(container);_captureRichInlineLogicalCaret(container);}
     richSelectionDoc.addEventListener('selectionchange',captureFormulaSelection);
@@ -14434,11 +14450,16 @@ window.handleImportFile = function(event) {
       var keepNativeCaret=_richSelectionInEmptyBlock(container),length=richDelay().length||String(container._wfRichSource&&container._wfRichSource.value||'').length,deferSurfaces=mode==='max'&&length>5000,suppressMaxVisual=mode==='max'&&length>5000,simplePatch=!multipleBlocks&&pendingBlock===_richSelectionTopBlock(container)&&eventInfo&&/^(?:insertText|insertCompositionText|deleteContentBackward|deleteContentForward)$/.test(String(eventInfo.inputType||''))?_richActiveBlockPatch(container):null;
       dirty=false;pendingBlock=null;multipleBlocks=false;
       var result=_commitRichPreview(container,{deferSurfaces:true,deferPosition:true,patch:simplePatch});if(result)container._wfRichTextLength=String(result.markdown||'').length;
-      // The delta fallback is specifically for IME/browser events that omit
-      // InputEvent.data. Normal character events must stay on the incremental
-      // path even when a long document already contains Markdown structures.
-      if(!completedFormat&&eventInfo&&String(eventInfo.data||'')===''&&result&&_richCompletedFormatDelta(sourceBefore,result.markdown))completedFormat=true;
-      if(!keepNativeCaret&&result&&(completedFormat||_richCompletedFormat(result,eventInfo))){container._wfDeferredSurfaceSync=false;container._wfDeferredRichResult=null;_rerenderCompletedRichFormat(container,result);_syncRichSourcePosition(container,result.index);}
+      // Most completed formats end immediately before the caret. Restoring an
+      // opening delimiter is the important inverse case: typing the leading
+      // "$" turns `tex$` into `$tex$` while the caret remains after the first
+      // character. Compare signatures only for empty-data IME events or an
+      // actual Markdown delimiter, so ordinary long-document typing stays on
+      // the incremental path.
+      if(!completedFormat&&result)completedFormat=_richCompletedFormat(result,eventInfo);
+      var completedData=String(eventInfo&&eventInfo.data||'');
+      if(!completedFormat&&eventInfo&&result&&(completedData===''||/[\n$\\*_~`+=^%\])|]/.test(completedData))&&_richCompletedFormatDelta(sourceBefore,result.markdown))completedFormat=true;
+      if(!keepNativeCaret&&result&&completedFormat){container._wfDeferredSurfaceSync=false;container._wfDeferredRichResult=null;_rerenderCompletedRichFormat(container,result);_syncRichSourcePosition(container,result.index);}
       // A bounded single-block patch is cheap enough to broadcast at the max
       // commit itself. Only structural/full-view updates need the extra pause.
       else if(deferSurfaces&&!simplePatch){_syncRichSourcePosition(container,result&&result.index,false,suppressMaxVisual);richClearTimer(container._wfDeferredSurfaceTimer);container._wfDeferredSurfaceTimer=richSetTimer(function(){_flushDeferredRichSurfaces(container);},280);}
@@ -14447,7 +14468,7 @@ window.handleImportFile = function(event) {
     }
     function queue(ev){
       if(container._wfRichDisposed||composing||ev&&ev.target&&ev.target.closest&&ev.target.closest('.formula-source-editor'))return;
-      var block=_richSelectionTopBlock(container);if(block)block._wfPreviewMarkup=null;if(dirty&&pendingBlock!==block)multipleBlocks=true;if(!dirty)pendingBlock=block;dirty=true;
+      var block=_richSelectionTopBlock(container);if(block){block._wfPreviewMarkup=null;_invalidateRichMarkdownBlock(container,block);}if(dirty&&pendingBlock!==block)multipleBlocks=true;if(!dirty)pendingBlock=block;dirty=true;
       // Remember a completed inline boundary even if plain characters follow
       // before the batch commits. Inspect only the active block, not the document.
       if(!completedFormatPending&&ev&&/[\n$\\*_~`+=^%\])|]/.test(String(ev.data||''))){
@@ -14467,11 +14488,16 @@ window.handleImportFile = function(event) {
     container._wfDisposeRichEdit=function(){
       container._wfRichDisposed=true;
       try{richClearTimer(timer);richClearTimer(maxTimer);richClearTimer(container._wfDeferredSurfaceTimer);richClearTimer(container._wfRichPointerEditingTimer);}catch(e){}
+      try{if(richMarkdownObserver)richMarkdownObserver.disconnect();}catch(e){}
       timer=null;maxTimer=null;pendingEvent=null;pendingBlock=null;dirty=false;multipleBlocks=false;batchStarted=0;completedFormatPending=false;
       container._wfDeferredSurfaceTimer=null;container._wfDeferredSurfaceSync=false;container._wfDeferredRichResult=null;
       try{richSelectionDoc.removeEventListener('selectionchange',captureFormulaSelection);}catch(e){}
       if(container._wfDisposeFormulaEdit)container._wfDisposeFormulaEdit();
     };
+    if(typeof MutationObserver!=='undefined'){
+      richMarkdownObserver=new MutationObserver(function(records){records.forEach(function(record){_invalidateRichMarkdownBlock(container,record.target);Array.prototype.forEach.call(record.addedNodes||[],function(node){_invalidateRichMarkdownBlock(container,node);});Array.prototype.forEach.call(record.removedNodes||[],function(){_invalidateRichMarkdownBlock(container,record.target);});});});
+      richMarkdownObserver.observe(container,{subtree:true,childList:true,characterData:true,attributes:true});
+    }
     function prepareRichHandoff(){
       if(composing||container._wfRichComposing)return '';
       var source=container._wfRichSource,sourceRefreshed=false;
@@ -15145,9 +15171,9 @@ window.handleImportFile = function(event) {
 
 <!--
 workflow_tool build
-version: 2026.10.01.8
-sourceSha256: 580ecbbed83668b73f634cfb3694c2a0a745c53e1a4ba6afd283c84e6fdf082b
-configSha256: 6255d80646884d759a2c2d71c1d698c54d008215d45a6b58deb9e38be06cb6cd
+version: 2026.10.03.1
+sourceSha256: c735ad69d912473fc31d42da73a8d0d0bec9bba090f388fa5f68dfb93835d75e
+configSha256: d84266abbb08732b4a88b22b59d285e5e52f91304fface235cd90d4c20206427
 coreSha256: e11c59692e6777662a581daa1e1485651eb47cbcfa655aba17a2c0e79f961cfe
 appSha256: 2f24aa03f02a5b051051aad95e186b81abef342d0af6958c66b79307c3dc0db3
 exportSha256: 13ad148412f079c37fed48892779a4c15a69b986b274bf432dd0506e64c0fa2a
